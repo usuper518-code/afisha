@@ -16,7 +16,7 @@ $stmt->execute([$clientId]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$user) {
-    jsonError('Пользователь не найден', 404);
+    jsonResponse(['success' => false, 'name' => null, 'email' => null]);
 }
 
 jsonResponse(['success' => true, 'name' => $user['name'], 'email' => $user['email']]);

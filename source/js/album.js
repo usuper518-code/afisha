@@ -49,8 +49,8 @@ function initIndexPage() {
         btn.addEventListener('click', async (e) => {
             e.preventDefault();
             
-            let savedName = sessionStorage.getItem('twit_name') || '';;
-            let savedEmail = sessionStorage.getItem('twit_email') || '';;
+            let savedName = sessionStorage.getItem('twit_name') || '';
+            let savedEmail = sessionStorage.getItem('twit_email') || '';
 
             if (!savedName || !savedEmail) {
                 const userData = await apiRequest('get-user-profile', {}, null, { method: 'GET' });
@@ -100,9 +100,16 @@ function initIndexPage() {
         
             safeYm('reachGoal', subscribe ? 'subscription_on' : 'subscription_off');
 
-            const res = await apiRequest('remind', { email, name, subscribe }, btn);
+            const res = await apiRequest('remind', {
+                email,
+                name,
+                subscribe,
+                release_id: window.ALBUM_ID
+            }, btn);
             if (res.success) {
-                toastSuccess('Спасибо! Вы подписаны.');
+                toastSuccess(subscribe
+                    ? 'Напомним о премьере и будем сообщать о следующих.'
+                    : 'Напомним об этой премьере.');
                 remindModal.style.display = 'none';
             } else {
                 toastError('Ошибка. Попробуйте позже.');

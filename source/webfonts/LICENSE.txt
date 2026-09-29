@@ -1,0 +1,7 @@
+Шрифты Cormorant Garamond, Montserrat, Playfair Display и Russo One
+распространяются по лицензии SIL Open Font License 1.1.
+Источник файлов: пакеты @fontsource (набор latin + cyrillic).
+
+Иконки Font Awesome Free 6.5.2:
+иконки — CC BY 4.0, шрифты — SIL OFL 1.1, код CSS — MIT.
+https://fontawesome.com/license/free

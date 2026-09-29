@@ -83,7 +83,9 @@
 }
 
 html {
-    font-size: 1.2vmin;
+    /* rem в тостах и модалке посчитаны от 16px (17.5rem ≈ 280px).
+       1.2vmin на телефоне схлопывал эти размеры до нескольких пикселей. */
+    font-size: 16px;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -98,7 +100,9 @@ body {
     user-select: none;
     
     min-height: 100vh;
+    min-height: 100dvh;
     max-height: 100vh;
+    max-height: 100dvh;
     background-color: inherit;
     color: inherit;
     -webkit-font-smoothing: antialiased;
@@ -185,6 +189,12 @@ ul, ol {
 /* ============================================ */
 /* ФОРМЫ (структура)                            */
 /* ============================================ */
+
+input,
+textarea {
+    user-select: text;
+    -webkit-user-select: text;
+}
 
 .form-group {
     display: flex;
@@ -600,8 +610,11 @@ ul, ol {
     background: var(--theme-color-surface);
     border-radius: var(--theme-radius-md);
     padding: 3vh 3vw;
-    max-width: 32rem;
+    max-width: min(32rem, 92vw);
     width: 90%;
+    max-height: 90vh;
+    max-height: 90dvh;
+    overflow-y: auto;
     text-align: center;
     color: var(--theme-color-text-primary);
     font-family: var(--theme-font-body);

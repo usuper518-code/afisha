@@ -484,6 +484,29 @@ ALTER TABLE `track_artists`
 ALTER TABLE `track_genre`
   ADD CONSTRAINT `track_genre_ibfk_1` FOREIGN KEY (`track_id`) REFERENCES `tracks` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `track_genre_ibfk_2` FOREIGN KEY (`genre_id`) REFERENCES `genres` (`id`) ON DELETE CASCADE;
+
+--
+-- Очередь напоминаний о премьере
+--
+CREATE TABLE `premiere_reminders` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `release_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `sent_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `premiere_reminders`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_user_release` (`user_id`, `release_id`),
+  ADD KEY `idx_unsent` (`sent_at`, `release_id`);
+
+ALTER TABLE `premiere_reminders`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `premiere_reminders`
+  ADD CONSTRAINT `premiere_reminders_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `premiere_reminders_release` FOREIGN KEY (`release_id`) REFERENCES `releases` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

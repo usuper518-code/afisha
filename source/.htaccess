@@ -1,0 +1,5 @@
+RewriteEngine On
+RewriteRule ^api(/|$) api/index.php [L]
+
+# Сессии посетителей не должны отдаваться по HTTP.
+RewriteRule ^storage/ - [F,L]
