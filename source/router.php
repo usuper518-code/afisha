@@ -10,6 +10,17 @@ if ($uri !== '/' && is_file($file)) {
     return false;
 }
 
+// /admin/ и другие каталоги — как DirectoryIndex на Apache.
+$dir = rtrim($file, '/');
+if ($uri !== '/' && is_dir($dir)) {
+    $index = $dir . '/index.html';
+    if (is_file($index)) {
+        header('Content-Type: text/html; charset=utf-8');
+        readfile($index);
+        return true;
+    }
+}
+
 if (str_starts_with($uri, '/api/') || $uri === '/api') {
     require __DIR__ . '/api/index.php';
     return true;
