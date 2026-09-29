@@ -33,6 +33,8 @@ if ($method === 'GET') {
 
 // POST — отправка отзыва
 if ($method === 'POST') {
+    enforcePublicRate('feedback', 6, 30, 3600);
+
     $data = getRequestBody();
     $releaseId = (int) ($data['release_id'] ?? 0);
     $review = trim($data['review'] ?? '');
@@ -43,11 +45,24 @@ if ($method === 'POST') {
     if (!$review) {
         jsonError('Необходим текст отзыва', 400);
     }
+    if (mb_strlen($review) > 5000) {
+        jsonError('Слишком длинный отзыв', 400);
+    }
 
     $nickname = trim($data['name'] ?? '');
     $email = trim($data['email'] ?? '');
     $wantBooklet = !empty($data['want_booklet']);
     $subscribe = !empty($data['subscribe']);
+
+    if (mb_strlen($nickname) > 100) {
+        jsonError('Имя слишком длинное', 400);
+    }
+    if ($email !== '' && !isSafeEmail($email)) {
+        jsonError('Некорректный email', 400);
+    }
+    if ($wantBooklet && $email === '') {
+        jsonError('Для получения буклета укажите email', 400);
+    }
 
     $pdo = getDB();
     $userId = getOrCreateUser($pdo, $sessionId, [
@@ -74,10 +89,15 @@ if ($method === 'POST') {
         $stmtAlbum->execute([$releaseId]);
         $release = $stmtAlbum->fetch(PDO::FETCH_ASSOC);
 
-        $subject = "Спасибо за ваш отзыв! Буклет спектакля «{$release['title']}»";
+        if (!$release || !defined('MAIL_FROM') || MAIL_FROM === '') {
+            jsonResponse(['success' => true]);
+        }
 
-        // Ссылка на буклет (заглушка, замените на реальный путь)
-        $bookletUrl = BASE_URL . '/albums/' . $release['slug'] . '/booklet.pdf';
+        $title = str_replace(["\r", "\n"], ' ', (string) ($release['title'] ?? ''));
+        $slug = str_replace(["\r", "\n"], '', (string) ($release['slug'] ?? ''));
+        $subject = mb_encode_mimeheader('Спасибо за ваш отзыв! Буклет спектакля «' . $title . '»', 'UTF-8');
+
+        $bookletUrl = BASE_URL . '/albums/' . rawurlencode($slug) . '/booklet.pdf';
 
         $message = "Здравствуйте, {$nickname}!\n\n";
         $message .= "Спасибо за ваш отзыв о спектакле «{$release['title']}».\n";

@@ -40,11 +40,11 @@ function generate_footer($page='') {
 </footer>
 HTML;
     return render_content($content, [
-        'SITE_TITLE' => SITE_TITLE, 
-        'TELEGRAM_URL' => defined('TELEGRAM_URL') && TELEGRAM_URL ? '<a href="' . TELEGRAM_URL . '" aria-label="Telegram" data-ym-goal="telegram_click"><i class="fab fa-telegram"></i></a>' : '',
-        'STIHI_URL' => defined('STIHI_URL') && STIHI_URL ? '<a href="' . STIHI_URL . '" aria-label="Стихи" data-ym-goal="stihi_click"><i class="fas fa-book"></i></a>' : '',
+        'SITE_TITLE' => h(SITE_TITLE), 
+        'TELEGRAM_URL' => defined('TELEGRAM_URL') && TELEGRAM_URL ? '<a href="' . h(TELEGRAM_URL) . '" aria-label="Telegram" data-ym-goal="telegram_click"><i class="fab fa-telegram"></i></a>' : '',
+        'STIHI_URL' => defined('STIHI_URL') && STIHI_URL ? '<a href="' . h(STIHI_URL) . '" aria-label="Стихи" data-ym-goal="stihi_click"><i class="fas fa-book"></i></a>' : '',
         'CURRENT_YEAR' => date('Y'),
-        'SLOGAN' => SLOGAN,
+        'SLOGAN' => h(SLOGAN),
         'ABOUT' => $about
     ]);
 }
@@ -63,8 +63,8 @@ function generate_header() {
 </header>
 HTML;
     return render_content($content, [
-        'SITE_TITLE' => SITE_TITLE, 
-        'SITE_TAGLINE' => SITE_TAGLINE
+        'SITE_TITLE' => h(SITE_TITLE), 
+        'SITE_TAGLINE' => h(SITE_TAGLINE)
     ]);
 }
 
@@ -80,6 +80,9 @@ function generate_meta($metaData) {
 <meta property="og:url" content="{{URL}}">
 HTML;
     $metaData['THEME_COLOR'] = $metaData['THEME_COLOR'] ?? '#0D0A0B';
+    foreach (['TITLE', 'DESCRIPTION', 'IMAGE', 'URL', 'THEME_COLOR'] as $key) {
+        $metaData[$key] = h($metaData[$key] ?? '');
+    }
     return render_content($content, $metaData);
 }
 
@@ -136,17 +139,20 @@ function generate_afisha($albumId) {
     $archive = $stmtArchive->fetchAll(PDO::FETCH_ASSOC);
 
     // 3. Генерация HTML
-    $theme = $premiere['theme'] ?? 'default';
+    $theme = safe_theme($premiere['theme'] ?? 'default');
     $themeCss = '<link rel="stylesheet" href="/css/themes/theme-' . $theme . '.css">';
 
     // Секция премьеры
     $premiereHtml = '';
     if ($premiere) {
-        $coverUrl = get_cover_url($premiere['uuid']);
-        $albumUrl = '/albums/' . $premiere['slug'] . '/';
+        $coverUrl = h(get_cover_url($premiere['uuid']));
+        $albumUrl = '/albums/' . safe_slug($premiere['slug']) . '/';
         $durationFormatted = format_duration($premiere['duration_total']);
+        $premiereTitle = h($premiere['title']);
+        $premiereSubtitle = h($premiere['subtitle']);
+        $premiereDescription = h($premiere['description']);
         $videoAttr = has_video($premiere['uuid']) 
-            ? ' data-video="' . get_video_url($premiere['uuid']) . '"' 
+            ? ' data-video="' . h(get_video_url($premiere['uuid'])) . '"' 
             : '';
         $videoBtn = has_video($premiere['uuid'])
             ? '<button type="button" class="media-video-toggle" aria-label="Смотреть видео"><i class="fas fa-play"></i></button>'
@@ -155,15 +161,15 @@ function generate_afisha($albumId) {
         $premiereHtml = <<<HTML
 <div class="poster-card main-poster"{$videoAttr}>
     <div class="poster-media">
-        <img src="{$coverUrl}" alt="{$premiere['title']}">
+        <img src="{$coverUrl}" alt="{$premiereTitle}">
         {$videoBtn}
         <div class="poster-overlay"></div>
         <div class="premiere-ribbon">ПРЕМЬЕРА</div>
     </div>
     <div class="poster-content">
-        <h2 class="poster-title">{$premiere['title']}</h2>
-        <p class="poster-subtitle">{$premiere['subtitle']}</p>
-        <p class="poster-description">{$premiere['description']}</p>
+        <h2 class="poster-title">{$premiereTitle}</h2>
+        <p class="poster-subtitle">{$premiereSubtitle}</p>
+        <p class="poster-description">{$premiereDescription}</p>
         <div class="poster-meta">
             <span><i class="fas fa-clock"></i> {$durationFormatted}</span>
             <span><i class="fas fa-users"></i> Труппа голосов</span>
@@ -178,24 +184,27 @@ HTML;
 
     // Карточка списка (используется и для «Скоро», и для «Архива»)
     $buildListCard = function($item, $dateLabel) {
-        $coverUrl = get_cover_url($item['uuid']);
-        $dateStr = format_date_ru($item['premiere_date']);
-        $albumUrl = '/albums/' . $item['slug'] . '/';
+        $coverUrl = h(get_cover_url($item['uuid']));
+        $dateStr = h(format_date_ru($item['premiere_date']));
+        $albumUrl = '/albums/' . safe_slug($item['slug']) . '/';
+        $itemTitle = h($item['title']);
+        $itemSubtitle = h($item['subtitle']);
+        $ymParams = h(json_encode(['album' => $item['slug']], JSON_UNESCAPED_UNICODE));
         $videoAttr = has_video($item['uuid']) 
-            ? ' data-video="' . get_video_url($item['uuid']) . '"' 
+            ? ' data-video="' . h(get_video_url($item['uuid'])) . '"' 
             : '';
         $videoBtn = has_video($item['uuid'])
             ? '<button type="button" class="media-video-toggle" aria-label="Смотреть видео"><i class="fas fa-play"></i></button>'
             : '';
         return <<<HTML
 <div class="poster-card coming"{$videoAttr}>
-    <a href="{$albumUrl}" class="poster-card-link" data-ym-goal="coming_soon_click" data-ym-params='{"album":"{$item['slug']}"}'>
+    <a href="{$albumUrl}" class="poster-card-link" data-ym-goal="coming_soon_click" data-ym-params="{$ymParams}">
         <div class="poster-media">
-            <img src="{$coverUrl}" alt="{$item['title']}">
+            <img src="{$coverUrl}" alt="{$itemTitle}">
         </div>
         <div class="poster-content">
-            <h4 class="poster-title">{$item['title']}</h4>
-            <p class="poster-type">{$item['subtitle']}</p>
+            <h4 class="poster-title">{$itemTitle}</h4>
+            <p class="poster-type">{$itemSubtitle}</p>
             <p class="poster-status">{$dateLabel}: {$dateStr}</p>
         </div>
     </a>
@@ -235,7 +244,7 @@ HTML;
     </div>
 </div>
 HTML;
-    $aboutPanelHtml = str_replace('{ABOUT_TEXT}', ABOUT_TEXT, $aboutPanelHtml);
+    $aboutPanelHtml = str_replace('{ABOUT_TEXT}', h(ABOUT_TEXT), $aboutPanelHtml);
 
     $tabs = [];
     $tabs[] = ['id' => 'premiere', 'icon' => 'fa-star', 'label' => 'Премьера', 'body' => $premiereHtml, 'paged' => false];
@@ -278,9 +287,9 @@ HTML;
         'FOOTER' => generate_footer(),
         'THEME_CSS' => $themeCss,
         
-        'ALBUM_ID' => $premiere['id'],
-        'ALBUM_SLUG' => $premiere['slug'],
-        'METRIKA_ID' => METRIKA_ID,
+        'ALBUM_ID' => (int) $premiere['id'],
+        'ALBUM_SLUG_JS' => json_for_script($premiere['slug']),
+        'METRIKA_ID' => (int) METRIKA_ID,
         
         'PROGRAM_NAV' => $navHtml,
         'PROGRAM_PANELS' => $panelsHtml
@@ -301,18 +310,19 @@ HTML;
     $troupeHtml = '';
     foreach ($troupeMembers as $member) {
         $avatarHtml = has_avatar($member['uuid'])
-            ? '<img src="' . get_avatar_url($member['uuid']) . '" alt="' . htmlspecialchars($member['name']) . '" loading="lazy">'
+            ? '<img src="' . h(get_avatar_url($member['uuid'])) . '" alt="' . h($member['name']) . '" loading="lazy">'
             : '<i class="fas fa-theater-masks swing-on-hover"></i>';
         $voiceTypeHtml = $member['voice_type']
-            ? '<p class="troupe-member-voice">' . htmlspecialchars($member['voice_type']) . '</p>'
+            ? '<p class="troupe-member-voice">' . h($member['voice_type']) . '</p>'
             : '';
         $descriptionHtml = $member['description']
-            ? '<p class="troupe-member-bio">' . htmlspecialchars($member['description']) . '</p>'
+            ? '<p class="troupe-member-bio">' . h($member['description']) . '</p>'
             : '';
+        $memberName = h($member['name']);
         $troupeHtml .= <<<HTML
 <div class="troupe-member">
     <div class="troupe-member-avatar">{$avatarHtml}</div>
-    <h3>{$member['name']}</h3>
+    <h3>{$memberName}</h3>
     {$voiceTypeHtml}
     {$descriptionHtml}
 </div>
@@ -321,7 +331,7 @@ HTML;
     $troupeHtml = $troupeHtml ?: '<p class="text-muted">Состав труппы скоро будет объявлен</p>';
 
     $authorBioHtml = AUTHOR_BIO !== ''
-        ? '<p>' . htmlspecialchars(AUTHOR_BIO) . '</p>'
+        ? '<p>' . h(AUTHOR_BIO) . '</p>'
         : '';
 
     $aboutHtml = render_template('about.html.tpl', [
@@ -329,11 +339,11 @@ HTML;
         'HEADER' => generate_header(),
         'FOOTER' => generate_footer('about'),
         'THEME_CSS' => $themeCss,
-        'METRIKA_ID' => METRIKA_ID,
+        'METRIKA_ID' => (int) METRIKA_ID,
 
-        'ABOUT_TEXT' => ABOUT_TEXT,
+        'ABOUT_TEXT' => h(ABOUT_TEXT),
         'TROUPE_GRID' => $troupeHtml,
-        'AUTHOR_NAME' => DEFAULT_AUTHOR,
+        'AUTHOR_NAME' => h(DEFAULT_AUTHOR),
         'AUTHOR_BIO' => $authorBioHtml
     ]);
     file_put_contents(ROOT_DIR . '/about.html', $aboutHtml);
@@ -342,14 +352,17 @@ HTML;
     $html = render_template('404.html.tpl', [
         'META' => generate_meta($metaData),
         'THEME_CSS' => $themeCss,
-        'METRIKA_ID' => METRIKA_ID,
+        'METRIKA_ID' => (int) METRIKA_ID,
     ]);
     file_put_contents(ROOT_DIR . '/404.html', $html);
 }
 
 function generate_album($albumId) {
     $data = load_album_data($albumId);
-    $slug = $data['album']['slug'];
+    $slug = (string) $data['album']['slug'];
+    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $slug)) {
+        throw new Exception('Некорректный код альбома');
+    }
     $outputDir = ALBUMS_DIR . '/' . $slug;
 
     if (!is_dir($outputDir)) {
@@ -433,11 +446,11 @@ function generate_index($outputDir, $data) {
     foreach ($data['tracks'] as $index => $track) {
         $num = $index + 1;
         $track_type = $track['is_instrumental'] ? 'Инструментал' : 'Вокал';
-        $tracklistHtml .= "<li><span class=\"track-num\">{$num}.</span><span class=\"track-title\">{$track['title']}</span><span class=\"track-type\">{$track_type}</span><span class=\"track-duration\">" . format_duration($track['duration']) . "</span></li>";
+        $tracklistHtml .= '<li><span class="track-num">' . $num . '.</span><span class="track-title">' . h($track['title']) . '</span><span class="track-type">' . h($track_type) . '</span><span class="track-duration">' . h(format_duration($track['duration'])) . '</span></li>';
     }
 
     $albumVideoAttr = has_video($album['uuid']) 
-        ? ' data-video="' . get_video_url($album['uuid']) . '"' 
+        ? ' data-video="' . h(get_video_url($album['uuid'])) . '"' 
         : '';
     $albumVideoBtn = has_video($album['uuid'])
         ? '<button type="button" class="media-video-toggle" aria-label="Смотреть видео"><i class="fas fa-play"></i></button>'
@@ -449,21 +462,21 @@ function generate_index($outputDir, $data) {
         'FOOTER' => generate_footer(),
         'THEME_CSS' => getThemeCss($album),
         
-        'ALBUM_ID' => $album['id'],
-        'ALBUM_SLUG' => $album['slug'],
-        'METRIKA_ID' => METRIKA_ID,
-        'EMOTION_MAP_JSON' => json_encode(getEmotionMapSimple(), JSON_UNESCAPED_UNICODE),
+        'ALBUM_ID' => (int) $album['id'],
+        'ALBUM_SLUG_JS' => json_for_script($album['slug']),
+        'METRIKA_ID' => (int) METRIKA_ID,
+        'EMOTION_MAP_JSON' => json_for_script(getEmotionMapSimple()),
         
-        'ALBUM_COVER' => get_cover_url($album['uuid']),
+        'ALBUM_COVER' => h(get_cover_url($album['uuid'])),
         'ALBUM_VIDEO_ATTR' => $albumVideoAttr,
         'ALBUM_VIDEO_BTN' => $albumVideoBtn,
-        'ALBUM_TITLE' => $album['title'],
-        'ALBUM_SUBTITLE' => $album['subtitle'],
+        'ALBUM_TITLE' => h($album['title']),
+        'ALBUM_SUBTITLE' => h($album['subtitle']),
         'TRACKLIST' => $tracklistHtml,
-        'DURATION_TOTAL' => format_duration($album['duration_total']),
-        'ALBUM_DESCRIPTION' => $album['description'],
+        'DURATION_TOTAL' => h(format_duration($album['duration_total'])),
+        'ALBUM_DESCRIPTION' => h($album['description']),
         
-        'PREMIERE_DATE' => $album['premiere_date']
+        'PREMIERE_DATE_JS' => json_for_script($album['premiere_date'])
     ]);
 
     file_put_contents($outputDir . '/index.html', $html);
@@ -476,7 +489,7 @@ function generate_track($outputDir, $data, $track, $index) {
     $trackNum = $index + 1;
 
     $trackVideoAttr = has_video($track['uuid'], 'track') 
-        ? ' data-video="' . get_video_url($track['uuid'], 'track') . '"' 
+        ? ' data-video="' . h(get_video_url($track['uuid'], 'track')) . '"' 
         : '';
     $trackVideoBtn = has_video($track['uuid'], 'track')
         ? '<button type="button" class="media-video-toggle" aria-label="Смотреть видео"><i class="fas fa-play"></i></button>'
@@ -494,32 +507,32 @@ function generate_track($outputDir, $data, $track, $index) {
         'META' => generate_meta($metaData),
         'THEME_CSS' => getThemeCss($album),
         
-        'ALBUM_ID' => $album['id'],
-        'ALBUM_SLUG' => $album['slug'],
-        'METRIKA_ID' => METRIKA_ID,
+        'ALBUM_ID' => (int) $album['id'],
+        'ALBUM_SLUG_JS' => json_for_script($album['slug']),
+        'METRIKA_ID' => (int) METRIKA_ID,
 
         //для интерфейса
-        'TRACK_NUM' => $trackNum,  
-        'ALBUM_TITLE' => $album['title'],
-        'TRACK_TITLE' => $track['title'],
-        'VOCAL_TYPE' => $track['is_instrumental'] ? 'Инструментал' : 'Вокал',
-        'TRACK_DURATION' => format_duration($track['duration']),
-        'TRACK_COVER' => get_cover_url($track['uuid'], 'track'),
+        'TRACK_NUM' => (int) $trackNum,  
+        'ALBUM_TITLE' => h($album['title']),
+        'TRACK_TITLE' => h($track['title']),
+        'VOCAL_TYPE' => h($track['is_instrumental'] ? 'Инструментал' : 'Вокал'),
+        'TRACK_DURATION' => h(format_duration($track['duration'])),
+        'TRACK_COVER' => h(get_cover_url($track['uuid'], 'track')),
         'TRACK_VIDEO_ATTR' => $trackVideoAttr,
         'TRACK_VIDEO_BTN' => $trackVideoBtn,
-        'AUTHORS' => $track['authors'],
-        'ARTISTS' => implode(', ', $track['artists']),
+        'AUTHORS' => h($track['authors']),
+        'ARTISTS' => h(implode(', ', $track['artists'])),
         'PREV_DISABLED' => ($index > 0 ? '' : 'disabled'),
         
         //для share-btn
-        'TRACK_ID' => $track['id'],
-        'TRACK_SLUG' => $track['slug'],
+        'TRACK_ID' => (int) $track['id'],
+        'TRACK_SLUG_JS' => json_for_script($track['slug']),
         
-        'CURRENT_TRACK_INDEX' => $index,
-        'EMOTION_MAP_JSON' => json_encode(getEmotionMapSimple(), JSON_UNESCAPED_UNICODE),
-        'ALBUM_TRACKS_JSON' => json_encode(array_map(function($t) {
+        'CURRENT_TRACK_INDEX' => (int) $index,
+        'EMOTION_MAP_JSON' => json_for_script(getEmotionMapSimple()),
+        'ALBUM_TRACKS_JSON' => json_for_script(array_map(function($t) {
             return [
-                'id' => $t['id'],
+                'id' => (int) $t['id'],
                 'title' => $t['title'],
                 'slug' => $t['slug'],
                 'audio' => get_audio_url($t['uuid']),
@@ -530,7 +543,7 @@ function generate_track($outputDir, $data, $track, $index) {
                 'artists' => implode(', ', $t['artists']),
                 'authors' => $t['authors']
             ];
-        }, $data['tracks']), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),        
+        }, $data['tracks'])),        
     ]);
 
     file_put_contents($outputDir . "/track-{$trackNum}.html", $html);
@@ -548,7 +561,7 @@ function generate_finale($outputDir, $data) {
         'THEME_COLOR' => get_theme_bg_color($album['theme'] ?? 'default')
     ];
 
-    $tracksJson = json_encode(array_map(fn($t) => ['id' => $t['id'], 'title' => $t['title']], $data['tracks']));
+    $tracksJson = json_for_script(array_map(fn($t) => ['id' => (int) $t['id'], 'title' => $t['title']], $data['tracks']));
 
     $html = render_template('finale.html.tpl', [
         'META' => generate_meta($metaData),
@@ -556,13 +569,13 @@ function generate_finale($outputDir, $data) {
         'FOOTER' => generate_footer(),
         'THEME_CSS' => getThemeCss($album),
         
-        'ALBUM_ID' => $album['id'],
-        'ALBUM_SLUG' => $album['slug'],
-        'METRIKA_ID' => METRIKA_ID,
+        'ALBUM_ID' => (int) $album['id'],
+        'ALBUM_SLUG_JS' => json_for_script($album['slug']),
+        'METRIKA_ID' => (int) METRIKA_ID,
         'TRACKS_JSON' => $tracksJson,
-        'EMOTION_MAP_JSON' => json_encode(getEmotionMapSimple(), JSON_UNESCAPED_UNICODE),
+        'EMOTION_MAP_JSON' => json_for_script(getEmotionMapSimple()),
         
-        'ALBUM_TITLE' => $album['title']
+        'ALBUM_TITLE' => h($album['title'])
     ]);
 
     file_put_contents($outputDir . '/finale.html', $html);
@@ -586,11 +599,11 @@ function generate_after($outputDir, $data) {
         'FOOTER' => generate_footer(),
         'THEME_CSS' => getThemeCss($album),
         
-        'ALBUM_ID' => $album['id'],
-        'ALBUM_SLUG' => $album['slug'],
-        'METRIKA_ID' => METRIKA_ID,
+        'ALBUM_ID' => (int) $album['id'],
+        'ALBUM_SLUG_JS' => json_for_script($album['slug']),
+        'METRIKA_ID' => (int) METRIKA_ID,
 
-        'ALBUM_TITLE' => $album['title']
+        'ALBUM_TITLE' => h($album['title'])
     ]);
 
     file_put_contents($outputDir . '/after.html', $html);
@@ -600,8 +613,29 @@ function generate_after($outputDir, $data) {
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // ============================================
 
+function safe_theme($theme): string {
+    $theme = (string) ($theme ?: 'default');
+    if (!preg_match('/^[a-z0-9-]{1,40}$/', $theme)) {
+        return 'default';
+    }
+    return is_file(ROOT_DIR . '/css/themes/theme-' . $theme . '.css') ? $theme : 'default';
+}
+
+function safe_slug($slug): string {
+    $slug = (string) $slug;
+    return preg_match('/^[a-zA-Z0-9_-]+$/', $slug) ? $slug : rawurlencode($slug);
+}
+
+function json_for_script($value): string {
+    $json = json_encode(
+        $value,
+        JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+    );
+    return $json === false ? 'null' : $json;
+}
+
 function getThemeCss($album) {
-    $theme = $album['theme'] ?? 'default';
+    $theme = safe_theme($album['theme'] ?? 'default');
     return '<link rel="stylesheet" href="/css/themes/theme-' . $theme . '.css">';
 }
 

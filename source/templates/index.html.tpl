@@ -99,10 +99,10 @@
         <canvas id="dust-canvas" aria-hidden="true" class="canvas"></canvas>
         <script>
             window.ALBUM_ID = {{ALBUM_ID}};
-            window.ALBUM_SLUG = '{{ALBUM_SLUG}}';
+            window.ALBUM_SLUG = {{ALBUM_SLUG_JS}};
             window.METRIKA_ID = {{METRIKA_ID}};
             window.EMOTION_MAP = {{EMOTION_MAP_JSON}};
-            window.PREMIERE_DATE = '{{PREMIERE_DATE}}';
+            window.PREMIERE_DATE = {{PREMIERE_DATE_JS}};
         </script>
         <script src="/js/common.js"></script>
         <script src="/js/album.js"></script>

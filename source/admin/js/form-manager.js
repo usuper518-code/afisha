@@ -177,7 +177,7 @@ async function loadReferenceData() {
             const container = document.getElementById('artists-checkboxes');
             if (container) {
                 container.innerHTML = data.data.map(a => `
-                    <label><input type="checkbox" name="artists[]" value="${a.id}"> ${escapeHtml(a.name)} (${a.voice_type || 'вокал'})</label>
+                    <label><input type="checkbox" name="artists[]" value="${Number(a.id)}"> ${escapeHtml(a.name)} (${escapeHtml(a.voice_type || 'вокал')})</label>
                 `).join('');
             }
         }
@@ -729,7 +729,7 @@ async function searchAjax(query, fieldConfig, datalist) {
             .filter(([key]) => !['id', displayField].includes(key))
             .map(([key, val]) => `data-${key}="${escapeHtml(String(val))}"`)
             .join(' ');
-        return `<option value="${escapeHtml(item[displayField])}" data-id="${item.id}" ${extras}>${item[displayField]}</option>`;
+        return `<option value="${escapeHtml(item[displayField])}" data-id="${Number(item.id)}" ${extras}>${escapeHtml(item[displayField])}</option>`;
     }).join('');
     return true;
 }

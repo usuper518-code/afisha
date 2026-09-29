@@ -1,5 +1,22 @@
 RewriteEngine On
-RewriteRule ^api(/|$) api/index.php [L]
 
-# Сессии посетителей не должны отдаваться по HTTP.
-RewriteRule ^storage/ - [F,L]
+# Блокировка доступа к скрытым файлам
+RedirectMatch 403 /\..*$
+
+# Сессии и счётчики ограничений не отдаются по HTTP
+RewriteRule ^storage(/|$) - [F,L]
+
+# Статические файлы и существующие папки не трогаем
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# API запросы идут в свою папку
+RewriteRule ^api/ - [L]
+
+# Ошибка 404
+ErrorDocument 404 /404.html
+
+<FilesMatch "\.php$">
+    Header set Content-Type "text/html; charset=utf-8"
+</FilesMatch>

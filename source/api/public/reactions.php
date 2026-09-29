@@ -28,6 +28,8 @@ if (!is_array($emotions)) {
 $emotionFields = EMOTION_MAP;
 $emotions = array_unique(array_intersect($emotions, array_keys($emotionFields)));
 
+enforcePublicRate('reactions', 40, 160, 600);
+
 $pdo = getDB();
 $userId = getOrCreateUser($pdo, $sessionId);
 

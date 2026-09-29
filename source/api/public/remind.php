@@ -22,12 +22,14 @@ if ($name === '' || $email === '') {
 if (mb_strlen($name) > 100) {
     jsonError('Имя слишком длинное', 400);
 }
-if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+if (!isSafeEmail($email)) {
     jsonError('Некорректный email', 400);
 }
 if (!$releaseId) {
     jsonError('Необходим ИД релиза', 400);
 }
+
+enforcePublicRate('remind', 5, 20, 3600);
 
 $pdo = getDB();
 $stmt = $pdo->prepare("SELECT id, premiere_date, is_published FROM releases WHERE id = ?");

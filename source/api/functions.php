@@ -104,6 +104,71 @@ function getClientId(): ?string {
     return ensureVisitorSession();
 }
 
+function h($value): string {
+    return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function isSafeEmail(string $email): bool {
+    if ($email === '' || preg_match('/[\r\n\0]/', $email)) {
+        return false;
+    }
+    return (bool) filter_var($email, FILTER_VALIDATE_EMAIL);
+}
+
+function clientIp(): string {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    if (!is_string($ip) || !filter_var($ip, FILTER_VALIDATE_IP)) {
+        return '0.0.0.0';
+    }
+    return $ip;
+}
+
+// Ограничение публичных записей: отдельно на сессию и на адрес.
+// Файлы счётчиков лежат вне отдачи вебом (см. .htaccess, storage/).
+function enforcePublicRate(string $bucket, int $perClient, int $perIp, int $windowSec): void {
+    $client = getClientId() ?: 'none';
+    $allowed = rateAllows($bucket . '|c|' . $client, $perClient, $windowSec)
+        && rateAllows($bucket . '|ip|' . clientIp(), $perIp, $windowSec);
+    if (!$allowed) {
+        jsonError('Слишком много запросов. Попробуйте позже.', 429);
+    }
+}
+
+function rateAllows(string $key, int $limit, int $windowSec): bool {
+    $dir = ROOT_DIR . '/storage/ratelimit';
+    if (!is_dir($dir)) {
+        mkdir($dir, 0700, true);
+    }
+    $path = $dir . '/' . hash('sha256', $key) . '.json';
+    $fh = fopen($path, 'c+');
+    if ($fh === false) {
+        return true;
+    }
+    try {
+        if (!flock($fh, LOCK_EX)) {
+            return true;
+        }
+        $raw = stream_get_contents($fh);
+        $data = json_decode($raw ?: '', true);
+        $now = time();
+        if (!is_array($data) || !isset($data['start'], $data['hits']) || ($data['start'] + $windowSec) <= $now) {
+            $data = ['start' => $now, 'hits' => 0];
+        }
+        if ($data['hits'] >= $limit) {
+            return false;
+        }
+        $data['hits']++;
+        rewind($fh);
+        ftruncate($fh, 0);
+        fwrite($fh, json_encode($data));
+        fflush($fh);
+        return true;
+    } finally {
+        flock($fh, LOCK_UN);
+        fclose($fh);
+    }
+}
+
 // Получение тела запроса как массива
 function getRequestBody(): array {
     $input = file_get_contents('php://input');
@@ -273,6 +338,10 @@ function get_audio_url($uuid) {
 // Тот же приём чтения из живого CSS, что и в generateBooklet() —
 // единственный источник правды остаётся в css/themes/theme-*.css.
 function get_theme_bg_color($theme) {
+    $theme = (string) $theme;
+    if (!preg_match('/^[a-z0-9-]{1,40}$/', $theme)) {
+        $theme = 'default';
+    }
     $path = ROOT_DIR . '/css/themes/theme-' . $theme . '.css';
     if (file_exists($path)) {
         $css = file_get_contents($path);

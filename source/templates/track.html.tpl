@@ -83,7 +83,7 @@
         <canvas id="dust-canvas" aria-hidden="true" class="canvas"></canvas>
         <script>
             window.ALBUM_ID = {{ALBUM_ID}};
-            window.ALBUM_SLUG = '{{ALBUM_SLUG}}';
+            window.ALBUM_SLUG = {{ALBUM_SLUG_JS}};
             window.METRIKA_ID = {{METRIKA_ID}};
             
             window.CURRENT_TRACK_INDEX = {{CURRENT_TRACK_INDEX}};
@@ -91,7 +91,7 @@
             window.ALBUM_TRACKS = {{ALBUM_TRACKS_JSON}};
             
             window.CURRENT_TRACK_ID = {{TRACK_ID}}; 
-            window.CURRENT_TRACK_SLUG = '{{TRACK_SLUG}}';
+            window.CURRENT_TRACK_SLUG = {{TRACK_SLUG_JS}};
         </script>                        
         <script src="/js/common.js"></script>
         <script src="/js/player.js"></script>

@@ -43,7 +43,7 @@
                 `;
 
                 const topTracks = stats.top_tracks.map(t =>
-                        `<div>${t.title} — ${t.plays} прослушиваний, ${t.likes} лайков</div>`
+                        `<div>${escapeHtml(t.title)} — ${Number(t.plays) || 0} прослушиваний, ${Number(t.likes) || 0} лайков</div>`
                 ).join('');
                 document.getElementById('top-tracks').innerHTML = topTracks;
 

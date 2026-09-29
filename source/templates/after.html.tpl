@@ -81,7 +81,7 @@
      
         <script>
             window.ALBUM_ID = {{ALBUM_ID}};
-            window.ALBUM_SLUG = '{{ALBUM_SLUG}}';
+            window.ALBUM_SLUG = {{ALBUM_SLUG_JS}};
             window.METRIKA_ID = {{METRIKA_ID}};
         </script>            
         <script src="/js/common.js"></script>
