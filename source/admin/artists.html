@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Управление артистами | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <div class="page-header">
+                <h2>Артисты</h2>
+                <div class="page-header-actions">
+                    <div class="list-controls">
+                        <input type="text" id="search-input" placeholder="Имя артиста" class="search-input">
+                        <button type="button" id="search-btn" class="btn">Найти</button>
+                        <button type="button" id="reset-search-btn" class="btn btn-cancel">Сбросить</button>
+                    </div>
+                    <a href="/admin/artist-form.html" class="btn">➕ Новый</a>
+                </div>
+            </div>
+
+            <table class="admin-table">
+                <thead><tr></tr></thead>
+                <tbody id="data-table"></tbody>
+            </table>
+
+            <div class="list-footer">
+                <div id="total-info" class="total-info">Всего: 0</div>
+                <div id="pagination" class="pagination"></div>
+            </div>
+        </main>
+
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script src="/admin/js/list-manager.js"></script>
+        <script>
+            initListManager({
+                endpoint: '/artists',
+                obj: 'artist',
+                objName: 'Артист',
+                objNamePlural: 'Артисты',
+                fields: 'id,name,sort_order,voice_type,is_active',
+                titleField: 'name', //выводится при удалении
+                limit: 10,
+                actionWidth: '7%',
+                columns: [
+                    {field: 'id', label: 'ID', width: '8%'},
+                    {field: 'name', label: 'Имя', width: '42%', link: true},
+                    {field: 'sort_order', label: 'Порядок', width: '10%'},
+                    {field: 'voice_type', label: 'Голос', width: '20%'},
+                    {field: 'is_active', label: 'Активен', width: '8%', format: 'boolean'}
+                ]
+            });
+        </script>
+    </body>
+</html>

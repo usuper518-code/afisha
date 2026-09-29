@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Модерация отзывов | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <div class="page-header">
+                <h2>Отзывы</h2>
+                <div class="page-header-actions">
+                    <div class="list-controls">
+                        <input type="text" id="search-input" placeholder="Название альбома" class="search-input">
+                        <select id="filter-status" class="search-input">
+                            <option value="">Все</option>
+                            <option value="pending">На модерации</option>
+                            <option value="approved">Одобренные</option>
+                            <option value="rejected">Отклонённые</option>
+                        </select>
+                        <button type="button" id="apply-filters-btn" class="btn">Найти</button>
+                        <button type="button" id="reset-filters-btn" class="btn btn-cancel">Сбросить</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="reviews-list"></div>
+
+            <div class="list-footer">
+                <div id="total-info" class="total-info">Всего: 0</div>
+                <div id="pagination" class="pagination"></div>
+            </div>
+        </main>
+
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script src="/admin/js/list-manager.js"></script>
+        <script>
+            const container = document.getElementById('reviews-list');
+
+            // Кастомный рендер для отзывов
+            function renderReviews(reviews) {
+                if (!reviews.length) {
+                    container.innerHTML = '<p>Отзывов нет</p>';
+                    return;
+                }
+
+                container.innerHTML = reviews.map(r => `
+                    <div class="review-card">
+                        <div class="review-header">
+                            <a class="review-author" href="/admin/user-form.html?id=${r.user_id}">${escapeHtml(r.nickname || 'Аноним')}</a>
+                            <span class="review-date">${new Date(r.created_at).toLocaleString()}</span>
+                        </div>
+                        <a class="review-entity" href="/admin/release-form.html?id=${r.release_id}">📀 ${escapeHtml(r.album_title || 'Без названия')}</a>
+                        <div class="review-content">${escapeHtml(r.content)}</div>
+                        <div class="review-actions">
+                            ${r.status === 'pending' ? `
+                                <button class="btn btn-success" data-id="${r.id}" data-action="approve">Одобрить</button>
+                                <button class="btn btn-cancel" data-id="${r.id}" data-action="reject">Отклонить</button>
+                            ` : `
+                                <span class="review-status status-${r.status}">
+                                    ${r.status === 'approved' ? '✅ Одобрен' : '❌ Отклонён'}
+                                </span>
+                            `}
+                            <button class="btn-icon delete-btn" data-id="${r.id}" data-action="delete">🗑️</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.querySelectorAll('[data-action="approve"]').forEach(btn => {
+                    btn.addEventListener('click', () => updateReviewStatus(btn.dataset.id, 'approved'));
+                });
+                container.querySelectorAll('[data-action="reject"]').forEach(btn => {
+                    btn.addEventListener('click', () => updateReviewStatus(btn.dataset.id, 'rejected'));
+                });
+                container.querySelectorAll('[data-action="delete"]').forEach(btn => {
+                    btn.addEventListener('click', () => deleteReview(btn.dataset.id));
+                });
+            }
+
+            async function updateReviewStatus(id, status) {
+                const actionText = status === 'approved' ? 'одобрить' : 'отклонить';
+                showConfirm(`Вы уверены, что хотите ${actionText} этот отзыв?`, async () => {
+                    const res = await adminApiRequest(`/reviews?id=${id}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({status})
+                    });
+                    if (res.error) {
+                        toastError(res.error);
+                        return;
+                    }
+                    toastSuccess(`Отзыв ${status === 'approved' ? 'одобрен' : 'отклонён'}`);
+                    loadData();
+                });
+            }
+
+            async function deleteReview(id) {
+                showConfirm('Удалить отзыв? Это действие нельзя отменить.', async () => {
+                    const res = await adminApiRequest(`/reviews?id=${id}`, {method: 'DELETE'});
+                    if (res.error) {
+                        toastError(res.error);
+                        return;
+                    }
+                    toastSuccess('Отзыв удалён');
+                    loadData();
+                });
+            }
+
+            // Инициализация через list-manager с кастомным рендером
+            initListManager({
+                endpoint: '/reviews',
+                obj: 'review',
+                objName: 'Отзыв',
+                objNamePlural: 'Отзывы',
+                titleField: 'id',
+                limit: 10,
+                customRender: renderReviews,
+                filters: [
+                    {param: 'status', selector: '#filter-status'}
+                ]
+            });
+        </script>
+    </body>
+</html>

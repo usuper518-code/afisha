@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Редактор тега | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+        <main class="container">
+            <h2 id="form-title">Новый тег</h2>
+
+            <form id="genre-form" class="form-container-small">
+                <label>Название</label>
+                <input type="text" id="name" required maxlength="255">
+                
+                <label>Код</label>
+                <input type="text" id="slug" maxlength="255" placeholder="Заполнится автоматически">
+                
+                <div class="form-actions">
+                    <button type="button" id="save-btn" class="btn">Сохранить</button>
+                    <a href="/admin/genres.html" class="btn-cancel">Отмена</a>
+                </div>
+            </form>
+        </main>
+        
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script src="/admin/js/form-manager.js"></script>
+        <script>
+            initFormManager({
+                endpoint: '/genres',
+                listUrl: '/admin/genres.html',
+                obj: 'genre',
+                objName: 'Тег',
+                autoSlug: true,
+                fields: [ // для заполнения, отправка кроме readOnly и ajaxSearch
+                    {name: 'name', 'label': 'Название', required: true},
+                    {name: 'slug', 'label': 'Код'}
+                ]
+            });
+        </script>
+    </body>
+</html>

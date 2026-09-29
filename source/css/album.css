@@ -1,0 +1,987 @@
+/* album.css */
+/* Цвета, шрифты, размеры шрифта, радиусы и тени — в css/themes/theme-*.css
+   (алиасы --album-*/--radius-*/--font-* там же). Здесь остаются только
+   размеры структурных элементов, не зависящие от темы. */
+:root {
+    /* Размеры кнопок */
+    --btn-play-size: 8vh;
+    --btn-nav-size: 6vh;
+}
+
+/* ---------- БАЗОВЫЕ НАСТРОЙКИ ---------- */
+body {
+    background-color: var(--theme-color-bg);
+    color: var(--theme-color-text-primary);
+    font-family: var(--theme-font-body);
+}
+
+/* ---------- ХЛЕБНЫЕ КРОШКИ ---------- */
+.breadcrumbs {
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    height: 1vh;
+    margin-bottom: 1.5vh;
+    opacity: 0.6;
+}
+
+.breadcrumbs a { color: var(--theme-color-accent-secondary); }
+.breadcrumbs a:hover { color: var(--theme-color-accent-light); }
+.breadcrumbs .separator { margin: 0 0.5vw; }
+
+/* ============================================ */
+/* СТРАНИЦА ТРЕКА                               */
+/* ============================================ */
+.track-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2vw;
+}
+
+/* ---------- ЛЕВАЯ КОЛОНКА (ТЕКСТ) ---------- */
+.lyrics-column {
+    position: relative; 
+    background: color-mix(in srgb, var(--theme-color-surface) 50%, transparent);
+    border-left: var(--border-width-thick) solid var(--theme-color-accent);
+    border-radius: var(--theme-radius-sm);
+    display: flex;
+    flex-direction: column;
+    height: 94vh;
+    overflow: hidden;
+}
+.lyrics-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--theme-color-surface) 95%, transparent);
+    backdrop-filter: blur(1vh);
+    padding: 1.5vh 1.5vw 1vh 1.5vw;
+    border-bottom: var(--border-width-thin) solid var(--theme-color-border);
+    flex-shrink: 0;
+}
+
+.lyrics-text {
+    font-size: var(--theme-text-base);
+    flex: 1;
+    padding: 1vh 1.5vw 1.5vh 1.5vw;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;  
+    -ms-overflow-style: none;
+}
+.lyrics-text::-webkit-scrollbar {
+  display: none;
+}
+
+.track-page-title {
+    font-size: var(--theme-text-xl);
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+    color: var(--theme-color-accent-secondary-light);
+}
+
+.track-page-meta {
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--theme-color-accent);
+}
+
+.lyric-line {
+    transition: all 0.3s ease;
+    opacity: 0.6;
+    padding: 0.2vh 0;
+}
+
+.lyric-line.highlight {
+    opacity: 1;
+    color: var(--theme-color-accent-secondary-light);
+    text-shadow: var(--theme-shadow-text-glow);
+    border-left: var(--border-width-thin) solid var(--theme-color-accent);
+    padding-left: 1vw;
+}
+
+.no-lyrics {
+    text-align: center;
+    opacity: 0.5;
+    font-style: italic;
+    padding: 2vh 0;
+}
+
+/* ---------- ПРАВАЯ КОЛОНКА (ПЛЕЕР) ---------- */
+.stage-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    height: auto;
+}
+
+/* Обложка */
+.stage-visual {
+    position: relative;
+    border-radius: var(--theme-radius-md);
+    overflow: hidden;
+    box-shadow: var(--theme-shadow-lg);
+    border: var(--border-width-thin) solid var(--theme-color-border);
+    background: var(--theme-color-bg);
+    aspect-ratio: 1/1;
+    max-height: 50vh;
+    flex-shrink: 0;
+}
+
+.stage-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /*opacity: 0;*/
+    transition: opacity 0.4s ease;
+}
+
+.stage-visual img.loaded { opacity: 1; }
+
+/* Переключатель видео здесь ВСЕГДА в углу (не по центру, как на
+   обложке альбома) — по центру в портретной ориентации выводится
+   караоке-текст (.lyrics-overlay-text), кнопка бы перекрывала его. */
+.stage-visual .media-video-toggle {
+    top: auto;
+    left: auto;
+    bottom: var(--spacing-md);
+    right: var(--spacing-md);
+    transform: none;
+}
+.stage-visual .media-video-toggle:hover {
+    transform: scale(1.08);
+}
+
+/* Заглушка, если картинки нет */
+.stage-visual .no-cover {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 6vh;
+    color: var(--theme-color-accent-secondary);
+    opacity: 0.3;
+}
+
+/* Плеер */
+.player-section {
+    background: var(--theme-color-surface);
+    padding: 1.5vh 1.5vw;
+    border: var(--border-width-thin) solid var(--theme-color-border);
+    border-radius: var(--theme-radius-md);
+    box-shadow: var(--theme-shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    flex-shrink: 0;
+}
+
+#audio-player { display: none; }
+
+.player-controls-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2vw;
+}
+
+.play-pause-btn {
+    background: var(--theme-color-accent);
+    width: var(--btn-play-size);
+    height: var(--btn-play-size);
+    border-radius: 50%;
+    color: var(--theme-color-text-primary);
+    font-size: var(--theme-text-lg);
+    border: var(--border-width-thin) solid var(--theme-color-accent-secondary);
+    transition: all 0.3s ease;
+    box-shadow: var(--theme-shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.play-pause-btn:hover {
+    background: var(--theme-color-accent-secondary);
+    color: var(--theme-color-bg);
+    box-shadow: var(--theme-shadow-glow);
+}
+
+/* Буферизация трека — показывается между 'waiting' и 'canplay'/'playing' */
+.play-pause-btn.buffering {
+    position: relative;
+}
+.play-pause-btn.buffering::after {
+    content: '';
+    position: absolute;
+    inset: -0.4vh;
+    border-radius: 50%;
+    border: var(--border-width-normal) solid transparent;
+    border-top-color: var(--theme-color-accent-secondary);
+    animation: btnSpin 0.8s linear infinite;
+}
+@keyframes btnSpin {
+    to { transform: rotate(360deg); }
+}
+
+.nav-btn {
+    background: transparent;
+    border: var(--border-width-thin) solid var(--theme-color-border);
+    color: var(--theme-color-text-primary);
+    width: var(--btn-nav-size);
+    height: var(--btn-nav-size);
+    border-radius: 50%;
+    font-size: var(--theme-text-sm);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn:hover:not(:disabled) {
+    border-color: var(--theme-color-accent-secondary);
+    color: var(--theme-color-accent-secondary-light);
+    box-shadow: var(--theme-shadow-glow);
+}
+
+.nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Прогресс-бар */
+.progress-container {
+    width: 100%;
+    height: 0.8vh;
+    background: var(--theme-color-border);
+    border-radius: var(--theme-radius-sm);
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.progress-container:hover {
+    box-shadow: 0 0 0 0.2vw var(--theme-color-border-light);
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background: var(--theme-color-accent-secondary);
+    border-radius: var(--theme-radius-sm);
+    transition: width 0.1s linear;
+}
+
+/* Авторы и исполнители */
+.track-credits {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding-top: 1vh;
+    border-top: var(--border-width-thin) solid var(--theme-color-border);
+}
+
+.track-authors { color: var(--theme-color-accent-secondary); }
+.track-artists { color: var(--theme-color-accent); }
+
+/* Эмоции */
+.emotion-selector-label {
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--theme-color-accent-secondary);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.emotion-legend {
+    font-size: 1.2rem; 
+    opacity: 0.7; 
+    margin-bottom: 0.5rem; 
+    text-align: center; 
+    line-height: 1.5;
+}
+
+.emotion-selector {
+    display: flex;
+    gap: 1vw;
+    font-size: 3vh;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.emotion-option {
+    opacity: 0.45;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+    filter: grayscale(0.3);
+    padding: 0.2vh;
+}
+
+.emotion-option:hover { transform: scale(1.15); }
+.emotion-option.selected {
+    opacity: 1;
+    filter: grayscale(0);
+    filter: drop-shadow(0 0 1.2vh currentColor);
+}
+
+.emotion-option.bounce {
+    animation: emotionBounce 0.6s ease-in-out;
+}
+
+@keyframes emotionBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2vh); }
+}
+
+/* ============================================ */
+/* ЗАНАВЕС (finale.html)                        */
+/* ============================================ */
+.finale-scene {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.finale-icon {
+    font-size: 8vh;
+    color: var(--theme-color-accent-secondary);
+    margin-bottom: 1.5vh;
+    opacity: 0.7;
+}
+
+.finale-title {
+    font-size: var(--theme-text-2xl);
+    letter-spacing: 0.3em;
+    margin-right: -0.3em;
+    margin-bottom: 0.5rem;
+    text-shadow: var(--theme-shadow-glow);
+    color: var(--theme-color-accent-secondary-light);
+}
+
+.finale-message {
+    font-size: var(--theme-text-lg);
+    font-style: italic;
+    max-width: 60vw;
+    margin: 1.5vh auto;
+    color: var(--theme-color-accent);
+}
+
+.finale-emotions-container {
+    width: 100%;
+    max-width: 80vw;
+    margin: 1.5vh 0;
+}
+
+.emotion-row {
+    display: flex;
+    align-items: center;
+    padding: 0.5vh 0;
+    border-bottom: 0.2vh dashed var(--theme-color-border);
+}
+
+.emotion-track {
+    width: 24vw;
+    font-family: var(--theme-font-body);
+    font-size: var(--theme-text-base);
+    text-align: left;
+    color: var(--theme-color-text-primary);
+}
+
+.emotion-icons {
+    display: flex;
+    gap: 0.5vw;
+    font-size: 3vh;
+}
+
+.emotion-icon {
+    opacity: 0.35;
+    transition: opacity 0.3s ease;
+}
+
+.emotion-icon.selected {
+    opacity: 1;
+    filter: drop-shadow(0 0 1vh currentColor);
+}
+
+/* Аплодисменты */
+.applause-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5vh;
+    margin: 1.5vh 0;
+}
+
+.applause-label {
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--theme-color-accent-secondary);
+}
+
+.palms {
+    display: flex;
+    gap: 0.5vw;
+    font-size: 5vh;
+}
+
+.palm {
+    opacity: 0.3;
+    cursor: pointer;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.palm:hover { transform: scale(1.1); }
+.palm.active {
+    opacity: 1;
+    filter: drop-shadow(0 0 0.4vh var(--theme-color-accent-secondary));
+}
+
+.bravo-bis {
+    display: flex;
+    gap: 1.5vw;
+}
+
+.btn-bravo, .btn-bis {
+    padding: 1vh 2vw;
+    font-family: var(--theme-font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    font-size: var(--theme-text-sm);
+    background: transparent;
+    border: var(--border-width-thin) solid var(--theme-color-accent-secondary);
+    color: var(--theme-color-accent-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.5;
+    border-radius: var(--theme-radius-sm);
+}
+
+.btn-bravo.active, .btn-bis.active {
+    opacity: 1;
+    background: var(--theme-color-accent-secondary);
+    color: var(--theme-color-bg);
+    box-shadow: var(--theme-shadow-glow);
+}
+
+.btn-bravo:hover, .btn-bis:hover { opacity: 1; }
+
+.finale-actions {
+    display: flex;
+    gap: 2vw;
+    margin-top: 2vh;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ============================================ */
+/* ФОРМА ОТЗЫВА (after.html)                    */
+/* ============================================ */
+.feedback-section {
+    max-width: 60vw;
+    margin: 2vh auto;
+    padding: 2vh 2vw;
+    background: var(--theme-color-surface);
+    border: var(--border-width-thin) solid var(--theme-color-border);
+    border-radius: var(--theme-radius-md);
+    box-shadow: var(--theme-shadow-lg);
+}
+
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+}
+
+.form-group label {
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--theme-color-accent-secondary);
+}
+
+.form-group input,
+.form-group textarea {
+    background: transparent;
+    border: none;
+    border-bottom: var(--border-width-thin) solid var(--theme-color-border);
+    padding: 1vh 0.5vw;
+    color: var(--theme-color-text-primary);
+    font-family: var(--theme-font-body);
+    font-size: var(--theme-text-base);
+    outline: none;
+    transition: border-color 0.3s ease;
+    width: 100%;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-bottom-color: var(--theme-color-accent);
+}
+
+.form-group textarea {
+    min-height: 15vh;
+    resize: vertical;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 2.5vh;
+    height: 2.5vh;
+    accent-color: var(--theme-color-accent);
+}
+
+.checkbox-group label {
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: var(--theme-text-sm);
+    color: var(--theme-color-text-primary);
+}
+
+/* ============================================ */
+/* ОБЩИЕ КНОПКИ АЛЬБОМА                         */
+/* ============================================ */
+.album-btn {
+    display: inline-block;
+    background: transparent;
+    border: var(--border-width-normal) solid var(--theme-color-accent-secondary);
+    color: var(--theme-color-accent-secondary);
+    font-family: var(--theme-font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    padding: 1vh 2vw;
+    font-size: var(--theme-text-sm);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: var(--theme-radius-sm);
+    text-align: center;
+}
+
+.album-btn:hover {
+    background: var(--theme-color-accent-secondary);
+    color: var(--theme-color-bg);
+    box-shadow: var(--theme-shadow-glow);
+}
+
+.album-btn-primary {
+    background: var(--theme-color-accent);
+    border-color: var(--theme-color-accent);
+    color: var(--theme-color-text-primary);
+}
+
+.album-btn-primary:hover { background: var(--theme-color-accent-light); }
+
+/* ============================================ */
+/* СТРАНИЦА ПРОГРАММКИ (index.html)             */
+/* ============================================ */
+.album-premiere {
+    text-align: center;
+    max-width: 70vw;
+    margin: 0 auto;
+}
+
+.album-cover-wrapper {
+    position: relative;
+    max-width: 50vw;
+    margin: 0 auto 1.5vh;
+    overflow: hidden;
+    border: var(--border-width-thin) solid var(--theme-color-accent-secondary);
+    box-shadow: var(--theme-shadow-lg);
+    border-radius: var(--theme-radius-sm);
+}
+
+.album-cover {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.premiere-badge {
+    position: absolute;
+    top: 1.5vh;
+    right: 1vw;
+    background: var(--theme-color-accent);
+    color: var(--theme-color-text-primary);
+    padding: 0.5vh 1.5vw;
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    transform: rotate(5deg);
+    border: var(--border-width-thin) solid var(--theme-color-accent-secondary);
+    border-radius: calc(var(--theme-radius-sm) / 2);
+    box-shadow: var(--theme-shadow-sm);
+}
+
+.album-title {
+    font-size: var(--theme-text-2xl);
+    margin-bottom: 0.5rem;
+    text-shadow: var(--theme-shadow-glow);
+}
+
+.album-subtitle {
+    font-family: var(--theme-font-body);
+    font-style: italic;
+    font-size: var(--theme-text-lg);
+    color: var(--theme-color-accent);
+    margin-bottom: 2vh;
+}
+
+.album-meta {
+    display: flex;
+    justify-content: center;
+    gap: 2vw;
+    margin: 1.5vh 0;
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--theme-color-accent-secondary);
+}
+
+.album-meta i {
+    color: var(--theme-color-accent);
+    margin-right: 0.5vw;
+}
+
+.album-description {
+    max-width: 70vw;
+    margin: 1.5vh auto;
+    font-size: var(--theme-text-base);
+    line-height: 1.6;
+    opacity: 0.9;
+}
+
+.action-center {
+    margin: 2vh 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1vh;
+}
+
+.btn-premiere {
+    display: inline-block;
+    background: transparent;
+    border: var(--border-width-thick) solid var(--theme-color-accent-secondary);
+    color: var(--theme-color-accent-secondary);
+    font-family: var(--theme-font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    padding: 1.5vh 3vw;
+    font-size: var(--theme-text-base);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: var(--theme-radius-sm);
+}
+
+.btn-premiere:hover {
+    background: var(--theme-color-accent-secondary);
+    color: var(--theme-color-bg);
+    box-shadow: var(--theme-shadow-glow);
+}
+
+/* Кнопка «напомнить о премьере» (вместо «купить билет», пока
+   премьера не наступила) — лёгкая пульсация свечения, чтобы
+   отличаться от обычного статичного CTA. */
+@keyframes remindPulse {
+    0%, 100% { box-shadow: 0 0 0 transparent; }
+    50% { box-shadow: var(--theme-shadow-glow); }
+}
+.remind-btn {
+    animation: remindPulse 2.4s ease-in-out infinite;
+}
+.remind-btn:hover {
+    animation: none;
+}
+
+.action-hint {
+    font-style: italic;
+    opacity: 0.6;
+    font-size: var(--theme-text-sm);
+}
+
+/* Программа (треклист) */
+.program {
+    max-width: 70vw;
+    margin: 2vh auto;
+    background: var(--theme-color-surface);
+    border: var(--border-width-thin) solid var(--theme-color-border);
+    padding: 2vh 2vw;
+    border-radius: var(--theme-radius-md);
+    box-shadow: var(--theme-shadow-lg);
+}
+
+.program-title {
+    font-size: var(--theme-text-xl);
+    margin-bottom: 1.5vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75vw;
+    color: var(--theme-color-accent-secondary-light);
+}
+
+.program-title i { color: var(--theme-color-accent); }
+
+.tracklist { text-align: left; }
+
+.tracklist li {
+    display: grid;
+    grid-template-columns: 6vw 1fr 14vw 7vw;
+    align-items: center;
+    text-decoration: none;
+    color: var(--theme-color-text-primary);
+    transition: all 0.3s ease;
+    border-radius: var(--theme-radius-sm);
+    border-bottom: var(--border-width-thin) dashed var(--theme-color-border);
+    padding: 0.75vh 0;
+}
+
+.tracklist li:last-child { border-bottom: none; }
+
+.track-num {
+    font-family: var(--theme-font-display);
+    font-size: var(--theme-text-lg);
+    color: var(--theme-color-accent-secondary);
+}
+
+.track-title {
+    font-family: var(--theme-font-body);
+    font-size: var(--theme-text-lg);
+    font-weight: 600;
+}
+
+.track-type {
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--theme-color-accent);
+}
+
+.track-duration {
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-sm);
+    text-align: right;
+    opacity: 0.7;
+}
+
+#volume-control {
+    color: var(--theme-color-accent-secondary);
+}
+
+/* --- Оверлей для караоке-лирики (по умолчанию скрыт) --- */
+.lyrics-overlay {
+    display: none;
+}
+
+/* ============================================ */
+/* АДАПТАЦИЯ — ЕДИНЫЙ МЕДИА-ЗАПРОС               */
+/* Включается, когда высота >= ширина           */
+/* ============================================ */
+@media (orientation: portrait) {
+    .lyrics-column {
+        display: none !important;
+    }
+
+    .stage-column {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .stage-visual {
+        flex: 1;
+        position: relative;
+        width: 100%;
+        height: auto;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        margin: 0;
+        overflow: hidden;
+    }
+
+    .stage-visual img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .player-section {
+        flex-shrink: 0;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10;
+    }
+
+    .lyrics-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 5;
+        pointer-events: none;
+    }
+
+    .lyrics-overlay-text {
+        text-align: center;
+        font-family: var(--theme-font-body);
+        font-size: 5vw;
+        line-height: 1.4;
+        color: var(--theme-color-text-primary);
+        text-shadow: 0 0 0.3em rgba(0,0,0,0.7), 0 0.08em 0.1em rgba(0,0,0,0.5);
+        padding: 1rem;
+        max-width: 90%;
+    }
+
+    .lyrics-overlay-line {
+        opacity: 0.8;
+        transition: opacity 0.3s ease, color 0.3s ease;
+        margin-bottom: 0.5rem;
+    }
+
+    .lyrics-overlay-line.highlight {
+        opacity: 1;
+        font-size: 110%;
+        /*color: var(--theme-color-accent-secondary-light);*/
+    }
+
+    .tracklist li {
+        grid-template-columns: 5vw 1fr 12vw 6vw;
+    }
+
+    .navigation-acts {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .act-link {
+        width: 100%;
+        text-align: center;
+        padding: 0.5rem;
+    }
+
+    .prev-act {
+        order: 2;
+    }
+
+    .next-act {
+        order: 1;
+    }
+
+    .emotion-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .emotion-track {
+        width: 100%;
+    }
+
+    .bravo-bis {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-bravo,
+    .btn-bis {
+        width: 100%;
+    }
+
+    .feedback-section {
+        max-width: 92vw;
+        padding: 2vh 3vw;
+    }
+
+    .finale-message {
+        max-width: 92vw;
+    }
+}
+
+.scroll-btn {
+    border: var(--border-width-thin) solid var(--theme-color-accent-secondary);
+    color: var(--theme-color-accent-secondary);
+}
+
+.scroll-btn:hover {
+    background: var(--theme-color-accent-secondary);
+    color: var(--theme-color-bg);
+}
+
+/*живой бордюр*/
+@keyframes loadingBorder {
+    0%, 100% { border-style: solid; }
+    50%      { border-style: dashed; }
+}
+
+.album-btn.loading-border {
+    animation: loadingBorder 0.8s step-start infinite;
+}
+
+/*отзывы*/
+.reviews {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: color-mix(in srgb, var(--theme-color-surface) 30%, transparent);
+    border-top: var(--border-width-thin) solid var(--theme-color-border);
+    border-bottom: var(--border-width-thin) solid var(--theme-color-border);
+}
+.reviews h3 {
+    font-size: var(--theme-text-base);
+    color: var(--theme-color-accent-secondary);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.review-item {
+    margin-bottom: 1.5rem;
+    padding-left: 1rem;
+    border-left: var(--border-width-thick) solid var(--theme-color-accent);
+}
+.review-item:last-child {
+    margin-bottom: 0;
+}
+.review-text {
+    font-style: italic;
+    font-size: var(--theme-text-sm);
+    line-height: 1.6;
+    margin-bottom: 0.25rem;
+}
+.review-author {
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--theme-color-accent);
+}

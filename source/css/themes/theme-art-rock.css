@@ -1,0 +1,82 @@
+/* Шрифт, специфичный для этой темы — грузится только когда
+   активна именно она (на странице подключается один файл
+   темы, см. getThemeCss() в generate_album.php). Общие для
+   всех тем шрифты (Cormorant Garamond, Montserrat) — в
+   common.css, чтобы не дублироваться по 9 файлам. */
+@font-face {
+    font-family: 'Russo One';
+    src: url('/webfonts/RussoOne-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* theme-art-rock — «Арт-рок» */
+:root {
+    /* ---------- ЦВЕТА ---------- */
+    --theme-color-bg: #0A0A0C;
+    --theme-color-surface: #17171B;
+    --theme-color-card: #101013;
+    --theme-color-text-primary: #F2F2F5;
+    --theme-color-text-secondary: #A8A8B2;
+    --theme-color-accent: #9B87FF;
+    --theme-color-accent-light: #BBA9FF;
+    --theme-color-accent-secondary: #FF7A6E;
+    --theme-color-accent-secondary-light: #FF9E94;
+    --theme-color-border: rgba(155, 135, 255, 0.22);
+    --theme-color-border-light: rgba(155, 135, 255, 0.42);
+    --theme-color-overlay: rgba(0, 0, 0, 0.85);
+
+    /* ---------- ШРИФТЫ ---------- */
+    --theme-font-display: 'Russo One', sans-serif;
+    --theme-font-body: 'Cormorant Garamond', serif;
+    --theme-font-ui: 'Montserrat', sans-serif;
+    --theme-font-weight-regular: 400;
+    --theme-font-weight-medium: 600;
+    --theme-font-weight-bold: 700;
+    --theme-font-style-display: normal;
+    --theme-letter-spacing-ui: 0.06em;
+
+    /* ---------- ШКАЛА РАЗМЕРОВ ШРИФТА ---------- */
+    --theme-text-xs: 1.5vh;
+    --theme-text-sm: 1.8vh;
+    --theme-text-base: 2.2vh;
+    --theme-text-md: 2.6vh;
+    --theme-text-lg: 3.2vh;
+    --theme-text-xl: 4.2vh;
+    --theme-text-2xl: 5.2vh;
+
+    /* ---------- РАДИУСЫ ---------- */
+    --theme-radius-sm: 0.15vh;
+    --theme-radius-md: 0.4vh;
+    --theme-radius-lg: 0.8vh;
+    --theme-radius-full: 50%;
+
+    /* ---------- ТЕНИ ---------- */
+    --theme-shadow-sm: 0 0.4vh 0.6vh rgba(0, 0, 0, 0.5);
+    --theme-shadow-md: 0 0.8vh 1.4vh rgba(0, 0, 0, 0.65);
+    --theme-shadow-lg: 0 1.6vh 2.6vh rgba(0, 0, 0, 0.8);
+    --theme-shadow-glow: 0 0 3vh rgba(155, 135, 255, 0.35);
+    --theme-shadow-text-glow: 0 0 1.6vh rgba(155, 135, 255, 0.35);
+
+    /* ---------- ЗАНАВЕС (canvas-анимация открытия) ----------
+       Читается из JS через getComputedStyle() — см. applyTheme()
+       в common.js. Значения — готовые rgba()/hex, БЕЗ вложенных
+       var()/color-mix(): canvas.fillStyle не умеет резолвить
+       CSS-переменные, поэтому здесь всё уже посчитано и записано
+       как финальная строка, а не ссылка на другие токены. */
+    --theme-curtain-fabric: #9B87FF;
+    --theme-curtain-fabric-shadow: rgba(0, 0, 0, 0.55);
+    --theme-curtain-fabric-highlight: rgba(187, 169, 255, 0.2);
+    --theme-curtain-trim-bright: rgb(255, 158, 148);
+    --theme-curtain-trim: #FF7A6E;
+    --theme-curtain-trim-dark: #9B87FF;
+    --theme-curtain-rod: #0A0A0C;
+    --theme-curtain-hem: rgba(255, 122, 110, 0.6);
+    --theme-curtain-hem-light: rgba(255, 158, 148, 0.3);
+    --theme-curtain-hint: #FF7A6E;
+    --theme-curtain-stage-bg-start: #17171B;
+    --theme-curtain-stage-bg-end: #0A0A0C;
+    --theme-curtain-dust: rgba(255, 122, 110, 0.6);
+    --theme-curtain-ray: rgba(255, 158, 148, 0.1);
+}

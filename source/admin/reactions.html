@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Реакции | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <div class="page-header">
+                <h2>Реакции (эмоции)</h2>
+                <div class="page-header-actions">
+                    <div class="list-controls">
+                        <input type="text" id="search-input" class="search-input" placeholder="Название релиза">
+                        <button type="button" id="search-btn" class="btn">Найти</button>
+                        <button type="button" id="reset-search-btn" class="btn btn-cancel">Сбросить</button>
+                    </div>
+                </div>
+            </div>
+            <table class="admin-table">
+                <thead><tr></tr></thead>
+                <tbody id="data-table"></tbody>
+            </table>
+            <div class="list-footer">
+                <div id="total-info" class="total-info">Всего: 0</div>
+                <div id="pagination" class="pagination"></div>
+            </div>
+        </main>
+
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script src="/admin/js/list-manager.js"></script>
+        <script>
+            initListManager({
+                endpoint: '/reactions',
+                obj: 'reaction',
+                objName: 'Реакция',
+                objNamePlural: 'Реакции',
+                referenceData: {
+                    emotions: true
+                },
+                //fields: 'id,release_id,track_id,user_id,emotion_A,emotion_B,emotion_C,emotion_D,emotion_E,emotion_F,emotion_G,created_at,user_nickname,release_title,track_title',
+                titleField: 'id', //выводится при удалении
+                limit: 10,
+                actionWidth: '7%',
+                columns: [
+                    {field: 'id', label: 'ID', width: '8%'},
+                    {field: 'release_title', label: 'Альбом', width: '17%',
+                        format: (value, row) => `<a href="/admin/release-form.html?id=${row.release_id}" class="album-link">${escapeHtml(value)}</a>`
+                    },
+                    {field: 'track_title', label: 'Трек', width: '17%',
+                        format: (value, row) => `<a href="/admin/track-form.html?id=${row.track_id}" class="track-link">${escapeHtml(value)}</a>`
+                    },
+                    {field: 'user_nickname', label: 'Пользователь', width: '15%',
+                        format: (value, row) => `<a href="/admin/user-form.html?id=${row.user_id}">${escapeHtml(value || 'Аноним')}</a>`
+                    },
+                    {field: 'emotions', label: 'Эмоции', width: '16%', sortable: false,
+                        format: (value, row) => {
+                            let icons = '';
+                            for (const code of Object.keys(listConfig.EMOTION_MAP)) {
+                                if (row['emotion_' + code] == 1) {
+                                    icons += listConfig.EMOTION_MAP[code].emoji;
+                                }
+                            }
+                            return `<span class="emotion-icons">${icons || '—'}</span>`;
+                        }
+                    },
+                    {field: 'created_at', label: 'Дата', width: '15%', format: 'date'}
+                ]
+            });
+        </script>
+    </body>
+</html>

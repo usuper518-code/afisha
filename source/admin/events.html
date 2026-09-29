@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>События | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <div class="page-header">
+                <h2>События</h2>
+                <div class="page-header-actions">
+                    <div class="list-controls">
+                        <select id="filter-event-type" class="search-input">
+                            <option value="">Все типы</option>
+                            <option value="play">Прослушивания</option>
+                            <option value="rating">Оценки</option>
+                            <option value="review">Отзывы</option>
+                            <option value="reaction">Реакции</option>
+                            <option value="share">Шеринг</option>
+                        </select>
+                        <select id="filter-entity-type" class="search-input">
+                            <option value="">Все сущности</option>
+                            <option value="release">Релизы</option>
+                            <option value="track">Треки</option>
+                        </select>
+                        <button type="button" id="apply-filters-btn" class="btn">Применить</button>
+                        <button type="button" id="reset-filters-btn" class="btn btn-cancel">Сбросить</button>
+                    </div>
+                </div>
+            </div>
+
+            <table class="admin-table">
+                <thead><tr></tr></thead>
+                <tbody id="data-table"></tbody>
+            </table>
+
+            <div class="list-footer">
+                <div id="total-info" class="total-info">Всего: 0</div>
+                <div id="pagination" class="pagination"></div>
+            </div>
+        </main>
+
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script src="/admin/js/list-manager.js"></script>
+        <script>
+            const eventTypeLabels = {
+                play: '▶️ Прослушивание',
+                rating: '⭐ Оценка',
+                review: '📝 Отзыв',
+                reaction: '😀 Реакция',
+                share: '🔗 Шеринг'
+            };
+            const entityTypeLabels = {release: '📀 Релиз', track: '🎵 Трек'};
+
+            initListManager({
+                endpoint: '/events',
+                obj: 'event',
+                objName: 'Событие',
+                objNamePlural: 'События',
+                //fields: 'id,event_type,entity_title,entity_type,entity_id,nickname,user_id,created_at,event_type,entity_type
+                titleField: 'id',
+                limit: 10,
+                actionWidth: '7%',
+                columns: [
+                    {field: 'id', label: 'ID', width: '5%'},
+                    {field: 'event_type', label: 'Тип', width: '18%', format: (value) => eventTypeLabels[value] || escapeHtml(value)},
+                    {field: 'entity_type', label: 'Сущность', width: '10%', format: (value) => entityTypeLabels[value] || escapeHtml(value) },
+                    {field: 'entity_title', label: 'Название', width: '30%',
+                        format: (value, row) => {
+                            if (row.entity_type === 'release') {
+                                return `<a href="/admin/release-form.html?id=${row.entity_id}">${escapeHtml(value)}</a>`;
+                            } else if (row.entity_type === 'track') {
+                                return `<a href="/admin/track-form.html?id=${row.entity_id}">${escapeHtml(value)}</a>`;
+                            }
+                            return escapeHtml(value);
+                        }
+                    },
+                    {field: 'nickname', label: 'Пользователь', width: '15%',
+                        format: (value, row) => `<a href="/admin/user-form.html?id=${row.user_id}">${escapeHtml(value || 'Аноним')}</a>`
+                    },
+                    {field: 'created_at', label: 'Время', width: '20%', format: 'date'}
+                ],
+                filters: [
+                    {param: 'event_type', selector: '#filter-event-type'},
+                    {param: 'entity_type', selector: '#filter-entity-type'}
+                ]
+            });
+        </script>
+    </body>
+</html>

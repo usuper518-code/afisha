@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Редактор артиста | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <h2 id="form-title">Новый артист</h2>
+
+            <div class="editor-layout">
+                <div class="editor-main">
+                    <form id="form" class="form-container">
+                        <label>Имя</label>
+                        <div class="title-row">
+                            <input type="text" id="name" required maxlength="255" class="flex-grow">
+                            <label>
+                                <input type="checkbox" id="is_active"> Активен
+                            </label>
+                        </div>
+
+                        <label>Код</label>
+                        <input type="text" id="slug" maxlength="255" placeholder="Заполнится автоматически">
+
+                        <div class="form-row-two">
+                            <div class="form-col">
+                                <label>Тип голоса</label>
+                                <select id="voice_type">
+                                    <option value="">Не указан</option>
+                                    <option value="soprano">Сопрано</option>
+                                    <option value="mezzo">Меццо-сопрано</option>
+                                    <option value="contralto">Контральто</option>
+                                    <option value="tenor">Тенор</option>
+                                    <option value="baritone">Баритон</option>
+                                    <option value="bass">Бас</option>
+                                    <option value="instrumental">Инструментал</option>
+                                    <option value="choir">Хор</option>
+                                </select>
+                            </div>
+                            <div class="form-col">
+                                <label>Порядок</label>
+                                <input type="number" id="sort_order" value="0" min="0" max="999">
+                            </div>
+                        </div>
+                        <label>Описание</label>
+                        <textarea id="description" rows="3"></textarea>
+                        
+                        <div class="form-actions">
+                            <button type="button" id="save-btn" class="btn">Сохранить</button>
+                            <a href="/admin/artists.html" class="btn btn-cancel">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="editor-sidebar">
+                    <div class="cover-card">
+                        <h3>Аватар</h3>
+                        <div id="cover-preview" class="cover-preview">
+                            <div class="placeholder-text">Нет</div>
+                        </div>
+                        <input type="file" id="cover-file" accept="image/*" style="display: none;">
+                        <label for="cover-file" class="btn">Загрузить</label>
+                        <p class="hint">Рекомендуемый размер: 500×500 px, до 10 МБ</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script src="/admin/js/form-manager.js"></script>
+        <script>
+            initFormManager({
+                endpoint: '/artists',
+                listUrl: '/admin/artists.html',
+                obj: 'artist',
+                objName: 'Артист',
+                hasCover: true,
+                autoSlug: true,
+                fields: [ // для заполнения, отправка кроме readOnly и ajaxSearch
+                    {name: 'name', label: 'Имя', required: true},
+                    {name: 'slug', label: 'Код'},
+                    {name: 'voice_type', label: 'Тип голоса'},
+                    {name: 'description', label: 'Описание'},
+                    {name: 'sort_order', label: 'Порядок'},
+                    {name: 'is_active', label: 'Активен'}
+                ]
+            });
+        </script>
+    </body>
+</html>

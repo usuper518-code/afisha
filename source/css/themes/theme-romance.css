@@ -1,0 +1,69 @@
+/* theme-romance — «Романтика» */
+:root {
+    /* ---------- ЦВЕТА ---------- */
+    --theme-color-bg: #170F13;
+    --theme-color-surface: #221319;
+    --theme-color-card: #190E14;
+    --theme-color-text-primary: #F6E8ED;
+    --theme-color-text-secondary: #C9A9B4;
+    --theme-color-accent: #E0A0B2;
+    --theme-color-accent-light: #EFC3D0;
+    --theme-color-accent-secondary: #D9BD8E;
+    --theme-color-accent-secondary-light: #EAD6AC;
+    --theme-color-border: rgba(224, 160, 178, 0.22);
+    --theme-color-border-light: rgba(224, 160, 178, 0.42);
+    --theme-color-overlay: rgba(0, 0, 0, 0.85);
+
+    /* ---------- ШРИФТЫ ---------- */
+    --theme-font-display: 'Cormorant Garamond', serif;
+    --theme-font-body: 'Cormorant Garamond', serif;
+    --theme-font-ui: 'Montserrat', sans-serif;
+    --theme-font-weight-regular: 400;
+    --theme-font-weight-medium: 600;
+    --theme-font-weight-bold: 700;
+    --theme-font-style-display: italic;
+    --theme-letter-spacing-ui: 0.12em;
+
+    /* ---------- ШКАЛА РАЗМЕРОВ ШРИФТА ---------- */
+    --theme-text-xs: 1.5vh;
+    --theme-text-sm: 1.8vh;
+    --theme-text-base: 2.2vh;
+    --theme-text-md: 2.6vh;
+    --theme-text-lg: 3.2vh;
+    --theme-text-xl: 4.2vh;
+    --theme-text-2xl: 5.2vh;
+
+    /* ---------- РАДИУСЫ ---------- */
+    --theme-radius-sm: 0.6vh;
+    --theme-radius-md: 1.6vh;
+    --theme-radius-lg: 3vh;
+    --theme-radius-full: 50%;
+
+    /* ---------- ТЕНИ ---------- */
+    --theme-shadow-sm: 0 0.6vh 1.4vh rgba(15, 6, 10, 0.35);
+    --theme-shadow-md: 0 1.2vh 3.2vh rgba(15, 6, 10, 0.5);
+    --theme-shadow-lg: 0 2.6vh 5.5vh rgba(15, 6, 10, 0.65);
+    --theme-shadow-glow: 0 0 3vh rgba(224, 160, 178, 0.3);
+    --theme-shadow-text-glow: 0 0 1.6vh rgba(224, 160, 178, 0.3);
+
+    /* ---------- ЗАНАВЕС (canvas-анимация открытия) ----------
+       Читается из JS через getComputedStyle() — см. applyTheme()
+       в common.js. Значения — готовые rgba()/hex, БЕЗ вложенных
+       var()/color-mix(): canvas.fillStyle не умеет резолвить
+       CSS-переменные, поэтому здесь всё уже посчитано и записано
+       как финальная строка, а не ссылка на другие токены. */
+    --theme-curtain-fabric: #E0A0B2;
+    --theme-curtain-fabric-shadow: rgba(0, 0, 0, 0.55);
+    --theme-curtain-fabric-highlight: rgba(239, 195, 208, 0.2);
+    --theme-curtain-trim-bright: rgb(234, 214, 172);
+    --theme-curtain-trim: #D9BD8E;
+    --theme-curtain-trim-dark: #E0A0B2;
+    --theme-curtain-rod: #170F13;
+    --theme-curtain-hem: rgba(217, 189, 142, 0.6);
+    --theme-curtain-hem-light: rgba(234, 214, 172, 0.3);
+    --theme-curtain-hint: #D9BD8E;
+    --theme-curtain-stage-bg-start: #221319;
+    --theme-curtain-stage-bg-end: #170F13;
+    --theme-curtain-dust: rgba(217, 189, 142, 0.6);
+    --theme-curtain-ray: rgba(234, 214, 172, 0.1);
+}

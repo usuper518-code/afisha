@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Редактор пользователя | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <h2 id="form-title">Новый пользователь</h2>
+
+            <div class="editor-layout">
+                <div class="editor-main">
+                    <form id="form" class="form-container">
+                        <label>Никнейм</label>
+                        <input type="text" id="nickname" required maxlength="100">
+
+                        <label>Email</label>
+                        <input type="email" id="email" maxlength="255">
+
+                        <label>Уровень</label>
+                        <input type="number" id="level" value="0" max="5" min="0">
+
+                        <div class="form-actions">
+                            <button type="button" id="save-btn" class="btn">Сохранить</button>
+                            <a href="/admin/users.html" class="btn btn-cancel">В список</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="editor-sidebar">
+                    <div class="cover-card">
+                        <h3>Статистика</h3>
+                        <div id="user-stats"></div>
+                    </div>
+                    <div class="cover-card">
+                        <h3>Недавние события</h3>
+                        <div id="recent-events"></div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script src="/admin/js/form-manager.js"></script>
+        <script>
+            initFormManager({
+                endpoint: '/users',
+                listUrl: '/admin/users.html',
+                obj: 'user',
+                objName: 'Пользователь',
+                fields: [ // для заполнения, отправка кроме readOnly и ajaxSearch
+                    {name: 'nickname', label: 'Никнейм', required: true},
+                    {name: 'level', label: 'Уровень'},
+                    {name: 'email', label: 'Email'}
+                ],
+                renderData: function (data) {
+                    data.level = data.level || 0;
+                },
+                onAfterLoad: async function (data) {
+                    renderRecentEvents(data.events);
+                    renderStats(data.stats);
+                }
+            });
+
+            function renderRecentEvents(events) {
+                const eventLabels = {
+                    play: '🎧️ Прослушивание',
+                    rating: '⭐ Оценка',
+                    review: '📝 Отзыв',
+                    reaction: '😀 Реакция',
+                    share: '🔗 Шеринг'
+                };
+                const container = document.getElementById('recent-events');
+                if (events && events.length) {
+                    container.innerHTML = events.slice(0, 10).map(e => `
+                    <div class="event-item">
+                        <span class="event-type">${eventLabels[e.event_type] || e.event_type}</span>
+                        <span class="event-time">${formatDate(e.created_at)}</span>
+                    </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<p class="text-muted">Нет недавних событий</p>';
+                }
+            }
+
+            function renderStats(stats) {
+                const container = document.getElementById('user-stats');
+                if (!stats || Object.keys(stats).length === 0) {
+                    container.innerHTML = '<p class="text-muted">Нет статистики</p>';
+                    return;
+                }
+
+                const statItems = [
+                    {key: 'plays', label: '🎧 Прослушиваний'},
+                    {key: 'ratings', label: '⭐ Оценок'},
+                    {key: 'reviews', label: '📝 Отзывов'},
+                    {key: 'reactions', label: '😀 Реакций'},
+                    {key: 'shares', label: '🔗 Поделился'}
+                ];
+
+                const html = statItems
+                        .filter(item => stats[item.key] > 0)
+                        .map(item => `
+                    <div class="stat-item">
+                        <span class="stat-label">${item.label}</span>
+                        <span class="stat-value">${stats[item.key]}</span>
+                    </div>
+                `).join('');
+                container.innerHTML = html || '<p class="text-muted">Нет статистики</p>';
+            }
+        </script>
+    </body>
+</html>

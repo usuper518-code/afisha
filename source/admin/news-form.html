@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Редактор новостей | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+        <main class="container">
+            <h2 id="form-title">Новая новость</h2>
+
+            <form id="news-form" class="form-container">
+                <label>Заголовок</label>
+                <div class="title-row">
+                    <input type="text" id="title" maxlength="255" required class="flex-grow">
+                    <label>
+                        <input type="checkbox" id="is_published"> Опубликована
+                    </label>
+                </div>
+                
+                <label>Текст</label>
+                <textarea id="content" rows="10" required placeholder="Текст новости"></textarea>
+                
+                <div class="form-actions">
+                    <button type="button" id="save-btn" class="btn">Сохранить</button>
+                    <a href="/admin/news.html" class="btn-cancel">Отмена</a>
+                </div>
+            </form>
+        </main>
+        
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script src="/admin/js/form-manager.js"></script>
+        <script>
+            initFormManager({
+                endpoint: '/news',
+                listUrl: '/admin/news.html',
+                obj: 'news',
+                objName: 'Новость',
+                   fields: [ // для заполнения, отправка кроме readOnly и ajaxSearch
+                    {name: 'title', 'label': 'Заголовок', required: true},
+                    {name: 'content', 'label': 'Текст', required: true},
+                    {name: 'is_published', label: 'Опубликован'}
+                ]
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Управление пользователями | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <div class="page-header">
+                <h2>Пользователи</h2>
+                <div class="page-header-actions">
+                    <div class="list-controls">
+                        <input type="text" id="search-input" placeholder="Ник или Email" class="search-input">
+                        <button type="button" id="search-btn" class="btn" title="Поиск">Найти</button>
+                        <button type="button" id="reset-search-btn" class="btn btn-cancel" title="Отменить">Сбросить</button>
+                    </div>
+                </div>
+            </div>
+
+            <table class="admin-table">
+                <thead><tr></tr></thead>
+                <tbody id="data-table"></tbody>
+            </table>
+
+            <div class="list-footer">
+                <div id="total-info" class="total-info">Всего: 0</div>
+                <div id="pagination" class="pagination"></div>
+            </div>
+        </main>
+
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script src="/admin/js/list-manager.js"></script>
+        <script>
+            initListManager({
+                endpoint: '/users',
+                obj: 'user',
+                objName: 'Пользователь',
+                objNamePlural: 'Пользователи',
+                fields: 'id,nickname,email,level,created_at',
+                titleField: 'nickname', //выводится при удалении
+                limit: 10,
+                actionWidth: '7%',
+                columns: [
+                    {field: 'id', label: 'ID', width: '8%'},
+                    {field: 'nickname', label: 'Ник', width: '26%', link: true},
+                    {field: 'email', label: 'Email', width: '26%'},
+                    {field: 'level', label: 'Уровень', width: '10%'},
+                    {field: 'created_at', label: 'Создан', width: '18%', format: 'date'}
+                ]
+            });
+        </script>
+    </body>
+</html>

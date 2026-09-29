@@ -1,0 +1,937 @@
+/* afisha.css */
+/* Цвета, шрифты, размеры шрифта, радиусы и тени — в css/themes/theme-*.css
+   (алиасы --afisha-* там же, подключается последним и переопределяет
+   значения). Здесь остаётся только структура и отступы. */
+:root {
+    /* Отступы (не тематические, одинаковы во всех темах) */
+    --afisha-spacing-xs: 0.4vh;
+    --afisha-spacing-sm: 0.8vh;
+    --afisha-spacing-md: 1.6vh;
+    --afisha-spacing-lg: 2.5vh;
+    --afisha-spacing-xl: 3.5vh;
+
+    /* Анимации (не тематические) */
+    --afisha-transition: 0.3s ease;
+    --afisha-transition-slow: 0.9s ease;
+}
+
+body {
+    background-color: var(--theme-color-bg);
+    color: var(--theme-color-text-primary);
+    font-family: var(--theme-font-body);
+}
+
+h1, h2, h3, h4 {
+    font-family: var(--theme-font-display);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--theme-color-text-primary);
+}
+
+/* ============================================ */
+/* ШАПКА АФИШИ                                  */
+/* ============================================ */
+
+.afisha-header {
+    position: sticky;
+    top: 0;
+    text-align: center;
+    z-index: 1;
+    background-color: var(--theme-color-bg);
+}
+
+.afisha-logo {
+    font-family: var(--theme-font-ui);
+    font-weight: 300;
+    font-size: var(--theme-text-xl);
+    letter-spacing: 0.4em;
+    margin-right: -0.4em;
+    color: var(--theme-color-accent-secondary);
+    text-shadow: var(--theme-shadow-glow);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--afisha-spacing-lg);
+    flex-wrap: wrap;
+    transition: opacity var(--afisha-transition);
+}
+
+.afisha-logo:hover {
+    opacity: 0.8;
+}
+
+.afisha-logo i {
+    font-size: 5vh;
+    color: var(--theme-color-accent);
+}
+
+.afisha-tagline {
+    font-family: var(--theme-font-body);
+    font-style: italic;
+    font-size: var(--theme-text-lg);
+    color: var(--theme-color-accent);
+    /*margin-top: var(--afisha-spacing-sm);*/
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--afisha-spacing-lg);
+    flex-wrap: wrap;
+}
+
+.afisha-divider {
+    width: 15vw;
+    height: 0.2vh;
+    background: linear-gradient(90deg, transparent, var(--theme-color-accent-secondary), transparent);
+    margin: var(--afisha-spacing-sm) auto;
+}
+
+/* ============================================ */
+/* ПРЕМЬЕРА (ГЛАВНЫЙ БЛОК)                      */
+/* ============================================ */
+
+.premiere-ribbon {
+    position: absolute;
+    top: var(--afisha-spacing-lg);
+    left: -1vw;
+    background: var(--theme-color-accent);
+    color: var(--theme-color-text-primary);
+    padding: var(--afisha-spacing-sm) var(--afisha-spacing-xl);
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    transform: rotate(-2deg);
+    border: 0.2vh solid var(--theme-color-accent-secondary);
+    /*z-index: 3;*/
+    box-shadow: var(--theme-shadow-md);
+    border-radius: var(--theme-radius-sm);
+}
+
+/* ============================================ */
+/* ПОСТЕР-КАРТОЧКА                              */
+/* ============================================ */
+
+.poster-card {
+    background: var(--theme-color-card);
+    border: 0.2vh solid var(--theme-color-border);
+    overflow: hidden;
+    border-radius: var(--theme-radius-md);
+    box-shadow: var(--theme-shadow-md);
+    transition: transform var(--afisha-transition), box-shadow var(--afisha-transition);
+    
+    font-size: var(--theme-text-base);
+    color: var(--theme-color-text-secondary);    
+}
+
+.poster-card:hover {
+    box-shadow: var(--theme-shadow-lg);
+}
+
+.poster-card.main-poster {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--afisha-spacing-xl);
+    max-height: 70vh;
+    overflow: hidden;
+}
+
+.poster-media {
+    position: relative;
+    background: var(--theme-color-bg);
+    overflow: hidden;
+    border-right: 0.2vh solid var(--theme-color-border);
+}
+.poster-media img,
+.poster-media video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--afisha-transition-slow), opacity var(--afisha-transition);
+}
+.poster-media video {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+.poster-media.video-active img {
+    opacity: 0;
+}
+.poster-media.video-active video {
+    opacity: 1;
+    pointer-events: auto;
+}
+@media (orientation: portrait) {
+    
+}
+.poster-media:hover img {
+    transform: scale(1.05);
+}
+
+.poster-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to right, transparent 0%, transparent 98%, var(--theme-color-card) 100%);
+    pointer-events: none;
+}
+.no-cover {
+    position: absolute;
+    inset: 0;
+    display: none;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.no-cover i {
+    font-size: 5vh;
+    color: var(--theme-color-accent-secondary);
+    opacity: 0.25;
+}
+
+.poster-content {
+    padding: var(--afisha-spacing-xl) var(--afisha-spacing-xl) var(--afisha-spacing-xl) 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.poster-content .afisha-btn {
+    align-self: center;
+}
+
+.poster-title {
+    font-size: var(--theme-text-xl);
+    color: var(--theme-color-accent-secondary-light);
+    margin-bottom: var(--afisha-spacing-xs);
+    line-height: 1.2;
+}
+
+.poster-subtitle {
+    font-family: var(--theme-font-body);
+    font-size: var(--theme-text-md);
+    font-style: italic;
+    color: var(--theme-color-accent);
+    margin-bottom: var(--afisha-spacing-md);
+}
+
+.poster-description {
+    font-size: var(--theme-text-base);
+    line-height: 1.7;
+    white-space: pre-line;
+    margin-bottom: var(--afisha-spacing-lg);
+    color: var(--theme-color-text-secondary);
+    /* На низком ландшафтном экране карточка премьеры (max-height: 70vh
+       на .poster-card.main-poster) может не вместить длинное описание
+       целиком — вместо того, чтобы раздувать всю страницу и включать
+       общую прокрутку body, скроллится только этот блок текста. */
+    max-height: 26vh;
+    overflow-y: auto;
+    padding-right: var(--afisha-spacing-xs);
+}
+
+.poster-meta {
+    align-self: center;
+    display: flex;
+    gap: var(--afisha-spacing-xl);
+    margin-bottom: var(--afisha-spacing-lg);
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--theme-color-accent-secondary);
+}
+
+.poster-meta i {
+    margin-right: var(--afisha-spacing-xs);
+    color: var(--theme-color-accent);
+}
+
+/* ============================================ */
+/* КНОПКИ АФИШИ                                 */
+/* ============================================ */
+
+.afisha-btn {
+    display: inline-block;
+    background: transparent;
+    border: 0.3vh solid var(--theme-color-accent-secondary);
+    color: var(--theme-color-accent-secondary);
+    font-family: var(--theme-font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    padding: var(--afisha-spacing-md) var(--afisha-spacing-xl);
+    font-size: var(--theme-text-sm);
+    text-decoration: none;
+    transition: all var(--afisha-transition);
+    text-align: center;
+    width: fit-content;
+    border-radius: var(--theme-radius-sm);
+}
+
+.afisha-btn:hover {
+    background: var(--theme-color-accent-secondary);
+    color: var(--theme-color-bg);
+    box-shadow: var(--theme-shadow-glow);
+}
+
+.afisha-btn-block {
+    display: block;
+    width: 100%;
+}
+
+.afisha-btn-large {
+    padding: var(--afisha-spacing-lg) var(--afisha-spacing-xl);
+    font-size: var(--theme-text-base);
+}
+
+/* ============================================ */
+/* ПРОГРАММКА: ВКЛАДКИ-РАЗДЕЛЫ                  */
+/* ============================================ */
+
+.program-nav {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--afisha-spacing-sm);
+    padding: var(--afisha-spacing-sm) 0;
+    margin-bottom: var(--afisha-spacing-lg);
+    background: var(--theme-color-bg);
+    border-bottom: 0.2vh solid var(--theme-color-border);
+}
+
+/* Нет смысла показывать навигацию, если выбирать не из чего —
+   PHP не выводит кнопки внутри .program-nav в этом случае
+   (см. generate_afisha()), CSS просто убирает пустую полосу. */
+.program-nav:empty {
+    display: none;
+}
+
+.program-tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--afisha-spacing-xs);
+    padding: var(--afisha-spacing-sm) var(--afisha-spacing-md);
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--theme-letter-spacing-ui);
+    color: var(--theme-color-text-secondary);
+    border: none;
+    border-bottom: 0.2vh solid transparent;
+    background: transparent;
+    cursor: pointer;
+    transition: color var(--afisha-transition), border-color var(--afisha-transition), transform var(--afisha-transition);
+    white-space: nowrap;
+}
+
+.program-tab:hover {
+    color: var(--theme-color-accent-secondary-light);
+    transform: translateY(-0.15vh);
+}
+
+.program-tab.active {
+    color: var(--theme-color-accent-secondary);
+    border-bottom-color: var(--theme-color-accent-secondary);
+}
+
+.program-tab i {
+    color: var(--theme-color-accent);
+}
+
+/* ============================================ */
+/* ПРОГРАММКА: ОБЛАСТЬ ПОКАЗА (БЕЗ ПРОКРУТКИ)   */
+/* ============================================ */
+
+.program-viewport {
+    position: relative;
+    min-height: 62vh;
+    perspective: 250vh;
+}
+
+.program-panel {
+    display: none;
+}
+
+.program-panel.active {
+    display: block;
+}
+
+.panel-subtitle {
+    font-size: var(--theme-text-lg);
+    margin: var(--afisha-spacing-xl) 0 var(--afisha-spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--afisha-spacing-md);
+    border-bottom: 0.2vh solid var(--theme-color-border);
+    padding-bottom: var(--afisha-spacing-sm);
+    color: var(--theme-color-accent-secondary-light);
+}
+
+.panel-subtitle i {
+    color: var(--theme-color-accent);
+}
+
+/* Развороты (по 2 карточки) — заполняются JS из плоского списка
+   .poster-card, отданного сервером внутри .program-panel[data-paged] */
+.spread {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--afisha-spacing-xl);
+    align-content: start;
+    opacity: 0;
+    transform: rotateY(-12deg) translateX(-1.5vw);
+    transform-origin: left center;
+    transition: transform 0.5s ease, opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.spread.active {
+    opacity: 1;
+    transform: rotateY(0deg) translateX(0);
+    pointer-events: auto;
+}
+
+.spread.leaving-to-prev {
+    opacity: 0;
+    transform: rotateY(12deg) translateX(1.5vw);
+}
+
+.spread.leaving-to-next {
+    opacity: 0;
+    transform: rotateY(-12deg) translateX(-1.5vw);
+}
+
+.spread-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 4;
+    width: 5vh;
+    height: 5vh;
+    border-radius: var(--theme-radius-full);
+    background: color-mix(in srgb, var(--theme-color-bg) 60%, transparent);
+    border: 0.2vh solid var(--theme-color-accent-secondary);
+    color: var(--theme-color-accent-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background var(--afisha-transition), color var(--afisha-transition);
+}
+
+.spread-nav:hover {
+    background: var(--theme-color-accent-secondary);
+    color: var(--theme-color-bg);
+}
+
+.spread-nav:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.spread-prev {
+    left: -1vw;
+}
+
+.spread-next {
+    right: -1vw;
+}
+
+.spread-dots {
+    position: absolute;
+    bottom: -1vh;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: var(--afisha-spacing-sm);
+    z-index: 4;
+}
+
+.spread-dot {
+    width: 1vh;
+    height: 1vh;
+    /* Видимая точка маленькая (по дизайну), но область клика вокруг
+       неё увеличена — иначе на телефоне в неё почти невозможно
+       попасть пальцем. background-clip прячет padding визуально. */
+    padding: 1vh;
+    box-sizing: content-box;
+    background-clip: content-box;
+    border-radius: 50%;
+    background: var(--theme-color-border-light);
+    cursor: pointer;
+    transition: background var(--afisha-transition), transform var(--afisha-transition);
+}
+
+.spread-dot.active {
+    background: var(--theme-color-accent-secondary);
+    transform: scale(1.3);
+}
+
+.poster-card.coming {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--theme-color-surface);
+    border: 0.2vh dashed var(--theme-color-border);
+}
+
+/* Кнопка видео здесь — сосед <a>, а не потомок .poster-media
+   (вложенный <button> внутри <a> — невалидная разметка), поэтому
+   позиционируется относительно всей карточки, в углу обложки. */
+.poster-card.coming .media-video-toggle {
+    position: absolute;
+    top: var(--afisha-spacing-sm);
+    right: var(--afisha-spacing-sm);
+    left: auto;
+    bottom: auto;
+    transform: none;
+    width: 4vh;
+    height: 4vh;
+    font-size: var(--theme-text-sm);
+}
+.poster-card.coming .media-video-toggle:hover {
+    transform: scale(1.08);
+}
+
+.poster-card.coming .poster-media {
+    border-bottom: 0.2vh solid var(--theme-color-border);
+    border-right: none;
+    aspect-ratio: 1 / 1;
+    max-height: 40vh;
+}
+
+.poster-card.coming .poster-content {
+    padding: var(--afisha-spacing-lg);
+}
+
+.poster-card.coming .poster-title {
+    font-size: var(--theme-text-xl);
+    margin-bottom: var(--afisha-spacing-xs);
+}
+
+.poster-type {
+    font-family: var(--theme-font-body);
+    font-size: var(--theme-text-sm);
+    font-style: italic;
+    color: var(--theme-color-accent);
+    margin-bottom: var(--afisha-spacing-sm);
+}
+
+.poster-status {
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--theme-color-accent-secondary);
+    opacity: 0.7;
+    margin-bottom: var(--afisha-spacing-xs);
+}
+
+/* ============================================ */
+/* О СТУДИИ (ТИЗЕР ВНУТРИ ПАНЕЛИ «О ТЕАТРЕ»)     */
+/* ============================================ */
+
+.about-content {
+    max-width: 80vw;
+    margin: 0 auto var(--afisha-spacing-xl);
+    padding: var(--afisha-spacing-xl);
+    background: var(--theme-color-surface);
+    border-left: 0.6vh solid var(--theme-color-accent);
+    border-radius: var(--theme-radius-md);
+    text-align: center;
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.about-content i {
+    font-size: 5vh;
+    opacity: 0.4;
+    margin-bottom: var(--afisha-spacing-md);
+}
+
+.about-content p {
+    font-size: var(--theme-text-md);
+    line-height: 1.7;
+    font-style: italic;
+    margin-bottom: var(--afisha-spacing-lg);
+    color: var(--theme-color-text-primary);
+}
+
+.about-link {
+    font-family: var(--theme-font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: var(--theme-text-xs);
+    color: var(--theme-color-accent-secondary);
+    text-decoration: none;
+    transition: color var(--afisha-transition);
+}
+
+.about-link:hover {
+    color: var(--theme-color-accent-light);
+}
+
+.about-link i {
+    font-size: inherit;
+    margin-left: var(--afisha-spacing-xs);
+    opacity: 1;
+}
+
+/* ============================================ */
+/* АНОНСЫ (внутри панели «О театре»)            */
+/* ============================================ */
+
+.announce-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--afisha-spacing-md);
+}
+
+.announce-item {
+    display: flex;
+    align-items: center;
+    gap: var(--afisha-spacing-lg);
+    padding: var(--afisha-spacing-md) var(--afisha-spacing-lg);
+    background: rgba(21, 10, 15, 0.4);
+    border: 0.2vh solid transparent;
+    text-decoration: none;
+    transition: all var(--afisha-transition);
+    border-radius: var(--theme-radius-sm);
+}
+
+.announce-item:hover {
+    border-color: var(--theme-color-border);
+    background: rgba(21, 10, 15, 0.7);
+}
+
+.announce-date {
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    color: var(--theme-color-accent);
+    min-width: 12vw;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.announce-text {
+    flex: 1;
+    font-family: var(--theme-font-body);
+    font-size: var(--theme-text-md);
+    color: var(--theme-color-text-primary);
+}
+
+.announce-item i {
+    color: var(--theme-color-accent-secondary);
+    opacity: 0.5;
+    transition: all var(--afisha-transition);
+}
+
+.announce-item:hover i {
+    opacity: 1;
+    transform: translateX(0.6vw);
+}
+
+/* ============================================ */
+/* ФУТЕР АФИШИ                                  */
+/* ============================================ */
+
+.afisha-footer {
+    margin-top: var(--afisha-spacing-xl);
+    padding-top: var(--afisha-spacing-xl);
+    border-top: 0.2vh solid var(--theme-color-border);
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--theme-color-text-secondary);
+}
+
+.afisha-footer-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--afisha-spacing-md);
+    text-align: center;
+}
+
+.afisha-social {
+    display: flex;
+    gap: var(--afisha-spacing-xl);
+}
+
+.afisha-social a {
+    color: var(--theme-color-accent-secondary);
+    text-decoration: none;
+    transition: color var(--afisha-transition);
+}
+
+.afisha-social a:hover {
+    color: var(--theme-color-accent-light);
+}
+
+.afisha-footer-note {
+    font-size: var(--theme-text-xs);
+    opacity: 0.3;
+    text-align: center;
+    margin-top: var(--afisha-spacing-md);
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+/* ============================================ */
+/* СТРАНИЦА «О СТУДИИ»                           */
+/* ============================================ */
+
+.about-page {
+    max-width: 80vw;
+    margin: 0 auto;
+    padding: 3vh 0;
+}
+
+.about-section {
+    margin-bottom: 5vh;
+}
+
+.about-section h2 {
+    font-size: var(--theme-text-xl);
+    color: var(--theme-color-accent-secondary-light);
+    margin-bottom: 2.5vh;
+    border-left: 0.4vh solid var(--theme-color-accent);
+    padding-left: 2.5vh;
+}
+
+.about-section p {
+    font-size: var(--theme-text-md);
+    line-height: 1.8;
+    margin-bottom: 2.5vh;
+    color: var(--theme-color-text-secondary);
+}
+
+.troupe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(25vw, 1fr));
+    gap: 3vh;
+    margin-top: 3vh;
+}
+
+.troupe-member {
+    text-align: center;
+}
+
+.troupe-member-avatar {
+    width: 10vh;
+    height: 10vh;
+    margin: 0 auto 0.8vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--theme-radius-full);
+    background: var(--theme-color-card);
+    border: 0.2vh solid var(--theme-color-border);
+    overflow: hidden;
+}
+
+.troupe-member-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.troupe-member-avatar i {
+    font-size: 4.5vh;
+    color: var(--theme-color-accent-secondary);
+}
+
+.troupe-member h3 {
+    font-size: var(--theme-text-lg);
+    color: var(--theme-color-text-primary);
+    margin-bottom: 0.4vh;
+}
+
+.troupe-member .troupe-member-voice {
+    font-size: var(--theme-text-sm);
+    color: var(--theme-color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0;
+}
+
+.troupe-member .troupe-member-bio {
+    font-size: var(--theme-text-sm);
+    color: var(--theme-color-text-secondary);
+    line-height: 1.5;
+    margin-top: 0.4vh;
+    margin-bottom: 0;
+    font-style: italic;
+}
+
+.about-section .author-name {
+    font-size: var(--theme-text-lg);
+    color: var(--theme-color-accent-secondary-light);
+    margin-bottom: 0.8vh;
+    font-style: normal;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 3vh;
+    color: var(--theme-color-accent-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: var(--theme-text-xs);
+    font-family: var(--theme-font-ui);
+}
+
+.back-link:hover {
+    color: var(--theme-color-accent-light);
+}
+
+/* ============================================ */
+/* СТРАНИЦА 404                                 */
+/* ============================================ */
+
+.page-404 {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.page-404-icon {
+    font-size: 10vh;
+    color: var(--theme-color-accent-secondary);
+    opacity: 0.6;
+    margin-bottom: 1.5vh;
+}
+.page-404-title {
+    font-family: var(--theme-font-display);
+    color: var(--theme-color-accent-secondary-light);
+    margin-bottom: 0.8vh;
+}
+.page-404-text {
+    font-family: var(--theme-font-body);
+    font-size: var(--theme-text-lg);
+    font-style: italic;
+    color: var(--theme-color-text-secondary);
+    margin-bottom: 3vh;
+}
+.page-404-link {
+    font-family: var(--theme-font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: var(--theme-text-sm);
+    color: var(--theme-color-accent-secondary);
+    text-decoration: none;
+}
+.page-404-link:hover {
+    color: var(--theme-color-accent-light);
+}
+
+#volume-control {
+    color: var(--theme-color-accent-secondary);
+}
+
+/* ============================================ */
+/* АДАПТАЦИЯ — ЕДИНЫЙ МЕДИА-ЗАПРОС               */
+/* Включается, когда высота >= ширина           */
+/* ============================================ */
+@media (orientation: portrait) {
+    .poster-card.main-poster {
+        grid-template-columns: 1fr;
+    }
+    .poster-content {
+        padding: var(--afisha-spacing-xl);
+    }
+    /* В портрете разворот показывает 1 карточку вместо 2 —
+       это гарантирует отсутствие вертикальной прокрутки на узких
+       экранах (JS группирует карточки по 1 при этой ориентации,
+       см. afisha.js). */
+    .spread {
+        grid-template-columns: 1fr;
+    }
+    .program-nav {
+        gap: var(--afisha-spacing-xs);
+    }
+    .program-tab span {
+        display: none;
+    }
+    .program-tab {
+        padding: var(--afisha-spacing-sm);
+    }
+    :root {
+        --afisha-text-2xl: 3.5vh;
+        --afisha-text-xl: 3vh;
+    }
+    .afisha-logo {
+        font-size: var(--theme-text-xl);
+        letter-spacing: 0.2em;
+        gap: var(--afisha-spacing-sm);
+    }
+    .afisha-logo i {
+        font-size: 4vh;
+    }
+    .afisha-tagline {
+        font-size: var(--theme-text-base);
+    }
+    .premiere-ribbon {
+        top: var(--afisha-spacing-sm);
+        padding: var(--afisha-spacing-xs) var(--afisha-spacing-md);
+        font-size: var(--theme-text-xs);
+    }
+    .afisha-btn-large {
+        padding: var(--afisha-spacing-md) var(--afisha-spacing-lg);
+        width: 100%;
+        max-width: 50vw;
+    }
+    .about-content {
+        max-width: 100%;
+        padding: var(--afisha-spacing-lg) var(--afisha-spacing-md);
+    }
+    .about-content p {
+        font-size: var(--theme-text-base);
+    }
+    .announce-item {
+        flex-wrap: wrap;
+        gap: var(--afisha-spacing-sm);
+    }
+    .announce-date {
+        min-width: auto;
+    }
+    .afisha-footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    .afisha-social {
+        justify-content: center;
+    }
+    .troupe-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2vh;
+    }
+}
+
+.scroll-btn {
+    border: var(--border-width-thin) solid var(--theme-color-accent-secondary);
+    color: var(--theme-color-accent-secondary);
+}
+
+.scroll-btn:hover {
+    background: var(--theme-color-accent-secondary);
+    color: var(--theme-color-bg);
+}

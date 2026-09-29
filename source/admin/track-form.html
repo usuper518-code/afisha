@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Редактор трека | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <h2 id="form-title">Новый трек</h2>
+
+            <div class="editor-layout">
+                <!-- Левая колонка: основная форма -->
+                <div class="editor-main">
+                    <form id="track-form" class="form-container">
+                        <label>Название</label>
+                        <div class="title-row">
+                            <input type="text" id="title" maxlength="255" required class="flex-grow">
+                            <label>
+                                <input type="checkbox" id="is_published"> Опубликован
+                            </label>
+                        </div>
+
+                        <label>Код</label>
+                        <input type="text" id="slug" maxlength="255" placeholder="Заполнится автоматически">
+
+                        <label>Авторы</label>
+                        <input type="text" id="authors" maxlength="500" placeholder="Авторы текста и музыки">
+
+                        <label>Текст лирики</label>
+                        <textarea id="lyrics" rows="10"></textarea>
+
+                        <label>
+                            <input type="checkbox" id="is_instrumental"> Инструментальный трек
+                        </label>
+                        <p class="hint">Если отмечено, текст не обязателен</p>
+
+                        <h3>Рекомендованные эмоции</h3>
+                        <div id="emotions-selector" class="emotions-selector"></div>
+                        <input type="hidden" id="suggested_emotions">
+                        <p class="hint">Выберите эмоции, которые будут подпрыгивать при проигрывании</p>
+
+                        <label>Таймкоды</label>
+                        <textarea id="lyrics_timed" rows="4" placeholder="[мм:сс.дс] строка 1
+                                  [мм:сс.дс] строка 2"></textarea>
+
+                        <div class="form-row-two">
+                            <div class="form-col flex-grow">
+                                <label>Длительность (сек.)</label>
+                                <input type="number" id="duration" min="0" step="1" value="0">
+                            </div>
+                            <div class="form-col flex-grow">
+                                <label>Оригинальный трек</label>
+                                <input type="text" id="original-track-input" placeholder="Поиск трека..." list="original-tracks-datalist" autocomplete="off">
+                                <input type="hidden" id="original-track-id">
+                            </div>
+                        </div>
+
+                        <h3>Жанры</h3>
+                        <div id="genres-checkboxes" class="genres-grid"></div>
+
+                        <h3>Артисты</h3>
+                        <div id="artists-checkboxes" class="genres-grid"></div>
+
+                        <!-- Кнопки сохранения -->
+                        <div class="form-actions">
+                            <button type="button" id="save-btn" class="btn">Сохранить</button>
+                            <a href="/admin/tracks.html" class="btn btn-cancel">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Правая колонка: обложка и аудио -->
+                <div class="editor-sidebar">
+                    <div id="image-upload-card" class="cover-card">
+                        <h3>Обложка</h3>
+                        <div id="cover-preview" class="cover-preview">
+                            <div class="placeholder-text">Нет обложки</div>
+                        </div>
+                        <input type="file" id="cover-file" accept="image/*" style="display: none;">
+                        <label for="cover-file" class="btn">Загрузить</label>
+                        <p class="hint">Рекомендуемый размер: 1200×1200 px, до 10 МБ</p>
+                    </div>
+                    <div id="video-upload-card" class="cover-card" style="display: none;">
+                        <h3>Видео</h3>
+                        <div id="video-preview" class="video-preview">
+                            <div class="placeholder-text">Нет видео</div>
+                        </div>
+                        <input type="file" id="video-file" accept="video/*" style="display: none;">
+                        <label for="video-file" class="btn">Загрузить</label>
+                        <p class="hint">Рекомендуемый размер: 624×624 px, до 10 МБ</p>
+                    </div>                    
+                    <div class="cover-card">
+                        <h3>Тип медиа</h3>
+                        <div class="media-type-switch">
+                            <button type="button" id="btn-media-image" class="btn btn-sm active">🖼️ Обложка</button>
+                            <button type="button" id="btn-media-video" class="btn btn-sm">🎬 Видео</button>
+                        </div>
+                    </div>
+                    <div class="audio-card">
+                        <h3>Аудиофайл</h3>
+                        <div id="audio-preview" class="audio-preview">
+                            <div class="placeholder-text">Нет аудио</div>
+                        </div>
+                        <input type="file" id="audio-file" accept="audio/mpeg,audio/mp3" style="display: none;">
+                        <label for="audio-file" class="btn">Загрузить</label>
+                        <p class="hint">MP3, до 50 МБ</p>
+                    </div>
+
+                    <!-- Кнопка генерации лирики -->
+
+                    <div class="cover-card">
+                        <h3>Обработка</h3>
+                        <!--
+                        <button type="button" id="generate-timestamps-btn" class="btn">
+                            🎤 Сгенерировать
+                        </button>
+                        -->
+                        <button type="button" id="open-lrc-master" class="btn" title="Расставить таймкоды вручную">
+                            🎤 Мастер LRC
+                        </button>
+                        <p class="hint">Создать таймкоды лирики</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="lrc-master-modal" class="lrc-modal" style="display:none;">
+            <div class="lrc-modal-content">
+                <div class="lrc-modal-header">
+                    <h3>🎤 Мастер LRC — расстановка таймкодов</h3>
+                    <button id="lrc-close" class="btn-icon">&times;</button>
+                </div>
+                <div class="lrc-modal-body">
+                    <div class="lrc-instruction">
+                        Нажмите <strong>Play</strong> и нажимайте клавишу <strong>Пробел</strong> в момент начала каждой строки.<br>
+                        Можно ставить на паузу и перематывать.
+                    </div>
+                    <div class="lrc-layout">
+                        <div class="lrc-lyrics">
+                            <div id="lrc-lines"></div>
+                        </div>
+                    </div>
+                    <div class="lrc-player-bar">
+                        <audio id="lrc-audio" controls></audio>
+                        <div class="lrc-actions">
+                            <label class="lrc-test-label">
+                                <input type="checkbox" id="lrc-test-mode"> Тест (только просмотр)
+                            </label>
+                            <button id="lrc-record-btn" class="btn" title="Записать таймкод">Отметить</button>
+                            <button id="lrc-save" class="btn">Сохранить таймкоды</button>
+                            <button id="lrc-speed-btn" class="btn" title="Скорость">1x</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        
+
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script src="/admin/js/form-manager.js"></script>
+        <script>
+            /*
+             document.getElementById('generate-timestamps-btn').addEventListener('click', async function() {
+             const trackId = currentId;
+             if (!trackId) {
+             toastWarning('Сначала сохраните трек');
+             return;
+             }
+             setButtonLoading('generate-timestamps-btn', true, '⏳ Идёт генерация...');
+             const res = await adminApiRequest(`/generate_timestamps?id=${trackId}`);
+             if (res.error) {
+             toastError('Ошибка: ' + res.error);
+             } else {
+             if (res.lyrics_timed) {
+             document.getElementById('lyrics_timed').value = JSON.stringify(res.lyrics_timed, null, 2);
+             }
+             toastSuccess('Таймкоды сгенерированы');
+             }
+             setButtonLoading('generate-timestamps-btn', false);
+             });            
+             */
+            function renderEmotions(selectedCodes = '') {
+                const container = document.getElementById('emotions-selector');
+                const selected = selectedCodes.split('');
+
+                container.innerHTML = Object.entries(formConfig.EMOTION_MAP).map(([code, {emoji, name}]) => `
+                        <label class="emotion-option">
+                            <input type="checkbox" value="${code}" ${selected.includes(code) ? 'checked' : ''}>
+                            <span class="emotion-emoji">${emoji}</span>
+                            <span>${name}</span>
+                        </label>
+                    `).join('');
+
+                updateSuggestedEmotions();
+                container.querySelectorAll('input').forEach(cb => {
+                    cb.addEventListener('change', updateSuggestedEmotions);
+                });
+            }
+
+            function updateSuggestedEmotions() {
+                const checked = Array.from(document.querySelectorAll('#emotions-selector input:checked'))
+                        .map(cb => cb.value)
+                        .join('');
+                document.getElementById('suggested_emotions').value = checked;
+            }
+
+            // Блокировка текста при инструментале
+            function toggleLyrics() {
+                const isInstrumental = document.getElementById('is_instrumental').checked;
+                const lyricsTextarea = document.getElementById('lyrics');
+                lyricsTextarea.disabled = isInstrumental;
+                lyricsTextarea.required = !isInstrumental;
+                lyricsTextarea.style.opacity = isInstrumental ? '0.5' : '1';
+                const lyricsTimedTextarea = document.getElementById('lyrics_timed');
+                lyricsTimedTextarea.disabled = isInstrumental;
+                lyricsTimedTextarea.style.opacity = isInstrumental ? '0.5' : '1';
+            }
+
+            initFormManager({
+                endpoint: '/tracks',
+                listUrl: '/admin/tracks.html',
+                obj: 'track',
+                objName: 'Трек',
+                hasVideo: true,
+                hasCover: true,
+                hasAudio: true,
+                autoSlug: true,
+                fields: [
+                    {name: 'title', label: 'Название', required: true},
+                    {name: 'slug', label: 'Код'},
+                    {name: 'authors', label: 'Авторы'},
+                    {name: 'lyrics', label: 'Текст'},
+                    {name: 'lyrics_timed', label: 'Таймкоды'},
+                    {name: 'is_instrumental', label: 'Инструментальный'},
+                    {name: 'duration', label: 'Длительность'},
+                    {name: 'is_published', label: 'Опубликован'},
+                    {name: 'original-track-input', // видимый input
+                        label: 'Оригинальный трек',
+                        ajaxSearch: {
+                            endpoint: '/tracks',
+                            fields: 'id,title',
+                            displayField: 'title',
+                            valueField: 'id',
+                            excludeSelf: true,
+                            hiddenInputId: 'original-track-id' // скрытый input для сохранения
+                        }
+                    }
+                ],
+                referenceData: {
+                    genres: true,
+                    artists: true,
+                    emotions: true
+                },
+                onBeforeSave: function (data) {
+                    // Собираем дополнительные поля
+                    data.suggested_emotions = document.getElementById('suggested_emotions').value;
+                    data.lyrics_timed = document.getElementById('lyrics_timed').value.trim() || null;
+                    data.artist_ids = Array.from(document.querySelectorAll('#artists-checkboxes input:checked')).map(cb => parseInt(cb.value));
+                    data.genre_ids = Array.from(document.querySelectorAll('#genres-checkboxes input:checked')).map(cb => parseInt(cb.value));
+                    data.original_track_id = document.getElementById('original-track-id').value || null;
+                },
+                renderData: function (data) {
+                    data.created_at = formatDate(data.created_at);
+                    data.updated_at = formatDate(data.updated_at);
+                    return data;
+                },
+                onAfterLoad: async function (data) {
+                    // Эмоции
+                    renderEmotions(data.suggested_emotions || '');
+
+                    // Отмечаем жанры
+                    if (data.genres) {
+                        const genreIds = data.genres.map(g => g.id);
+                        document.querySelectorAll('#genres-checkboxes input').forEach(cb => {
+                            cb.checked = genreIds.includes(parseInt(cb.value));
+                        });
+                    }
+
+                    // Отмечаем артистов
+                    if (data.artists) {
+                        const artistIds = data.artists.map(a => a.id);
+                        document.querySelectorAll('#artists-checkboxes input').forEach(cb => {
+                            cb.checked = artistIds.includes(parseInt(cb.value));
+                        });
+                    }
+
+                    // Восстанавливаем оригинальный трек
+                    const origInput = document.getElementById('original-track-input');
+                    const origHidden = document.getElementById('original-track-id');
+                    if (data.original_track_id && origInput && origHidden) {
+                        origHidden.value = data.original_track_id;
+                        const origData = await adminApiRequest(`/tracks?id=${data.original_track_id}`);
+                        if (!origData.error) {
+                            origInput.value = origData.title;
+                        }
+                    }
+
+                    // Инструментал
+                    document.getElementById('is_instrumental').addEventListener('change', toggleLyrics);
+                    toggleLyrics();
+                }
+            });
+
+            const LrcMaster = {
+                lines: [],
+                currentIndex: 0,
+                audio: null,
+                timestamps: [],
+
+                open() {
+                    const rawTimed = document.getElementById('lyrics_timed').value.trim();
+                    let textToParse = '';
+
+                    if (rawTimed) {
+                        // Есть существующие таймкоды — используем их как источник
+                        const lrcLines = rawTimed.split('\n').filter(l => l.trim() !== '');
+                        this.lines = [];
+                        this.timestamps = [];
+
+                        lrcLines.forEach(line => {
+                            const match = line.match(/^\[(\d+):(\d+\.\d+)\](.*)/);
+                            if (match) {
+                                const mins = parseInt(match[1]);
+                                const secs = parseFloat(match[2]);
+                                const text = match[3].trim();
+                                const timeInSeconds = mins * 60 + secs;
+
+                                this.lines.push(text);
+                                this.timestamps.push(timeInSeconds);
+                            } else {
+                                // Строка без таймкода
+                                this.lines.push(line.trim());
+                                this.timestamps.push(null);
+                            }
+                        });
+                    } else {
+                        // Таймкодов нет — используем исходную лирику
+                        const rawText = document.getElementById('lyrics').value.trim();
+                        if (!rawText) {
+                            toastWarning('Нет текста для расстановки таймкодов');
+                            return;
+                        }
+                        this.lines = rawText.split('\n').map(l => l.trim()).filter(l => l !== '');
+                        this.timestamps = new Array(this.lines.length).fill(null);
+                    }
+
+                    this.currentIndex = 0;
+
+                    // Настраиваем аудио
+                    const audioEl = document.getElementById('lrc-audio');
+                    const trackAudio = document.getElementById('audio')?.src || '';
+                    audioEl.src = trackAudio;
+                    audioEl.addEventListener('play', () => {
+                        if (document.activeElement) {
+                            document.activeElement.blur();
+                        }
+                        document.getElementById('lrc-master-modal').focus();
+                    });
+                    audioEl.addEventListener('timeupdate', () => {
+                        if (!document.getElementById('lrc-test-mode').checked)
+                            return; // не тест
+                        const t = audioEl.currentTime;
+                        let nearest = -1;
+                        for (let i = 0; i < LrcMaster.timestamps.length; i++) {
+                            if (LrcMaster.timestamps[i] !== null && LrcMaster.timestamps[i] <= t) {
+                                nearest = i;
+                            } else if (LrcMaster.timestamps[i] > t || LrcMaster.timestamps[i] === null) {
+                                break;
+                            }
+                        }
+                        if (nearest !== -1 && nearest !== LrcMaster.currentIndex) {
+                            LrcMaster.currentIndex = nearest;
+                            LrcMaster.render();
+                        }
+                    });
+
+                    const speeds = [1, 0.75, 0.5];
+                    let speedIndex = 0;
+                    document.getElementById('lrc-speed-btn').addEventListener('click', function () {
+                        const audioEl = document.getElementById('lrc-audio');
+                        speedIndex = (speedIndex + 1) % speeds.length;
+                        audioEl.playbackRate = speeds[speedIndex];
+                        this.textContent = speeds[speedIndex] + 'x';
+                    });
+
+                    this.render();
+
+                    const container = document.getElementById('lrc-lines');
+                    container.addEventListener('click', (e) => {
+                        const lineEl = e.target.closest('.lrc-line');
+                        if (!lineEl)
+                            return;
+                        const i = parseInt(lineEl.dataset.index);
+                        LrcMaster.currentIndex = i;
+                        LrcMaster.render();
+                        LrcMaster.remoteAudio();
+                    });
+
+                    // Показываем окно
+                    const modal = document.getElementById('lrc-master-modal');
+                    modal.style.display = 'flex';
+                    modal.setAttribute('tabindex', '-1');
+                    if (document.activeElement)
+                        document.activeElement.blur();
+                    modal.focus();
+
+                    document.addEventListener('keydown', this.keyHandler, true);
+
+                    document.getElementById('lrc-record-btn').addEventListener('click', (e) => {
+                        if (document.getElementById('lrc-test-mode').checked)
+                            return; // тест
+                        LrcMaster.recordTimestamp();
+                    });
+                },
+
+                close() {
+                    const audio = document.getElementById('lrc-audio');
+                    if (audio) {
+                        audio.pause();
+                        audio.removeAttribute('src'); // убрать источник
+                    }
+                    document.getElementById('lrc-master-modal').style.display = 'none';
+                    document.removeEventListener('keydown', this.keyHandler);
+                },
+
+                keyHandler(e) {
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON')
+                        return;
+                    if (document.getElementById('lrc-test-mode').checked)
+                        return; // тест
+
+                    if (e.code === 'ArrowUp') {
+                        e.preventDefault();
+                        LrcMaster.currentIndex = Math.max(0, LrcMaster.currentIndex - 1);
+                        LrcMaster.render();
+                        LrcMaster.remoteAudio();
+                    } else if (e.code === 'ArrowDown') {
+                        e.preventDefault();
+                        LrcMaster.currentIndex = Math.min(LrcMaster.lines.length - 1, LrcMaster.currentIndex + 1);
+                        LrcMaster.render();
+                        LrcMaster.remoteAudio();
+                    } else if (e.code === 'Space' && document.getElementById('lrc-master-modal').style.display === 'flex') {
+                        e.preventDefault();
+                        LrcMaster.recordTimestamp();
+                    }
+                },
+
+                recordTimestamp() {
+                    const audio = document.getElementById('lrc-audio');
+                    if (audio.paused)
+                        return;
+
+                    const time = Math.max(0, audio.currentTime - 0.02); // смещение 20 мс
+                    this.timestamps[this.currentIndex] = parseFloat(time.toFixed(2));
+                    this.currentIndex++;
+
+                    if (this.currentIndex >= this.lines.length) {
+                        toastSuccess('Все строки размечены!');
+                    }
+
+                    this.render();
+                },
+
+                formatLrc(i) {
+                    const t = this.timestamps[i];
+                    if (t === null)
+                        return `[--:--.--]`;
+                    const mins = Math.floor(t / 60);
+                    const secs = (t % 60).toFixed(2).padStart(5, '0');
+                    return `[${String(mins).padStart(2, '0')}:${secs}]`;
+                },
+
+                remoteAudio() {
+                    // Если у строки есть таймкод - перематываем аудио
+                    const t = this.timestamps[this.currentIndex];
+                    if (t !== null && t > 0) {
+                        const audioEl = document.getElementById('lrc-audio');
+                        audioEl.currentTime = t;
+                    }
+                },
+
+                render() {
+                    const container = document.getElementById('lrc-lines');
+
+                    container.innerHTML = this.lines.map((line, i) => {
+                        let cls = '';
+                        const done = (this.timestamps[i] !== null && this.timestamps[i] > 0);
+
+                        if (i === this.currentIndex)
+                            cls = 'active';
+                        if (done)
+                            cls = cls + ' done';
+
+                        const timeStr = done ? `<span class="lrc-timestamp">${this.formatLrc(i)}</span>` : '';
+
+                        return `<div data-index="${i}" class="lrc-line ${cls}">${timeStr}${line}</div>`;
+                    }).join('');
+
+                    // Прокрутка к активной строке
+                    const activeEl = container.querySelector('.lrc-line.active');
+                    if (activeEl) {
+                        activeEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    }
+                },
+
+                save() {
+                    const result = this.lines.map((text, i) => {
+                        return this.formatLrc(i) + text;
+                    });
+                    document.getElementById('lyrics_timed').value = result.join('\n');
+                    this.close();
+                    toastSuccess('Таймкоды сохранены в LRC');
+                }
+            };
+
+            // Инициализация
+            document.getElementById('open-lrc-master').addEventListener('click', () => LrcMaster.open());
+            document.getElementById('lrc-close').addEventListener('click', () => LrcMaster.close());
+            document.getElementById('lrc-save').addEventListener('click', () => LrcMaster.save());
+        </script>
+    </body>
+</html>

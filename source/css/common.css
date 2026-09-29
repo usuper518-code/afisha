@@ -1,0 +1,747 @@
+/* common.css */
+/* ---------- СТРУКТУРНЫЕ ПЕРЕМЕННЫЕ ---------- */
+/* Цвета, шрифты, радиусы и тени определяются в css/themes/theme-*.css
+   (подключается последним и переопределяет значения ниже при их
+   совпадении). Здесь остаются только НЕ-тематические величины:
+   отступы, толщина рамок и переходы — они одинаковы во всех темах. */
+:root {
+    --border-width-thin: 0.2vh;
+    --border-width-normal: 0.3vh;
+    --border-width-thick: 0.4vh;
+
+    --spacing-xs: 0.5vh;
+    --spacing-sm: 1vh;
+    --spacing-md: 2vh;
+    --spacing-lg: 3vh;
+    --spacing-xl: 4vh;
+}
+
+/* ---------- ШРИФТЫ ---------- */
+/* Cormorant Garamond — основной текст */
+@font-face {
+    font-family: 'Cormorant Garamond';
+    src: url('/webfonts/CormorantGaramond-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Cormorant Garamond';
+    src: url('/webfonts/CormorantGaramond-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Cormorant Garamond';
+    src: url('/webfonts/CormorantGaramond-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Montserrat — UI, кнопки, навигация */
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/webfonts/Montserrat-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/webfonts/Montserrat-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('/webfonts/Montserrat-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Шрифты, специфичные для отдельных тем (Playfair Display, Russo One
+   и т.д.), НЕ объявляются здесь — они лежат в самом файле темы,
+   которая их использует (css/themes/theme-*.css), и загружаются
+   только когда эта тема активна (на странице подключается ровно
+   один файл темы, см. getThemeCss() в generate_album.php). Здесь —
+   только семейства, нужные абсолютно всем темам без исключения. */
+
+/* ============================================ */
+/* СБРОС И БАЗОВЫЕ СТИЛИ                       */
+/* ============================================ */
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 1.2vmin;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+html::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    
+    min-height: 100vh;
+    max-height: 100vh;
+    background-color: inherit;
+    color: inherit;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin: 0 auto;
+    max-width: calc(100vh * 16 / 9);
+    
+    /* Плёночное зерно — намеренное исключение из правила "избегать px":
+       это пиксель-точный шум для эффекта старой плёнки, а не элемент
+       раскладки. При переводе в vh/vw рисунок зерна растягивался бы
+       вместе с экраном и терял фактуру. */
+    background: 
+        repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05) 0.3px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 3px);    
+   
+}
+@supports (height: 100dvh) {
+    body { max-width: calc(100dvh * 16 / 9); }
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.3;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+button {
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+    background: none;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+/* ============================================ */
+/* ЗАНАВЕС                                      */
+/* ============================================ */
+/* КОНТЕЙНЕР                                    */
+/* ============================================ */
+
+.container {
+    min-height: 100%;
+    padding: 0 1.5vw 1.5vh ;
+    display: flex;
+    flex-direction: column;
+    /*
+    background: 
+        repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05) 0.3px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 3px);
+    */
+}
+
+/* ============================================ */
+/* БАЗОВЫЕ КНОПКИ (структура)                   */
+/* ============================================ */
+
+.btn {
+    display: inline-block;
+    background: transparent;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    text-align: center;
+    cursor: pointer;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+/* ============================================ */
+/* ФОРМЫ (структура)                            */
+/* ============================================ */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+/* .form-group label / input / textarea / .checkbox-group — стилизация
+   этих элементов теперь только в album.css (там она полнее — учитывает
+   :focus). Здесь остаётся только структурный layout, который album.css
+   не переопределяет. */
+
+.form-actions {
+    display: flex;
+    gap: 2vw;
+    margin-top: 2vh;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ============================================ */
+/* УТИЛИТЫ                                      */
+/* ============================================ */
+
+.text-center {
+    text-align: center;
+}
+.text-left {
+    text-align: left;
+}
+.text-right {
+    text-align: right;
+}
+
+.mt-1 {
+    margin-top: var(--spacing-xs);
+}
+.mt-2 {
+    margin-top: var(--spacing-sm);
+}
+.mt-3 {
+    margin-top: var(--spacing-md);
+}
+.mt-4 {
+    margin-top: var(--spacing-lg);
+}
+.mt-5 {
+    margin-top: var(--spacing-xl);
+}
+
+.mb-1 {
+    margin-bottom: var(--spacing-xs);
+}
+.mb-2 {
+    margin-bottom: var(--spacing-sm);
+}
+.mb-3 {
+    margin-bottom: var(--spacing-md);
+}
+.mb-4 {
+    margin-bottom: var(--spacing-lg);
+}
+.mb-5 {
+    margin-bottom: var(--spacing-xl);
+}
+
+.hidden {
+    display: none;
+}
+.invisible {
+    visibility: hidden;
+}
+
+.opacity-50 {
+    opacity: 0.5;
+}
+.opacity-75 {
+    opacity: 0.75;
+}
+
+.relative {
+    position: relative;
+}
+.absolute {
+    position: absolute;
+}
+.fixed {
+    position: fixed;
+}
+
+.flex {
+    display: flex;
+}
+.flex-col {
+    flex-direction: column;
+}
+.items-center {
+    align-items: center;
+}
+.justify-center {
+    justify-content: center;
+}
+.justify-between {
+    justify-content: space-between;
+}
+.gap-1 {
+    gap: var(--spacing-xs);
+}
+.gap-2 {
+    gap: var(--spacing-sm);
+}
+.gap-3 {
+    gap: var(--spacing-md);
+}
+
+.w-full {
+    width: 100%;
+}
+.h-full {
+    height: 100%;
+}
+
+/* ============================================ */
+/* ПРЕЛОАДЕР (ЗАТЕМНЕНИЕ)                       */
+/* ============================================ */
+
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0B0709;
+    z-index: 10000;
+    transition: opacity 0.3s ease;
+    opacity: 1;
+}
+
+#preloader.complete {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ============================================ */
+/* ДЕКОРАТИВНЫЕ ЭФФЕКТЫ                         */
+/* ============================================ */
+
+/* Покачивание при наведении */
+.swing-on-hover {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+.swing-on-hover:hover {
+    animation: swing 0.6s ease-in-out;
+}
+
+@keyframes swing {
+    0%   {
+        transform: rotate(0deg);
+    }
+    25%  {
+        transform: rotate(10deg);
+    }
+    50%  {
+        transform: rotate(-10deg);
+    }
+    75%  {
+        transform: rotate(5deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+/* ---------- КОНТРОЛ ГРОМКОСТИ ---------- */
+#volume-control {
+    position: fixed;
+    top: 1vh;
+    right: 2vh;
+    z-index: 100;
+    font-size: 2.5vh;
+    opacity: 0.8;
+    cursor: pointer;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+#volume-control:hover {
+    opacity: 0.9 !important;
+    transform: scale(1.2);
+}
+
+/* Тач-устройства */
+@media (hover: none) and (pointer: coarse) {
+    * {
+        touch-action: manipulation;
+    }
+}
+
+/* Кнопки прокрутки – абсолютно внутри колонки, не двигаются */
+.scroll-buttons {
+    position: absolute;
+    right: clamp(0.5vw, 1rem, 1.5vw);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.5vh, 0.5rem, 1vh);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+}
+
+.scroll-buttons.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.scroll-btn {
+    background: rgba(158, 132, 92, 0.2);
+    width: 4vh;
+    height: 4vh;
+    border-radius: var(--theme-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    font-size: clamp(0.8rem, 1.5vh, 1.2rem);
+}
+
+.scroll-btn:hover {
+    transform: scale(1.1);
+}
+
+.scroll-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ===== TOAST УВЕДОМЛЕНИЯ ===== */
+:root {
+    /* Состояния */
+    --error: #cf6679;
+    --success: #6abf69;
+    --warning: #f0ad4e;
+    --info: #5bc0de;
+}
+.toast-success {
+    border-left-color: var(--success);
+}
+.toast-error {
+    border-left-color: var(--error);
+}
+.toast-warning {
+    border-left-color: var(--warning);
+}
+.toast-info {
+    border-left-color: var(--info);
+}
+/* ===== ТОСТЫ (адаптированы под тему) ===== */
+.toast-container {
+    position: fixed;
+    top: 1.25rem;           /* 20px → rem */
+    right: 1.25rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;          /* 10px → rem */
+}
+
+/* ============================================ */
+/* ПЕРЕКЛЮЧАТЕЛЬ «ОБЛОЖКА ⇄ ВИДЕО»                */
+/* Единая логика для всего сайта (см. common.js) —*/
+/* обложка альбома, сцена трека, карточки афиши.  */
+/* Позиционирование кнопки контекстное: базовое   */
+/* здесь, переопределения — в afisha.css/album.css*/
+/* ============================================ */
+.media-video-toggle {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6vh;
+    height: 6vh;
+    border-radius: var(--theme-radius-full);
+    background: color-mix(in srgb, var(--theme-color-bg) 55%, transparent);
+    border: var(--border-width-normal) solid var(--theme-color-accent-secondary);
+    color: var(--theme-color-accent-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--theme-text-lg);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.media-video-toggle:hover {
+    background: var(--theme-color-accent-secondary);
+    color: var(--theme-color-bg);
+    transform: translate(-50%, -50%) scale(1.08);
+}
+[data-video].video-active .media-video-toggle {
+    top: auto;
+    left: auto;
+    bottom: var(--spacing-sm);
+    right: var(--spacing-sm);
+    transform: none;
+    width: 4.4vh;
+    height: 4.4vh;
+    font-size: var(--theme-text-sm);
+}
+[data-video].video-active .media-video-toggle:hover {
+    transform: scale(1.08);
+}
+
+/* Пока видео грузится (клик уже был, кадра ещё нет) — крутится
+   кольцо вместо иконки, картинка остаётся на месте. Без этого между
+   кликом и стартом воспроизведения был бы момент пустого/чёрного
+   экрана на медленном соединении. */
+.media-video-toggle.loading {
+    color: transparent;
+}
+.media-video-toggle.loading::after {
+    content: '';
+    position: absolute;
+    inset: 0.6vh;
+    border-radius: 50%;
+    border: var(--border-width-normal) solid transparent;
+    border-top-color: var(--theme-color-accent-secondary);
+    animation: btnSpin 0.8s linear infinite;
+}
+@keyframes btnSpin {
+    to { transform: rotate(360deg); }
+}
+
+[data-video] > video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+[data-video].video-active > video {
+    opacity: 1;
+    pointer-events: auto;
+}
+[data-video].video-active > img {
+    opacity: 0;
+}
+
+.toast {
+    min-width: 17.5rem;     /* 280px → rem */
+    max-width: 90vw;        /* ограничиваем шириной экрана */
+    padding: 0.875rem 1.25rem; /* 14px 20px → rem */
+    border-radius: var(--theme-radius-md);
+    background: var(--theme-color-surface);
+    border-left: 0.25rem solid var(--theme-color-accent-secondary); /* 4px → rem */
+    box-shadow: var(--theme-shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideIn 0.3s ease;
+    color: var(--theme-color-text-primary);
+    font-family: var(--theme-font-ui);
+    font-size: var(--theme-text-sm);
+}
+
+.toast-content {
+    flex: 1;
+    margin-right: 0.75rem;  /* 12px → rem */
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: var(--theme-color-text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 0.3125rem;   /* 5px → rem */
+    transition: color 0.2s;
+    font-family: var(--theme-font-ui);
+}
+.toast-close:hover {
+    color: var(--theme-color-text-primary);
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to   { transform: translateX(100%); opacity: 0; }
+}
+
+/* Модальное окно */
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: var(--theme-color-surface);
+    border-radius: var(--theme-radius-md);
+    padding: 3vh 3vw;
+    max-width: 32rem;
+    width: 90%;
+    text-align: center;
+    color: var(--theme-color-text-primary);
+    font-family: var(--theme-font-body);
+    box-shadow: var(--theme-shadow-lg);
+}
+.modal-close {
+    float: right;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--theme-color-accent-secondary);
+}
+.modal-close:hover { color: var(--theme-color-accent); }
+#remind-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    margin-top: 1.5vh;
+}
+
+.canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;             /* ниже контента, но выше фона */
+  mix-blend-mode: screen; /* мягко смешивается со светлыми участками */
+}
+/*пыль*/
+#dust-canvas {
+  z-index: 0;
+}
+/*fire-btn*/
+.fire-btn {
+    position: relative;
+    display: inline-block;
+}
+#fire-canvas {
+    z-index: 0;
+}
+
+/*тление*/
+.smolder-text {
+  position: relative;
+  /*
+  display: inline-block;
+  cursor: default;
+  transition: color 0.4s var(--ease-curious);
+  */
+}
+
+/* Канвас для искр, позиционируется под текст */
+.smolder-canvas {
+  position: absolute;
+  top: -0.6em;
+  left: -0.6em;
+  width: calc(100% + 1.2em);
+  height: calc(100% + 1.2em);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/*занавес*/
+#curtain-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10;
+    cursor: pointer;
+    touch-action: manipulation;    
+}
+#curtain-canvas.open {
+    pointer-events: none;
+    cursor: none;
+}
+.hint {
+    position: fixed;
+    bottom: 18%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--theme-color-accent-secondary);
+    font-size: 3vh;
+    letter-spacing: 0.5vw;
+    text-transform: uppercase;
+    opacity: 0.75;
+    pointer-events: none;
+    text-shadow: 0 0.25vh 1.4vh rgba(0, 0, 0, 0.8);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    z-index: 20;
+    white-space: nowrap;
+}
+.hint.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(0.8vh);
+}
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}
+
+/* Фокус с клавиатуры — не убираем (это единственный способ понять,
+   где ты на странице, если не пользуешься мышью), но заменяем
+   дефолтное синее кольцо браузера на акцентное свечение под тему.
+   :focus-visible — только для клавиатуры/скринридеров, при клике
+   мышью не появляется. */
+:focus-visible {
+    outline: 0.2vh solid var(--theme-color-accent-secondary);
+    outline-offset: 0.2vh;
+}
+
+.old-paper-css {
+    
+    /* 1. Базовый выцветший тон */
+    background-color: #e6d5b3;
+    background-image:
+      /* 2. Пятна (вода/кофе) */
+      radial-gradient(circle at 22% 28%, rgba(139,90,43,0.22) 0%, transparent 28%),
+      radial-gradient(circle at 78% 65%, rgba(101,67,33,0.18) 0%, transparent 32%),
+      radial-gradient(circle at 50% 50%, rgba(160,110,50,0.12) 0%, transparent 45%),
+      /* 3. Заломы/складки */
+      linear-gradient(108deg, transparent 42%, rgba(0,0,0,0.025) 42.3%, rgba(0,0,0,0.025) 42.8%, transparent 43.2%),
+      linear-gradient(-72deg, transparent 58%, rgba(0,0,0,0.02) 58.2%, rgba(0,0,0,0.02) 58.9%, transparent 59.3%),
+      /* 4. Виньетка и потёртые края */
+      radial-gradient(ellipse at center, transparent 45%, rgba(80,45,15,0.28) 100%);
+      
+    /* 5. Зерно бумаги через SVG */
+    filter: url(#old-paper-grain);
+    
+    /* 6. Глубина: внутреннее свечение + внешняя тень */
+    box-shadow: 
+      inset 0 0 7vh rgba(90,50,20,0.12),
+      inset 0.2vh 0.2vh 4vh rgba(0,0,0,0.04),
+      0 1vh 3vh rgba(0,0,0,0.35);
+      
+    border: var(--border-width-thin) solid rgba(140,100,50,0.15);
+    border-radius: var(--theme-radius-sm);
+  }

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Редактор релиза | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <h2 id="form-title">Новый релиз</h2>
+
+            <div class="editor-layout">
+                <!-- Левая колонка: основная форма -->
+                <div class="editor-main">
+                    <form id="form" class="form-container">
+                        <label>Название</label>
+                        <div class="title-row">
+                            <input type="text" id="title" maxlength="255" required class="flex-grow">
+                            <label>
+                                <input type="checkbox" id="is_published"> Опубликован
+                            </label>
+                        </div>
+
+                        <label>Подзаголовок</label>
+                        <input type="text" id="subtitle" maxlength="255" placeholder="Краткое описание">
+
+                        <label>Код</label>
+                        <input type="text" id="slug" maxlength="255" placeholder="Заполнится автоматически">
+
+                        <label>Описание</label>
+                        <textarea id="description" rows="3"></textarea>
+
+                        <div class="form-row-three">
+                            <div class="form-col">
+                                <label>Год</label>
+                                <input type="number" id="release_year" min="1900" max="2200">
+                            </div>
+                            <div class="form-col">
+                                <label>Дата премьеры</label>
+                                <input type="date" id="premiere_date">
+                            </div>
+                            <label title="Отображается на афише. Только один релиз может быть премьерой.">
+                                <input type="checkbox" id="is_premiere"> Текущая премьера
+                            </label>
+                        </div>
+
+                        <div class="form-row-three">
+                            <div class="form-col">
+                                <label>Тип</label>
+                                <select id="type">
+                                    <option value="album">Альбом</option>
+                                    <option value="single">Сингл</option>
+                                    <option value="ep">EP</option>
+                                    <option value="compilation">Сборник</option>
+                                    <option value="remix">Ремикс</option>
+                                    <option value="demo">Демо</option>
+                                    <option value="rock_opera">Рок-опера</option>
+                                    <option value="musical">Мюзикл</option>
+                                </select>
+                            </div>
+                            <div class="form-col">
+                                <label>Тема оформления</label>
+                                <select id="theme">
+                                    <option value="vampire">Вампир</option>
+                                    <option value="night">Ночь</option>
+                                    <option value="cabaret">Кабаре</option>
+                                    <option value="ghost">Призрак</option>
+                                    <option value="ember">Тлеющий</option>
+                                    <option value="romance">Романтика</option>
+                                    <option value="dark-cabaret">Дарк кабаре</option>
+                                    <option value="art-rock">Арт-рок</option>
+                                    <option value="default">По умолчанию</option>
+                                </select>
+                            </div>
+                            <div class="form-col">
+                                <label>Порядок</label>
+                                <input type="number" id="sort_order" value="0" min="0" max="999">
+                            </div>
+                        </div>
+
+                        <h3>Жанры</h3>
+                        <div id="genres-checkboxes" class="genres-grid"></div>
+                    </form>
+
+                    <!-- Секция треков -->
+                    <div id="tracks-section" class="tracks-section">
+                        <h3>Треки</h3>
+                        <h4>Добавить трек</h4>
+                        <div class="add-track-row">
+                            <input type="text" id="track-input" class="flex-grow" placeholder="Введите название трека..." list="tracks-datalist" autocomplete="off">
+                            <button type="button" id="add-track-btn" class="btn" disabled>Добавить</button>
+                            <input type="hidden" id="new-track-id">
+                        </div>
+                        <table class="admin-table">
+                            <thead><tr><th>№</th><th>Название</th><th>Длительность</th><th>Действия</th></tr></thead>
+                            <tbody id="release-tracks-tbody"></tbody>
+                        </table>
+                        <div class="total-duration-row">
+                            Общая длительность: <span id="total-duration">0:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Кнопки сохранения -->
+                    <div class="form-actions">
+                        <button type="button" id="save-btn" class="btn">Сохранить</button>
+                        <a href="/admin/releases.html" class="btn btn-cancel">Отмена</a>
+                    </div>
+                </div>
+
+                <!-- Правая колонка: обложка -->
+                <div class="editor-sidebar">
+                    <div id="image-upload-card" class="cover-card">
+                        <h3>Обложка</h3>
+                        <div id="cover-preview" class="cover-preview">
+                            <div class="placeholder-text">Нет</div>
+                        </div>                        
+                        <input type="file" id="cover-file" accept="image/*" style="display: none;">
+                        <label for="cover-file" class="btn">Загрузить</label>
+                        <p class="hint">Рекомендуемый размер: 1200×1200 px, до 10 МБ</p>
+                    </div>
+                    <div id="video-upload-card" class="cover-card" style="display: none;">
+                        <h3>Видео</h3>
+                        <div id="video-preview" class="video-preview">
+                            <div class="placeholder-text">Нет видео</div>
+                        </div>
+                        <input type="file" id="video-file" accept="video/*" style="display: none;">
+                        <label for="video-file" class="btn">Загрузить</label>
+                        <p class="hint">Рекомендуемый размер: 624×624 px, до 10 МБ</p>
+                    </div>                    
+                    <div class="cover-card">
+                        <h3>Тип медиа</h3>
+                        <div class="media-type-switch">
+                            <button type="button" id="btn-media-image" class="btn btn-sm active">🖼️ Обложка</button>
+                            <button type="button" id="btn-media-video" class="btn btn-sm">🎬 Видео</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Кнопка генерации статики -->
+                    <div class="cover-card">
+                        <h3>Публикация</h3>
+                        <button type="button" id="generate-btn" class="btn">
+                            Сгенерировать статику
+                        </button>
+                        <p class="hint">Создаёт HTML-страницы альбома в /albums/{код}/</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script src="/admin/js/form-manager.js"></script>
+        <script>
+            initFormManager({
+                endpoint: '/releases',
+                listUrl: '/admin/releases.html',
+                obj: 'release',
+                objName: 'Релиз',
+                hasVideo: true,
+                hasCover: true,
+                autoSlug: true,
+                relatedLists: {
+                    tracks: {
+                        dataKey: 'tracks',
+                        tbodyId: 'release-tracks-tbody',
+                        numberField: 'track_number',
+                        columns: [
+                            {key: 'track_number', label: '№'},
+                            {key: 'title', label: 'Название', link: '/admin/track-form.html?id='},
+                            {key: 'duration', label: 'Длительность', format: 'duration'},
+                            {actions: ['moveUp', 'moveDown', 'remove']}
+                        ],
+                        render(data) {
+                            if (data) {
+                                const totalSec = data.reduce((sum, item) => sum + (item.duration || 0), 0);
+                                const mins = Math.floor(totalSec / 60);
+                                const secs = totalSec % 60;
+                                document.getElementById('total-duration').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+                            } else {
+                                document.getElementById('total-duration').textContent = '0:00';
+                            }
+                        }
+                    }
+                },
+                fields: [
+                    {name: 'title', label: 'Название', required: true},
+                    {name: 'subtitle', label: 'Подзаголовок'},
+                    {name: 'slug', label: 'Код'},
+                    {name: 'description', label: 'Описание'},
+                    {name: 'release_year', label: 'Год'},
+                    {name: 'premiere_date', label: 'Дата премьеры'},
+                    {name: 'type', label: 'Тип'},
+                    {name: 'theme', label: 'Тема'},
+                    {name: 'sort_order', label: 'Порядок'},
+                    {name: 'is_published', label: 'Опубликован'},
+                    {name: 'is_premiere', label: 'Премьера'},
+                    {name: 'track-input', // видимый input
+                        label: 'Добавить трек',
+                        ajaxSearch: {
+                            endpoint: '/tracks',
+                            fields: 'id,title,duration',
+                            displayField: 'title',
+                            valueField: 'id',
+                            excludeSelf: false,
+                            hiddenInputId: 'new-track-id', // скрытый input для сохранения
+                            addBtn: 'add-track-btn' //связанная кнопка
+                        }
+                    }
+                ],
+                referenceData: {
+                    genres: true
+                },
+                onBeforeSave: function(data) {
+                    // Собираем дополнительные поля
+                    data.genre_ids = Array.from(document.querySelectorAll('#genres-checkboxes input:checked')).map(cb => parseInt(cb.value));
+                },
+                renderData: function (data) {
+                    data.created_at = formatDate(data.created_at);
+                    data.updated_at = formatDate(data.updated_at);
+                    return data;
+                },
+                onAfterLoad: async function(data) {
+                    // Отмечаем жанры
+                    if (data.genres) {
+                        const genreIds = data.genres.map(g => g.id);
+                        document.querySelectorAll('#genres-checkboxes input').forEach(cb => {
+                            cb.checked = genreIds.includes(parseInt(cb.value));
+                        });
+                    }
+                },                
+                validate(errors) {
+                    const data = formConfig.relatedData?.tracks || [];
+                    if (!data.length) {
+                        errors.push({field: null, message: 'Добавьте хотя бы один трек в релиз'});
+                    }
+                }
+            });
+
+            document.getElementById('generate-btn').addEventListener('click', async function () {
+                const releaseId = currentId;
+                if (!releaseId) {
+                    toastWarning('Сначала сохраните релиз');
+                    return;
+                }
+                setButtonLoading('generate-btn', true);
+                const res = await adminApiRequest(`/generate_album?id=${releaseId}`);
+                if (res.error) {
+                    toastError('Ошибка: ' + res.error);
+                } else {
+                    toastSuccess('Статика сгенерирована');
+                }
+                setButtonLoading('generate-btn', false);
+            });
+
+            document.getElementById('add-track-btn').addEventListener('click', function () {
+                const listKey = 'tracks';
+                const hiddenInput = document.getElementById('new-track-id');
+                const trackId = hiddenInput?.value;
+                if (!trackId)
+                    return;
+
+                const datalist = document.getElementById('track-input-datalist');
+                const option = datalist?.querySelector(`option[data-id="${trackId}"]`);
+                if (!option) {
+                    toastWarning('Трек не найден в списке предложений');
+                    return;
+                }
+
+                const title = option.value;
+                const duration = parseInt(option.dataset.duration || '0');
+
+                const data = formConfig.relatedData[listKey];
+                if (data.some(t => t.id == trackId)) {
+                    toastWarning('Трек уже добавлен');
+                    return;
+                }
+
+                data.push({
+                    id: parseInt(trackId, 10),
+                    title: title,
+                    duration: duration,
+                    track_number: data.length + 1
+                });
+
+                renderRelatedTable(listKey);
+
+                document.getElementById('track-input').value = '';
+                hiddenInput.value = '';
+                datalist.innerHTML = '';
+                this.disabled = true;
+            });
+
+        </script>
+    </body>
+</html>

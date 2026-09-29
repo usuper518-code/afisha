@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Админка — Дашборд | Либретто</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+        <main class="container">
+            <h2>Статистика</h2>
+            <div id="stats-overview">Загрузка...</div>
+            <h3>Топ треков</h3>
+            <div id="top-tracks"></div>
+            <h3>Прослушивания по дням (30 дн)</h3>
+            <div id="plays-chart"></div>
+        </main>
+
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script>
+            requireAdminAuth();
+
+            async function loadDashboard() {
+                const stats = await adminApiRequest('/stats');
+                if (stats.error)
+                    return;
+
+                const ov = stats.overview;
+                document.getElementById('stats-overview').innerHTML = `
+                    <p>Всего прослушиваний: ${ov.total_plays}</p>
+                    <p>Всего лайков: ${ov.total_likes}</p>
+                    <p>Уникальных слушателей: ${ov.unique_listeners}</p>
+                    <p>Активных за 30 дней: ${ov.active_listeners_30d}</p>
+                `;
+
+                const topTracks = stats.top_tracks.map(t =>
+                        `<div>${t.title} — ${t.plays} прослушиваний, ${t.likes} лайков</div>`
+                ).join('');
+                document.getElementById('top-tracks').innerHTML = topTracks;
+
+                const chart = stats.plays_by_day.map(d => `${d.date}: ${d.count}`).join('<br>');
+                document.getElementById('plays-chart').innerHTML = chart;
+            }
+
+            loadDashboard();
+        </script>
+    </body>
+</html>
