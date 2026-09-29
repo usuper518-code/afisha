@@ -30,6 +30,8 @@ if (!in_array($entityType, $allowedEntities)) {
     jsonError('Недопустимый тип сущности', 400);
 }
 
+enforcePublicRate('events', 30, 120, 600);
+
 $pdo = getDB();
 $userId = getOrCreateUser($pdo, $sessionId);
 

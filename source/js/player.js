@@ -218,6 +218,7 @@
             if (!suggested || !suggested.length) return;
             
             const code = suggested[Math.floor(Math.random() * suggested.length)];
+            if (!/^[A-G]$/.test(code)) return;
             const el = document.querySelector(`.emotion-option[data-emotion="${code}"]`);
             if (el) {
                 el.classList.add('bounce');
@@ -265,13 +266,14 @@
         if (this.karaoke) {
             const start = Math.max(0, active - 2);
             const end = Math.min(track.lyrics_timed.length, start + 5);
-            let snippet = '';
+            overlayText.replaceChildren();
             for (let i = start; i < end; i++) {
-                const text = lyricsLines[i].textContent.trim();
-                const highlight = (i === active) ? ' highlight' : '';
-                snippet += `<div class="lyrics-overlay-line${highlight}">${text}</div>`;
+                if (!lyricsLines[i]) continue;
+                const line = document.createElement('div');
+                line.className = 'lyrics-overlay-line' + (i === active ? ' highlight' : '');
+                line.textContent = lyricsLines[i].textContent.trim();
+                overlayText.appendChild(line);
             }
-            overlayText.innerHTML = snippet;
         } else {
             overlayText.innerHTML = '';
             lyricsLines.forEach((el, i) => {

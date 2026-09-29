@@ -20,6 +20,8 @@ if ($rating < 1 || $rating > 7) {
     jsonError('Рейтинг должен быть от 1 до 7', 400);
 }
 
+enforcePublicRate('rate', 20, 80, 600);
+
 $pdo = getDB();
 $userId = getOrCreateUser($pdo, $sessionId);
 

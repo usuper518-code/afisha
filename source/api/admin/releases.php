@@ -208,10 +208,11 @@ function chkData($data, $method = 'PUT') {
         }
     }
 
-    // Тема
+    // Тема — только имя файла theme-*.css, без выхода из каталога
     if (isset($data['theme'])) {
-        $allowedThemes = ['vampire', 'night', 'cabaret', 'ghost', 'ember', 'default'];
-        if (!in_array($data['theme'], $allowedThemes)) {
+        $theme = (string) $data['theme'];
+        $themePath = ROOT_DIR . '/css/themes/theme-' . $theme . '.css';
+        if (!preg_match('/^[a-z0-9-]{1,40}$/', $theme) || !is_file($themePath)) {
             $errors[] = ['field' => 'theme', 'message' => 'Неверная тема'];
         }
     }
