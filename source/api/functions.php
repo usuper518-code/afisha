@@ -51,14 +51,57 @@ function checkAdminAuth(): void {
     }
 }
 
-// Получение Client-ID
-function getClientId(): ?string {
-    $headers = getallheaders();
-    $clientId = $headers['X-Client-Id'] ?? null;
-    if ($clientId && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $clientId)) {
-        return $clientId;
+function isUuidV4(string $value): bool {
+    return (bool) preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i', $value);
+}
+
+function generateUuidV4(): string {
+    $data = random_bytes(16);
+    $data[6] = chr((ord($data[6]) & 0x0f) | 0x40);
+    $data[8] = chr((ord($data[8]) & 0x3f) | 0x80);
+    return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+}
+
+// Личность посетителя живёт в серверной сессии. Cookie HttpOnly,
+// идентификатор выдаёт сервер. Заголовок X-Client-Id больше не
+// принимается: его можно было подставить и читать чужой профиль.
+function ensureVisitorSession(): string {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        $dir = ROOT_DIR . '/storage/sessions';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0700, true);
+        }
+        $lifetime = 60 * 60 * 24 * 365;
+        ini_set('session.gc_maxlifetime', (string) $lifetime);
+        ini_set('session.use_strict_mode', '1');
+        ini_set('session.use_only_cookies', '1');
+        session_save_path($dir);
+        $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https');
+        session_name('studio_visitor');
+        session_set_cookie_params([
+            'lifetime' => $lifetime,
+            'path' => '/',
+            'httponly' => true,
+            'samesite' => 'Lax',
+            'secure' => $secure,
+        ]);
+        session_start();
     }
-    return null;
+
+    $current = $_SESSION['client_id'] ?? '';
+    if (is_string($current) && isUuidV4($current)) {
+        return $current;
+    }
+
+    session_regenerate_id(true);
+    $id = generateUuidV4();
+    $_SESSION['client_id'] = $id;
+    return $id;
+}
+
+function getClientId(): ?string {
+    return ensureVisitorSession();
 }
 
 // Получение тела запроса как массива
@@ -170,9 +213,10 @@ function getOrCreateUser(PDO $pdo, string $clientId, array $data = []): int {
             $updates[] = 'nickname = ?';
             $params[] = $data['nickname'];
         }
-        if (!empty($data['email'])) {
+        if (array_key_exists('email', $data)) {
+            $email = trim((string) $data['email']);
             $updates[] = 'email = ?';
-            $params[] = $data['email'];
+            $params[] = $email === '' ? null : $email;
         }
         if (isset($data['subscribe'])) {
             $updates[] = 'is_subscribed = ?';
@@ -189,11 +233,12 @@ function getOrCreateUser(PDO $pdo, string $clientId, array $data = []): int {
     }
 
     // Создаём нового пользователя
+    $email = trim((string) ($data['email'] ?? ''));
     $stmtCreate = $pdo->prepare("INSERT INTO users (client_id, nickname, email, is_subscribed) VALUES (?, ?, ?, ?)");
     $stmtCreate->execute([
         $clientId,
         $data['nickname'] ?? 'Гость',
-        $data['email'] ?? null,
+        $email === '' ? null : $email,
         (int)(bool)($data['subscribe'] ?? 0)
     ]);
     

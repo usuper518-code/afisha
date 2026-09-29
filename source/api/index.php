@@ -22,8 +22,9 @@ set_error_handler(function ($severity, $message, $file, $line) {
 
 try {
     // Публичные эндпоинты
-    $publicFiles = ['reviews', 'reactions', 'rate-album', 'feedback', 'sitemap', 'news', 'get-user-profile', 'events'];
+    $publicFiles = ['reviews', 'reactions', 'rate-album', 'feedback', 'sitemap', 'news', 'get-user-profile', 'events', 'remind'];
     if (in_array($resource, $publicFiles)) {
+        ensureVisitorSession();
         $publicFile = __DIR__ . '/public/' . $resource . '.php';
         if (file_exists($publicFile)) {
             require_once $publicFile;

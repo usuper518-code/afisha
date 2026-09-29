@@ -854,9 +854,26 @@ h1, h2, h3, h4 {
 @media (orientation: portrait) {
     .poster-card.main-poster {
         grid-template-columns: 1fr;
+        max-height: none;
+        overflow: visible;
+    }
+    .poster-media {
+        border-right: none;
+        border-bottom: 0.2vh solid var(--theme-color-border);
+        aspect-ratio: 1 / 1;
+        max-height: 42vh;
+    }
+    .poster-overlay {
+        background: linear-gradient(to bottom, transparent 0%, transparent 88%, var(--theme-color-card) 100%);
+    }
+    .poster-description {
+        max-height: none;
     }
     .poster-content {
         padding: var(--afisha-spacing-xl);
+    }
+    .program-viewport {
+        min-height: 88vh;
     }
     /* В портрете разворот показывает 1 карточку вместо 2 —
        это гарантирует отсутствие вертикальной прокрутки на узких

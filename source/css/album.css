@@ -21,7 +21,8 @@ body {
     font-size: var(--theme-text-xs);
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    height: 1vh;
+    line-height: 1.4;
+    min-height: 2.2vh;
     margin-bottom: 1.5vh;
     opacity: 0.6;
 }
@@ -62,6 +63,8 @@ body {
 }
 
 .lyrics-text {
+    user-select: text;
+    -webkit-user-select: text;
     font-size: var(--theme-text-base);
     flex: 1;
     padding: 1vh 1.5vw 1.5vh 1.5vw;
@@ -277,6 +280,8 @@ body {
 .track-credits {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6vh 1vw;
     font-family: var(--theme-font-ui);
     font-size: var(--theme-text-xs);
     text-transform: uppercase;
@@ -662,6 +667,8 @@ body {
 }
 
 .album-description {
+    user-select: text;
+    -webkit-user-select: text;
     max-width: 70vw;
     margin: 1.5vh auto;
     font-size: var(--theme-text-base);
@@ -767,6 +774,8 @@ body {
     font-family: var(--theme-font-body);
     font-size: var(--theme-text-lg);
     font-weight: 600;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .track-type {
@@ -802,19 +811,27 @@ body {
         display: none !important;
     }
 
+    .track-page .breadcrumbs {
+        display: none;
+    }
+
     .stage-column {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
         display: flex;
         flex-direction: column;
+        gap: 0;
         overflow: hidden;
     }
 
     .stage-visual {
-        flex: 1;
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: none;
+        aspect-ratio: auto;
         position: relative;
         width: 100%;
         height: auto;
@@ -832,10 +849,37 @@ body {
     }
 
     .player-section {
-        flex-shrink: 0;
+        flex: 0 1 auto;
         width: 100%;
+        max-height: 48vh;
+        max-height: 48dvh;
+        overflow-y: auto;
         background: rgba(0, 0, 0, 0.7);
+        border-radius: 0;
         z-index: 10;
+        padding-bottom: calc(1.5vh + env(safe-area-inset-bottom));
+    }
+
+    .album-premiere,
+    .program,
+    .album-description {
+        max-width: 92vw;
+    }
+
+    .album-cover-wrapper {
+        max-width: 78vw;
+    }
+
+    .btn-premiere,
+    .album-btn {
+        letter-spacing: 0.08em;
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    .checkbox-group {
+        align-items: flex-start;
+        gap: 1vh;
     }
 
     .lyrics-overlay {
@@ -875,7 +919,16 @@ body {
     }
 
     .tracklist li {
-        grid-template-columns: 5vw 1fr 12vw 6vw;
+        grid-template-columns: 2.2em minmax(0, 1fr) auto;
+        column-gap: 0.6em;
+    }
+
+    .track-type {
+        display: none;
+    }
+
+    .track-duration {
+        white-space: nowrap;
     }
 
     .navigation-acts {
@@ -973,6 +1026,8 @@ body {
     margin-bottom: 0;
 }
 .review-text {
+    user-select: text;
+    -webkit-user-select: text;
     font-style: italic;
     font-size: var(--theme-text-sm);
     line-height: 1.6;

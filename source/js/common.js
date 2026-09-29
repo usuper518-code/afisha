@@ -32,21 +32,13 @@ async function apiRequest(endpoint, data, btn = null, options = {}) {
         btn.disabled = true;
         btn.classList.add('loading-border');
     }
-    let currentClientId = localStorage.getItem('client_id');
-    if (!currentClientId) {
-        currentClientId = crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-        localStorage.setItem('client_id', currentClientId);
-    }
-
     const method = (options.method || 'POST').toUpperCase();
 
     try {
         const fetchOptions = {
             method: method,
-            headers: {'Content-Type': 'application/json', 'X-Client-Id': currentClientId}
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/json'}
         };
         
         // Для GET-запросов тело не добавляем

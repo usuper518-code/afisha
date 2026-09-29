@@ -55,13 +55,16 @@ error_reporting(E_ALL); // Включить все уровни ошибок, в
 ini_set('log_errors', 1); // Также записывать ошибки в лог-файл
 ini_set('error_log', __DIR__ . '/../logs/php_errors.log'); // Путь к лог-файлу
 
-// Заголовки CORS (для разработки можно '*', в продакшене замените на конкретный домен)
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, X-API-Key, X-Client-Id');
-header('Content-Type: application/json; charset=utf-8');
+// Заголовки CORS. Посетитель ходит на API с того же домена, личность
+// держится в cookie сессии (см. ensureVisitorSession), а не в заголовке.
+if (PHP_SAPI !== 'cli') {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, X-API-Key, X-Client-Id');
+    header('Content-Type: application/json; charset=utf-8');
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(200);
+        exit;
+    }
 }
