@@ -35,7 +35,7 @@ define('MAX_VIDEO_SIZE', 10); // MB
 define('MAX_MP3_SIZE', 50); // MB
 // Путь к библиотеке getID3
 define('GETID3_PATH', __DIR__ . '/vendor/getid3/getid3.php');
-define('TCPDF_PATH', __DIR__ . '/vendor/TCPDF/tcpdf.php');
+define('TCPDF_PATH', __DIR__ . '/vendor/TCPDF/tcpdf.php'); // 6.11.4, нужен модуль curl
 
 // Маппинг эмоций
 define('EMOTION_MAP', [
