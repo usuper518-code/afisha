@@ -49,7 +49,7 @@
 
                         <div class="form-actions">
                             <p class="action-hint"></p>
-                            <button type="submit" class="album-btn album-btn-primary">Получить буклет</button>
+                            <button type="submit" class="album-btn album-btn-primary">Отправить</button>
                         </div>
                     </form>
                 </div>
