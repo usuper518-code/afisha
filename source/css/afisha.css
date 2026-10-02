@@ -232,14 +232,16 @@ h1, h2, h3, h4 {
 
 .poster-subtitle {
     font-family: var(--theme-font-body);
-    font-size: var(--theme-text-md);
+    /* 2.6vh на высоте 390px даёт ~10px. */
+    font-size: max(var(--theme-text-md), 0.75rem);
     font-style: italic;
     color: var(--theme-color-accent);
     margin-bottom: var(--afisha-spacing-md);
 }
 
 .poster-description {
-    font-size: var(--theme-text-base);
+    /* 2.2vh на той же высоте даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
     line-height: 1.7;
     white-space: pre-line;
     margin-bottom: var(--afisha-spacing-lg);
