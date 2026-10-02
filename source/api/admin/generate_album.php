@@ -668,8 +668,16 @@ function format_duration($seconds) {
 }
 
 function format_date_ru($dateStr) {
-    $timestamp = strtotime($dateStr);
+    $raw = (string) ($dateStr ?? '');
     $months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+    // Пустая дата у соседнего спектакля не должна ронять всю афишу.
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw)) {
+        return 'дата не назначена';
+    }
+    $timestamp = strtotime($raw);
+    if (!$timestamp) {
+        return 'дата не назначена';
+    }
     return date('j', $timestamp) . ' ' . $months[date('n', $timestamp) - 1] . ' ' . date('Y', $timestamp);
 }
 

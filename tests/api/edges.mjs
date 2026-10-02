@@ -346,13 +346,14 @@ try {
     check('спрос перед одобрением', approveText.includes('одобрить'), approveText);
     await page.click('.confirm-overlay [data-action="confirm"]');
     await page.waitForFunction(() => [...document.querySelectorAll('.review-card')].some((card) => card.innerText.includes('Отзыв на одобрение') && card.innerText.includes('Одобрен')), { timeout: 8000 });
+    await page.waitForFunction(() => !document.querySelector('.confirm-overlay'), { timeout: 4000 });
     check('отзыв одобрен', sql(`SELECT status FROM reviews WHERE id = ${approveId}`) === 'approved', sql(`SELECT status FROM reviews WHERE id = ${approveId}`));
 
     await page.click(`[data-action="reject"][data-id="${rejectId}"]`);
     await page.waitForSelector('.confirm-message');
-    const rejectText = await page.$eval('.confirm-message', (el) => el.textContent);
+    const rejectText = await page.$eval('.confirm-overlay:last-of-type .confirm-message', (el) => el.textContent);
     check('спрос перед отказом', rejectText.includes('отклонить'), rejectText);
-    await page.click('.confirm-overlay [data-action="confirm"]');
+    await page.click('.confirm-overlay:last-of-type [data-action="confirm"]');
     await page.waitForFunction(() => [...document.querySelectorAll('.review-card')].some((card) => card.innerText.includes('Отзыв на отказ') && card.innerText.includes('Отклонён')), { timeout: 8000 });
     check('отзыв отклонён', sql(`SELECT status FROM reviews WHERE id = ${rejectId}`) === 'rejected', sql(`SELECT status FROM reviews WHERE id = ${rejectId}`));
 
