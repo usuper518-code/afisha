@@ -1,4 +1,4 @@
-// Оставшиеся ветки на catalog_suite: письмо со ссылкой на буклет,
+// Оставшиеся ветки на catalog_suite: именной буклет уходит кроном,
 // черновики новости и спектакля, инструментал, кавер, занятый код,
 // клики админки. Рабочая catalog только сверяется по числу строк.
 //
@@ -77,6 +77,28 @@ function clearMail() {
 
 function readMail() {
   return readdirSync(mailBox).sort().map((name) => readFileSync(path.join(mailBox, name), 'utf8'));
+}
+
+function runBooklets(dry = false) {
+  const args = ['-d', `sendmail_path=${capture}`, path.join(mirror, 'cron/send-booklets.php')];
+  if (dry) args.push('--dry-run');
+  return execFileSync('php', args, { encoding: 'utf8' });
+}
+
+function attachedPdf(letter) {
+  const boundary = letter.match(/boundary="([^"]+)"/);
+  if (!boundary) return null;
+  const pdfPart = letter.split(`--${boundary[1]}`).find((part) => /application\/pdf/i.test(part));
+  if (!pdfPart) return null;
+  const body = pdfPart.split(/\r?\n\r?\n/).slice(1).join('\n');
+  const bytes = Buffer.from(body.replace(/\s/g, ''), 'base64');
+  return bytes.subarray(0, 4).toString() === '%PDF' ? bytes : null;
+}
+
+function pdfText(bytes) {
+  const file = '/tmp/suite-edge-booklet.pdf';
+  writeFileSync(file, bytes);
+  return execFileSync('python3', ['-c', 'from pypdf import PdfReader\nimport sys\nr = PdfReader(sys.argv[1])\nprint("\\n".join((p.extract_text() or "") for p in r.pages))', file], { encoding: 'utf8' });
 }
 
 const prodBefore = counts('catalog');
@@ -223,10 +245,9 @@ try {
   const mapHidden = await api('GET', '/api/sitemap');
   check('черновик отсутствует в карте', mapHidden.status === 200 && mapHidden.type.includes('application/xml') && mapHidden.text.includes('<urlset') && mapHidden.text.includes('https://site/albums/suite-live-show/') && mapHidden.text.includes('<lastmod>2026-12-01</lastmod>') && mapHidden.text.includes('https://site/albums/suite-edge-show/') && !mapHidden.text.includes('suite-draft-show') && !mapHidden.text.includes('1970-01-01'), `${mapHidden.status} ${mapHidden.type} ${mapHidden.text.slice(0, 400)}`);
 
-  const booklet = await admin('GET', `/api/admin/generate_album?id=${edge.id}`);
-  const pdfPath = path.join(mirror, 'albums/suite-edge-show/booklet.pdf');
-  const pdfHead = existsSync(pdfPath) ? readFileSync(pdfPath).subarray(0, 4).toString() : '';
-  check('буклет собран', booklet.status === 200 && booklet.json?.success === true && pdfHead === '%PDF', `${booklet.status} ${booklet.text.slice(0, 180)} ${pdfHead}`);
+  const built = await admin('GET', `/api/admin/generate_album?id=${edge.id}`);
+  const publicPdf = path.join(mirror, 'albums/suite-edge-show/booklet.pdf');
+  check('сборка не кладёт буклет на сайт', built.status === 200 && built.json?.success === true && !existsSync(publicPdf), `${built.status} ${built.text.slice(0, 160)}`);
 
   const poster = await admin('GET', `/api/admin/generate_album?id=${live.id}`);
   const indexHidden = existsSync(path.join(mirror, 'index.html')) ? readFileSync(path.join(mirror, 'index.html'), 'utf8') : '';
@@ -246,21 +267,6 @@ try {
       email: 'zritel-edge@example.com', want_booklet: true, subscribe: false,
     },
   });
-  check('без отправителя письмо не уходит', silent.status === 200 && silent.json?.success === true && readMail().length === 0, `${silent.status} ${silent.text.slice(0, 120)} писем ${readMail().length}`);
-
-  await stopPhp();
-  writeConfig(mailFrom);
-  clearMail();
-  startPhp();
-  await ready();
-
-  const sent = await api('POST', '/api/feedback', {
-    jar: 'zritel',
-    json: {
-      release_id: Number(edge.id), name: 'Зритель Края', review: 'Отзыв на одобрение',
-      email: 'zritel-edge@example.com', want_booklet: true, subscribe: false,
-    },
-  });
   const subscribed = await api('POST', '/api/feedback', {
     jar: 'podpis',
     json: {
@@ -268,13 +274,40 @@ try {
       email: 'podpis-edge@example.com', want_booklet: true, subscribe: true,
     },
   });
+  check('отзыв только ставит буклет в очередь', silent.status === 200 && silent.json?.booklet === 'queued' && subscribed.status === 200 && subscribed.json?.booklet === 'queued' && readMail().length === 0, `${silent.status} ${silent.text.slice(0, 120)} ${subscribed.text.slice(0, 120)}`);
+  const held = runBooklets();
+  check('без отправителя крон не шлёт', held.includes('MAIL_FROM пуст') && readMail().length === 0 && sql(`SELECT COUNT(*) FROM reviews WHERE booklet_sent_at IS NOT NULL`) === '0', held.trim());
+
+  writeConfig(mailFrom);
+  clearMail();
+  const preview = runBooklets(true);
+  check('пробный прогон никого не помечает', preview.includes('[dry-run]') && preview.includes('zritel-edge@example.com') && preview.includes('podpis-edge@example.com') && sql(`SELECT COUNT(*) FROM reviews WHERE booklet_sent_at IS NOT NULL`) === '0' && readMail().length === 0, preview.trim());
+  const cronOut = runBooklets();
   const letters = readMail();
-  const bookletUrl = 'https://site/albums/suite-edge-show/booklet.pdf';
   const plain = letters.find((letter) => letter.includes('Зритель Края') && !letter.includes('Подписчик Края'));
   const listed = letters.find((letter) => letter.includes('Подписчик Края'));
-  check('письма ушли', sent.status === 200 && subscribed.status === 200 && letters.length === 2, `${sent.status} ${subscribed.status} писем ${letters.length} ${letters.join('\n---\n').slice(0, 500)}`);
-  check('в письме ссылка на буклет', !!plain && plain.includes(bookletUrl) && plain.includes('Край спектакля') && plain.includes(`From: ${mailFrom}`) && !plain.includes('Вы подписаны на рассылку'), (plain || '').slice(0, 500));
-  check('подписка упомянута отдельно', !!listed && listed.includes(bookletUrl) && listed.includes('Вы подписаны на рассылку анонсов'), (listed || '').slice(0, 400));
+  const plainPdf = plain ? attachedPdf(plain) : null;
+  const listedPdf = listed ? attachedPdf(listed) : null;
+  const plainText = plainPdf ? pdfText(plainPdf) : '';
+  const listedText = listedPdf ? pdfText(listedPdf) : '';
+  const leftovers = existsSync(path.join(mirror, 'storage/booklets'))
+    ? readdirSync(path.join(mirror, 'storage/booklets')).filter((name) => name.endsWith('.pdf'))
+    : [];
+  check('крон отправил два буклета', cronOut.includes('Отправлено: 2') && letters.length === 2, cronOut.trim());
+  check('в письме вложение, не ссылка', !!plain && plain.includes(`From: ${mailFrom}`) && plain.includes('во вложении') && !plain.includes('/booklet.pdf') && !plain.includes('Вы подписаны на рассылку') && !!plainPdf, (plain || '').slice(0, 400));
+  check('подписка упомянута отдельно', !!listed && listed.includes('Вы подписаны на рассылку анонсов') && !!listedPdf, (listed || '').slice(0, 300));
+  check('буклет именной', plainText.includes('Этот буклет создан для') && plainText.includes('Зритель Края') && listedText.includes('Подписчик Края'), `${plainText.slice(0, 180)} | ${listedText.slice(0, 120)}`);
+  check('файлы буклетов сняты', leftovers.length === 0 && !existsSync(publicPdf), leftovers.join(','));
+  clearMail();
+  const again = await api('POST', '/api/feedback', {
+    jar: 'zritel',
+    json: {
+      release_id: Number(edge.id), name: 'Зритель Края', review: 'Отзыв на одобрение',
+      email: 'zritel-edge@example.com', want_booklet: true, subscribe: false,
+    },
+  });
+  const repeat = runBooklets();
+  check('повторно буклет не уходит', again.json?.booklet === 'sent' && repeat.includes('Отправлено: 0') && readMail().length === 0, `${again.text.slice(0, 120)} ${repeat.trim()}`);
 
   const bare = await admin('POST', '/api/admin/tracks', { json: { title: 'Без текста', slug: 'suite-bare' } });
   check('текст обязателен', bare.status === 422 && bare.text.includes('текст') && sql(`SELECT COUNT(*) FROM tracks WHERE slug = 'suite-bare'`) === '0', `${bare.status} ${bare.text.slice(0, 180)}`);

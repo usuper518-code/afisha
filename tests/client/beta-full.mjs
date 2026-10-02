@@ -597,7 +597,7 @@ await page.evaluate(() => { document.querySelector('[name="email"]').value = 'an
 apiMode = 'ok';
 await page.click('#feedback-form button[type="submit"]');
 await sleep(200);
-check('отзыв принят', await page.evaluate(() => document.body.textContent.includes('Ваш отзыв отправлен')));
+check('отзыв принят', await page.evaluate(() => document.body.textContent.includes('Буклет отправим на почту')));
 const feedbackPost = posts.filter((p) => p.path === 'feedback').pop();
 check('отзыв не записан в базу', feedbackPost && feedbackPost.body.review === 'Браво');
 apiMode = 'fail';

@@ -366,7 +366,12 @@ function has_avatar($uuid) {
     return file_exists(UPLOAD_DIR . 'artist/' . $uuid . '/avatar.jpg');
 }
 
-function generateBooklet($albumId, $data, $user = null) {
+function generateBooklet($albumId, $data, $user = null, $outputPath = null) {
+    // Без явного пути файл не пишем: публичный albums/{slug}/booklet.pdf
+    // больше не собирается вместе со страницами.
+    if (!is_string($outputPath) || $outputPath === '') {
+        return;
+    }
     if (!file_exists(TCPDF_PATH)) {
         return;
     }
@@ -606,7 +611,9 @@ function generateBooklet($albumId, $data, $user = null) {
     $pdf->SetTextColor(...$mutedRgb);
     $pdf->Cell(0, 5, 'автор стихов и либретто', 0, 1, 'R');    
     
-    $outputPath = ALBUMS_DIR . '/' . $album['slug'] . '/booklet.pdf';
-    if (!is_dir(dirname($outputPath))) mkdir(dirname($outputPath), 0755, true);
+    $outputDir = dirname($outputPath);
+    if (!is_dir($outputDir)) {
+        mkdir($outputDir, 0755, true);
+    }
     $pdf->Output($outputPath, 'F');
 }

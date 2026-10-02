@@ -176,6 +176,7 @@ CREATE TABLE `reviews` (
   `content` text NOT NULL COMMENT 'отзыв',
   `status` enum('pending','approved','rejected') DEFAULT 'pending',
   `want_booklet` tinyint(1) DEFAULT 0 COMMENT 'хочет буклет',
+  `booklet_sent_at` timestamp NULL DEFAULT NULL COMMENT 'когда именной буклет ушёл на почту',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

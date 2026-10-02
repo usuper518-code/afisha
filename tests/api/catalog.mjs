@@ -145,6 +145,7 @@ try {
     ['/sql/catalog.sql', 'CREATE TABLE'],
     ['/logs/php_errors.log', '[php]'],
     ['/cron/send-reminders.php', 'MAIL_FROM'],
+    ['/cron/send-booklets.php', 'MAIL_FROM'],
     ['/router.php', 'betaServeFile'],
     ['/templates/afisha.html.tpl', 'theme-color'],
     ['/storage/sessions/sess_probe', 'client_id'],
