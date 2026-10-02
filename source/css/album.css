@@ -498,7 +498,7 @@ body {
 }
 
 .finale-exit {
-    margin: 2.2vh 0 0;
+    margin: 2.2vh 0 3vh;
 }
 
 .finale-exit a {
@@ -564,7 +564,8 @@ body {
 }
 
 .form-group textarea {
-    min-height: 15vh;
+    height: 7vh;
+    min-height: 7vh;
     resize: vertical;
 }
 
@@ -586,6 +587,29 @@ body {
     /* 1.8vh на высоте 390px даёт ~7px. */
     font-size: max(var(--theme-text-sm), 0.75rem);
     color: var(--theme-color-text-primary);
+}
+
+/* На бежевой бумаге светлый цвет темы пропадает.
+   Заголовки — тёмно-коричневые, набранный текст — тёмно-синие чернила. */
+.feedback-section.old-paper-css {
+    --paper-ink: #16356b;
+    --paper-heading: #3f2a16;
+}
+
+.feedback-section.old-paper-css .form-group label,
+.feedback-section.old-paper-css .checkbox-group label {
+    color: var(--paper-heading);
+}
+
+.feedback-section.old-paper-css .form-group input,
+.feedback-section.old-paper-css .form-group textarea {
+    color: var(--paper-ink);
+    caret-color: var(--paper-ink);
+}
+
+.feedback-section.old-paper-css .form-group input::placeholder,
+.feedback-section.old-paper-css .form-group textarea::placeholder {
+    color: rgba(63, 42, 22, 0.55);
 }
 
 /* ============================================ */

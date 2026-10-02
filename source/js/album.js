@@ -270,18 +270,12 @@ function initAfterPage() {
     const submitBtn = form.querySelector('button[type="submit"]');
     const note = form.querySelector('p.action-hint');
     const reviewTextarea = form.querySelector('[name="review"]');
-    const bookletToggle = form.querySelector('#want_booklet');
-    bookletToggle.addEventListener('change', () => {
-        if (submitBtn.dataset.kept === '1') return;
-        submitBtn.textContent = bookletToggle.checked ? 'Получить буклет' : 'Отправить отзыв';
-    });
 
     // Загружаем старый отзыв
     apiRequest(`feedback/?release_id=${window.ALBUM_ID}`, {}, null, {method: 'GET'}).then(data => {
         if (!data) return;
         if (data.review) reviewTextarea.value = data.review;
         if (data.review || data.booklet) {
-            submitBtn.dataset.kept = '1';
             submitBtn.textContent = 'Изменить';
             note.textContent = feedbackNote(data.status, data.booklet, data.review);
         }
@@ -348,7 +342,6 @@ function initAfterPage() {
         safeYm('reachGoal', 'feedback_sent', { album: window.ALBUM_SLUG });
         const res = await apiRequest('feedback', data, submitBtn);
         if (res.success) {
-            submitBtn.dataset.kept = '1';
             submitBtn.textContent = 'Изменить';
             const booklet = res.booklet ?? (data.want_booklet ? 'queued' : null);
             note.textContent = feedbackNote('pending', booklet, data.review);
