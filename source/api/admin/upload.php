@@ -140,7 +140,7 @@ if ($action === 'track_video' && $id) {
     jsonResponse(['url' => $url]);
 }
 
-// POST /admin/upload/artist_avatar?id={id}
+// POST /admin/upload/artist_cover?id={id}
 if ($action === 'artist_cover' && $id) {
     if (!isset($_FILES['file'])) {
         jsonError('Файл отсутствует', 400);

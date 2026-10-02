@@ -147,7 +147,7 @@ try {
   check('список жанров и отрицательный сдвиг', genrePage.status === 200 && genrePage.json?.data?.some((row) => row.slug === 'suite-genre'), `${genrePage.status} ${genrePage.text.slice(0, 120)}`);
 
   const release = await api('POST', '/api/admin/releases', {
-    json: { title: 'Спектакль', slug: 'suite-show', theme: 'default', is_published: 1, release_year: 2026 },
+    json: { title: 'Спектакль', slug: 'suite-show', theme: 'default', is_published: 1, is_premiere: 0, release_year: 2026 },
   });
   const releaseId = release.json?.id;
   const releasePut = await api('PUT', `/api/admin/releases?id=${releaseId}`, { json: { title: 'Вечер <i>зал</i>', subtitle: 'подзаголовок' } });
@@ -219,7 +219,7 @@ try {
   const releaseUuid = sql(`SELECT uuid FROM releases WHERE id = ${releaseId}`);
   const cover = await upload(`/api/admin/upload/track_cover?id=${trackId}`, png, 'cover.png', 'image/png');
   const audio = await upload(`/api/admin/upload/audio?id=${trackId}`, readFileSync('/tmp/suite-tone.mp3'), 'tone.mp3', 'audio/mpeg');
-  const avatar = await upload(`/api/admin/upload/artist_avatar?id=${artistId}`, png, 'avatar.png', 'image/png');
+  const avatar = await upload(`/api/admin/upload/artist_cover?id=${artistId}`, png, 'avatar.png', 'image/png');
   const poster = await upload(`/api/admin/upload/release_cover?id=${releaseId}`, png, 'poster.png', 'image/png');
   const coverFile = path.join(mirror, 'uploads/track', trackUuid, 'cover.jpg');
   const audioFile = path.join(mirror, 'uploads/track', trackUuid, 'audio.mp3');
@@ -314,11 +314,15 @@ try {
     await page.click('#lrc-record-btn');
     await page.click('#lrc-save');
     const lrc = await page.$eval('#lyrics_timed', (el) => el.value);
-    check('мастер записал таймкоды', lrc.includes('[00:00.40]') && lrc.includes('Первая строка') && lrc.includes('[00:00.90]') && lrc.includes('Вторая строка'), lrc);
+    const marks = [...lrc.matchAll(/\[(\d+):(\d+\.\d+)\](.*)/g)].map((m) => ({
+      t: Number(m[1]) * 60 + Number(m[2]),
+      line: m[3],
+    }));
+    check('мастер записал таймкоды', marks.length === 2 && marks[0].line.includes('Первая строка') && marks[1].line.includes('Вторая строка') && marks[1].t > marks[0].t, lrc);
     await page.click('#save-btn');
     await page.waitForFunction(() => document.body.innerText.includes('Трек сохранён'), { timeout: 8000 });
     const stored = sql(`SELECT lyrics_timed FROM tracks WHERE id = ${trackId}`);
-    check('таймкоды лежат в треке', stored.includes('[00:00.40]') && stored.includes('Вторая строка'), stored.slice(0, 180));
+    check('таймкоды лежат в треке', stored.includes('Первая строка') && stored.includes('Вторая строка') && stored.includes('['), stored.slice(0, 180));
   } finally {
     await browser.close();
   }

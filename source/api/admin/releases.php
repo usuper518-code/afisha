@@ -280,7 +280,7 @@ if ($method === 'POST' && !$id) {
         $newId = $pdo->lastInsertId();
 
         // Сброс других премьер
-        if ($data['is_premiere']) {
+        if (!empty($data['is_premiere'])) {
             $stmtReset = $pdo->prepare("UPDATE releases SET is_premiere = 0 WHERE id != ?");
             $stmtReset->execute([$newId]);
         }
