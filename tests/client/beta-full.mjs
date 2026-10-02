@@ -571,7 +571,7 @@ await page.click('a[href="after.html"]');
 await page.waitForFunction(() => location.pathname.endsWith('/after.html'), { timeout: 8000 });
 
 check('бумага отзыва', await page.$eval('.feedback-section', (el) => getComputedStyle(el).backgroundColor === 'rgb(230, 213, 179)'));
-check('чернила на бумаге', await page.$eval('[name="name"]', (el) => getComputedStyle(el).color === 'rgb(28, 20, 14)'));
+check('чернила на бумаге', await page.$eval('[name="name"]', (el) => getComputedStyle(el).color === 'rgb(22, 53, 107)'));
 check('логотип ниже края', await page.$eval('.afisha-logo i', (el) => el.getBoundingClientRect().top >= 8));
 await page.waitForFunction(() => {
   const area = document.querySelector('[name="review"]');
