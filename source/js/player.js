@@ -186,9 +186,15 @@
         // Обложка
         const overlayText = document.getElementById('lyrics-overlay-text');
         function applyColor() {
-            const best = getKaraokeVibrantContrastColor(coverImg);
-            overlayText.style.color = best.hex;
-        }        
+            try {
+                const best = getKaraokeVibrantContrastColor(coverImg);
+                overlayText.style.color = best.hex;
+            } catch (e) {
+                // Битая или ещё пустая обложка не должна обрывать сцену:
+                // ниже этой функции обновляются текст, видео и эмоции.
+                overlayText.style.color = '#FFD700';
+            }
+        }
         const coverImg = document.querySelector('.stage-visual img');
         coverImg.src = track.cover;
         coverImg.alt = track.title;

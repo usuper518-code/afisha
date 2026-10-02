@@ -3,9 +3,10 @@
 $pdo = getDB();
 
 if ($method === 'GET') {
-    // Общая статистика из events
+    // В events нет типа like: эмоции живут в reactions.
+// Общая статистика из events
     $totalPlays = $pdo->query("SELECT COUNT(*) FROM events WHERE event_type = 'play'")->fetchColumn();
-    $totalLikes = $pdo->query("SELECT COUNT(*) FROM events WHERE event_type = 'like'")->fetchColumn();
+    $totalLikes = $pdo->query("SELECT COUNT(*) FROM reactions")->fetchColumn();
     $totalShares = $pdo->query("SELECT COUNT(*) FROM events WHERE event_type = 'share'")->fetchColumn();
     $uniqueListeners = $pdo->query("SELECT COUNT(DISTINCT user_id) FROM events")->fetchColumn();
     $active30d = $pdo->query("SELECT COUNT(DISTINCT user_id) FROM events WHERE created_at > DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetchColumn();
@@ -13,7 +14,7 @@ if ($method === 'GET') {
     // Топ треков по прослушиваниям
     $stmtTop = $pdo->query("SELECT t.id, t.title, 
                             (SELECT COUNT(*) FROM events WHERE event_type = 'play' AND entity_type = 'track' AND entity_id = t.id) AS plays,
-                            (SELECT COUNT(*) FROM events WHERE event_type = 'like' AND entity_type = 'track' AND entity_id = t.id) AS likes
+                            (SELECT COUNT(*) FROM reactions WHERE track_id = t.id) AS likes
                             FROM tracks t
                             WHERE t.is_published = 1
                             ORDER BY plays DESC LIMIT 10");

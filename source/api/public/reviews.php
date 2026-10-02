@@ -8,6 +8,15 @@ if ($method !== 'GET') {
 $releaseId = $_GET['release_id'] ?? null;
 $limit = (int) ($_GET['limit'] ?? 10);
 $offset = (int) ($_GET['offset'] ?? 0);
+if ($limit < 1) {
+    $limit = 1;
+}
+if ($limit > 50) {
+    $limit = 50;
+}
+if ($offset < 0) {
+    $offset = 0;
+}
 
 $where = "WHERE r.status = 'approved'";
 $params = [];
