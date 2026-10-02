@@ -507,11 +507,17 @@ h1, h2, h3, h4 {
     transform: scale(1.08);
 }
 
+/* Ширина колонки целиком. Квадрат 1/1 вместе с max-height сжимал
+   и ширину, из-за этого обложка оставалась квадратиком, а кнопка
+   ролика висела в пустом поле рядом. */
 .poster-card.coming .poster-media {
+    align-self: stretch;
+    flex: 0 0 auto;
+    width: 100%;
+    height: 40vh;
+    aspect-ratio: auto;
     border-bottom: 0.2vh solid var(--theme-color-border);
     border-right: none;
-    aspect-ratio: 1 / 1;
-    max-height: 40vh;
 }
 
 .poster-card.coming .poster-content {

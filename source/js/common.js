@@ -1411,10 +1411,8 @@ const CONFIG = {
 })();
 // ============================================
 // Переключатель «обложка ⇄ видео» — универсальный,
-// работает на любой странице с элементом [data-video],
-// внутри которого прямыми потомками лежат <img> и (создаваемый
-// на лету) <video>. На афише используется свой обработчик
-// (см. afisha.js, там другая структура карточек).
+// работает на любой странице с элементом [data-video].
+// Ролик сажается в рамку обложки, а не на всю карточку.
 // ============================================
 document.addEventListener('click', function (e) {
     const btn = e.target.closest('.media-video-toggle');
@@ -1425,12 +1423,11 @@ document.addEventListener('click', function (e) {
     const host = btn.closest('[data-video]');
     if (!host) return;
 
-    // Медиа-рамка (то, что реально показывает img/video) — это либо
-    // дочерний .poster-media (карточки афиши: кнопка вне рамки, она
-    // соседствует со ссылкой <a>, см. generate_afisha()), либо сам
-    // [data-video] (обложка альбома, сцена трека — там это одно и
-    // то же). URL видео в любом случае лежит в data-video хоста.
-    const media = host.querySelector(':scope > .poster-media') || host;
+    // Рамка — .poster-media. На премьере она прямой потомок карточки,
+    // в «Скоро» и «Архиве» она внутри ссылки, поэтому прямой потомок
+    // её не находит. На программке и на сцене рамка — сам [data-video].
+    // URL видео в любом случае лежит в data-video хоста.
+    const media = host.querySelector('.poster-media') || host;
 
     const isActive = media.classList.contains('video-active');
     if (isActive) {
