@@ -246,7 +246,7 @@ try {
   check('длительность mp3 записана', audio.status === 200 && audio.json?.url === `/uploads/track/${trackUuid}/audio.mp3` && existsSync(audioFile) && duration >= 1 && duration <= 3, `${audio.status} ${audio.text.slice(0, 160)} duration ${duration}`);
 
   const stamps = await api('GET', `/api/admin/generate_timestamps?id=${trackId}`);
-  check('таймкоды без whisper отвечают json', stamps.status === 501 && stamps.json?.error, `${stamps.status} ${stamps.text.slice(0, 160)}`);
+  check('генерации таймкодов нет', stamps.status === 404 && !/whisper/i.test(stamps.text), `${stamps.status} ${stamps.text.slice(0, 160)}`);
 
   const removed = await api('DELETE', `/api/admin/releases?id=${releaseId}`);
   const gone = sql(`SELECT COUNT(*) FROM releases WHERE id = ${releaseId}`);

@@ -117,19 +117,12 @@
                         <p class="hint">MP3, до 50 МБ</p>
                     </div>
 
-                    <!-- Кнопка генерации лирики -->
-
                     <div class="cover-card">
-                        <h3>Обработка</h3>
-                        <!--
-                        <button type="button" id="generate-timestamps-btn" class="btn">
-                            🎤 Сгенерировать
-                        </button>
-                        -->
+                        <h3>Таймкоды</h3>
                         <button type="button" id="open-lrc-master" class="btn" title="Расставить таймкоды вручную">
                             🎤 Мастер LRC
                         </button>
-                        <p class="hint">Создать таймкоды лирики</p>
+                        <p class="hint">Расставить таймкоды вручную</p>
                     </div>
                 </div>
             </div>
@@ -170,26 +163,6 @@
         <script src="/admin/js/admin-script.js"></script>
         <script src="/admin/js/form-manager.js"></script>
         <script>
-            /*
-             document.getElementById('generate-timestamps-btn').addEventListener('click', async function() {
-             const trackId = currentId;
-             if (!trackId) {
-             toastWarning('Сначала сохраните трек');
-             return;
-             }
-             setButtonLoading('generate-timestamps-btn', true, '⏳ Идёт генерация...');
-             const res = await adminApiRequest(`/generate_timestamps?id=${trackId}`);
-             if (res.error) {
-             toastError('Ошибка: ' + res.error);
-             } else {
-             if (res.lyrics_timed) {
-             document.getElementById('lyrics_timed').value = JSON.stringify(res.lyrics_timed, null, 2);
-             }
-             toastSuccess('Таймкоды сгенерированы');
-             }
-             setButtonLoading('generate-timestamps-btn', false);
-             });            
-             */
             function renderEmotions(selectedCodes = '') {
                 const container = document.getElementById('emotions-selector');
                 const selected = selectedCodes.split('');
