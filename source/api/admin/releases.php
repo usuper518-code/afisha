@@ -6,6 +6,15 @@ $pdo = getDB();
 if ($method === 'GET' && !$id) {
     $limit = (int) ($_GET['limit'] ?? 10);
     $offset = (int) ($_GET['offset'] ?? 0);
+    if ($limit < 1) {
+        $limit = 1;
+    }
+    if ($limit > 50) {
+        $limit = 50;
+    }
+    if ($offset < 0) {
+        $offset = 0;
+    }
     $order = $_GET['order'] ?? 'id';
     $direction = strtoupper($_GET['direction'] ?? 'DESC');
 
@@ -301,15 +310,15 @@ if ($method === 'POST' && !$id) {
 
         $pdo->commit();
         jsonResponseWithWarnings(['id' => $newId, 'warnings' => $result['warnings'], 'newData' => $result['newData']], 201);
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        jsonError($e->getMessage(), 400);
     } catch (PDOException $e) {
         $pdo->rollBack();
         if ($e->errorInfo[1] == 1062) {
             jsonError('Релиз с таким кодом уже существует', 409);
         }
         throw $e;
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        jsonError($e->getMessage(), 400);
     }
 }
 
@@ -387,15 +396,15 @@ if ($method === 'PUT' && $id) {
 
         $pdo->commit();
         jsonResponse(['success' => true, 'warnings' => $result['warnings'], 'newData' => $result['newData']]);
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        jsonError($e->getMessage(), 400);
     } catch (PDOException $e) {
         $pdo->rollBack();
         if ($e->errorInfo[1] == 1062) {
             jsonError('Релиз с таким кодом уже существует', 409);
         }
         throw $e;
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        jsonError($e->getMessage(), 400);
     }
 }
 

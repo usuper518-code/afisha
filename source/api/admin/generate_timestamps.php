@@ -16,6 +16,10 @@ if (!$track) {
     jsonError('Трек не найден', 404);
 }
 
+if (!defined('WHISPER_VENV') || WHISPER_VENV === '' || !is_dir(WHISPER_VENV)) {
+    jsonError('Генерация таймкодов не настроена', 501);
+}
+
 // Пути (настройки берутся из config.php)
 $pythonScript = WHISPER_VENV . '/whisper1.py'; // C:/py/aligner/whisper1.py
 $pythonExe = WHISPER_VENV . '/Scripts/python'; // C:/py/aligner/Scripts/python
