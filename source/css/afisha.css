@@ -905,6 +905,19 @@ h1, h2, h3, h4 {
     .program-viewport {
         min-height: 88vh;
     }
+    /* На вкладке со списком высота берётся от карточки, а не от 88vh.
+       Иначе точки, прижатые к низу области, уезжают за край экрана. */
+    .program-viewport:has(.program-panel.active[data-paged]) {
+        min-height: 0;
+    }
+    .spread.active {
+        position: relative;
+    }
+    /* Коробка точки выше видимого кружка из-за поля нажатия.
+       -1vh оставляет кружок на кромке карточки; опускаем в зазор до футера. */
+    .program-viewport:has(.program-panel.active[data-paged]) .spread-dots {
+        bottom: -2.8vh;
+    }
     /* Область показа выше обложки (40vh). Середина всей области
        сажает стрелку на название, поэтому держим её на кадре. */
     .spread-nav {
