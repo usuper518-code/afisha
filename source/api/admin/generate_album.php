@@ -378,7 +378,6 @@ function generate_album($albumId) {
     }
 
     generate_afisha($albumId);
-    generateBooklet($albumId, $data);
 }
 
 function load_album_data($albumId) {

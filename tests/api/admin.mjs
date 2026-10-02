@@ -134,6 +134,38 @@ for (const name of ['index.html', 'about.html', '404.html']) {
   rmSync(path.join(mirror, name), { force: true });
 }
 
+function renderBooklet(nickname = '') {
+  const out = path.join(mirror, 'storage/booklets/inspect.pdf');
+  mkdirSync(path.dirname(out), { recursive: true });
+  const user = nickname ? `['nickname' => ${JSON.stringify(nickname)}]` : 'null';
+  writeFileSync(path.join(mirror, 'booklet-render.php'), `<?php
+require __DIR__ . '/api/config.php';
+require __DIR__ . '/api/functions.php';
+$id = ${Number(releaseId)};
+$db = getDB();
+$stmt = $db->prepare('SELECT * FROM releases WHERE id = ?');
+$stmt->execute([$id]);
+$album = $stmt->fetch(PDO::FETCH_ASSOC);
+$stmtT = $db->prepare('SELECT t.* FROM release_tracks rt JOIN tracks t ON rt.track_id = t.id WHERE rt.release_id = ? ORDER BY rt.track_number');
+$stmtT->execute([$id]);
+$tracks = $stmtT->fetchAll(PDO::FETCH_ASSOC);
+foreach ($tracks as &$track) {
+    $stmtA = $db->prepare('SELECT a.name FROM track_artists ta JOIN artists a ON ta.artist_id = a.id WHERE ta.track_id = ?');
+    $stmtA->execute([$track['id']]);
+    $track['artists'] = $stmtA->fetchAll(PDO::FETCH_COLUMN);
+}
+unset($track);
+generateBooklet($id, ['album' => $album, 'tracks' => $tracks], ${user}, ${JSON.stringify(out)});
+if (!is_file(${JSON.stringify(out)})) {
+    fwrite(STDERR, "буклет не записан\\n");
+    exit(1);
+}
+echo "ok\\n";
+`);
+  execFileSync('php', [path.join(mirror, 'booklet-render.php')], { encoding: 'utf8' });
+  return out;
+}
+
 const php = spawn('php', ['-S', `127.0.0.1:${port}`, '-t', mirror, path.join(mirror, 'router.php')], {
   cwd: root,
   stdio: ['ignore', 'pipe', 'pipe'],
@@ -224,8 +256,10 @@ try {
   check('название экранировано', albumHtml.includes('&lt;script&gt;') && !albumHtml.includes('<script>alert'), albumHtml.slice(0, 120));
   check('афиша собрана', indexHtml.includes('suite-show') && existsSync(path.join(mirror, 'albums/suite-show/track-1.html')) && existsSync(path.join(mirror, 'albums/suite-show/after.html')));
 
-  const bookletPath = path.join(mirror, 'albums/suite-show/booklet.pdf');
-  const booklet = existsSync(bookletPath) ? pdfInspect(bookletPath) : { raw: Buffer.alloc(0), text: '' };
+  const publicBooklet = path.join(mirror, 'albums/suite-show/booklet.pdf');
+  check('сборка не кладёт буклет на сайт', !existsSync(publicBooklet));
+  const bookletPath = renderBooklet();
+  const booklet = pdfInspect(bookletPath);
   check('буклет это pdf', booklet.raw.subarray(0, 4).toString() === '%PDF' && booklet.text.includes('---PAGES---\n4'), booklet.text.slice(-40));
   check('буклет держит название текстом', booklet.text.includes('Спектакль <script>alert(1)</script>') && booklet.text.includes('Сцена <i>раз</i>') && booklet.text.includes('Голос <script>'), booklet.text.slice(0, 240));
   check('в буклете описание, труппа и адрес', booklet.text.includes('описание') && booklet.text.includes('О спектакле') && booklet.text.includes('https://site/albums/suite-show/') && booklet.text.includes('ТТТ') && !booklet.text.includes('Этот буклет создан для'));
@@ -279,33 +313,12 @@ try {
       pixels[theme] = pixel;
       check(`занавес ${theme} нарисован`, Array.isArray(pixel) && pixel.some((channel) => channel > 20), JSON.stringify(pixel));
       const fontByTheme = { 'art-rock': 'RussoOne', night: 'PlayfairDisplay-Bold', romance: 'CormorantGaramond-SemiBold' };
-      if (fontByTheme[theme] && existsSync(bookletPath)) {
-        const themed = pdfInspect(bookletPath);
+      if (fontByTheme[theme]) {
+        const themed = pdfInspect(renderBooklet());
         check(`шрифт буклета ${theme}`, themed.text.includes(fontByTheme[theme]) && themed.text.includes('https://site/albums/suite-show/'), themed.text.slice(themed.text.indexOf('---FONTS---')));
       }
     }
-    writeFileSync(path.join(mirror, 'booklet-personal.php'), `<?php
-require __DIR__ . '/api/config.php';
-require __DIR__ . '/api/functions.php';
-$id = ${Number(releaseId)};
-$db = getDB();
-$stmt = $db->prepare('SELECT * FROM releases WHERE id = ?');
-$stmt->execute([$id]);
-$album = $stmt->fetch(PDO::FETCH_ASSOC);
-$stmtT = $db->prepare('SELECT t.* FROM release_tracks rt JOIN tracks t ON rt.track_id = t.id WHERE rt.release_id = ? ORDER BY rt.track_number');
-$stmtT->execute([$id]);
-$tracks = $stmtT->fetchAll(PDO::FETCH_ASSOC);
-foreach ($tracks as &$track) {
-    $stmtA = $db->prepare('SELECT a.name FROM track_artists ta JOIN artists a ON ta.artist_id = a.id WHERE ta.track_id = ?');
-    $stmtA->execute([$track['id']]);
-    $track['artists'] = $stmtA->fetchAll(PDO::FETCH_COLUMN);
-}
-unset($track);
-generateBooklet($id, ['album' => $album, 'tracks' => $tracks], ['nickname' => 'Анна']);
-echo "ok\\n";
-`);
-    execFileSync('php', [path.join(mirror, 'booklet-personal.php')], { encoding: 'utf8' });
-    const personal = pdfInspect(bookletPath);
+    const personal = pdfInspect(renderBooklet('Анна'));
     check('именной буклет', personal.text.includes('Этот буклет создан для') && personal.text.includes('Анна') && personal.text.includes('Спектакль <script>alert(1)</script>'), personal.text.slice(0, 200));
     execFileSync('pdftoppm', ['-png', '-r', '200', '-f', '4', '-l', '4', bookletPath, '/tmp/booklet-qr']);
     const qr = execFileSync('zbarimg', ['--raw', '-q', '/tmp/booklet-qr-4.png'], { encoding: 'utf8' }).trim();

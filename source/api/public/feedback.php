@@ -20,14 +20,22 @@ if ($method === 'GET') {
         jsonResponse(['review' => null, 'status' => null]);
     }
 
-    $stmt = $pdo->prepare("SELECT content, status FROM reviews WHERE release_id = ? AND user_id = ?");
+    $stmt = $pdo->prepare("SELECT content, status, want_booklet, booklet_sent_at FROM reviews WHERE release_id = ? AND user_id = ?");
     $stmt->execute([$releaseId, $userId]);
     $review = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($review) {
-        jsonResponse(['review' => $review['content'], 'status' => $review['status']]);
+        $booklet = null;
+        if (!empty($review['want_booklet'])) {
+            $booklet = $review['booklet_sent_at'] ? 'sent' : 'queued';
+        }
+        jsonResponse([
+            'review' => $review['content'],
+            'status' => $review['status'],
+            'booklet' => $booklet,
+        ]);
     } else {
-        jsonResponse(['review' => null, 'status' => null]);
+        jsonResponse(['review' => null, 'status' => null, 'booklet' => null]);
     }
 }
 
@@ -82,38 +90,14 @@ if ($method === 'POST') {
     $stmt = $pdo->prepare("INSERT INTO events (user_id, event_type, entity_type, entity_id) VALUES (?, ?, ?, ?)");
     $stmt->execute([$userId, 'review', 'release', $releaseId]);
 
-    // Отправляем email с благодарностью и ссылкой на буклет, если нужно
-    if ($email && $wantBooklet) {
-        // Получаем данные альбома для письма
-        $stmtAlbum = $pdo->prepare("SELECT title, slug FROM releases WHERE id = ?");
-        $stmtAlbum->execute([$releaseId]);
-        $release = $stmtAlbum->fetch(PDO::FETCH_ASSOC);
-
-        if (!$release || !defined('MAIL_FROM') || MAIL_FROM === '') {
-            jsonResponse(['success' => true]);
-        }
-
-        $title = str_replace(["\r", "\n"], ' ', (string) ($release['title'] ?? ''));
-        $slug = str_replace(["\r", "\n"], '', (string) ($release['slug'] ?? ''));
-        $subject = mb_encode_mimeheader('Спасибо за ваш отзыв! Буклет спектакля «' . $title . '»', 'UTF-8');
-
-        $bookletUrl = BASE_URL . '/albums/' . rawurlencode($slug) . '/booklet.pdf';
-
-        $message = "Здравствуйте, {$nickname}!\n\n";
-        $message .= "Спасибо за ваш отзыв о спектакле «{$release['title']}».\n";
-        $message .= "Ваш буклет доступен по ссылке: {$bookletUrl}\n\n";
-        if ($subscribe) {
-            $message .= "Вы подписаны на рассылку анонсов. Будем сообщать о новых премьерах!\n";
-        }
-        $message .= "С уважением, " . SITE_TITLE;
-
-        $headers = "From: " . MAIL_FROM . "\r\n" .
-                "Reply-To: " . MAIL_FROM . "\r\n" .
-                "Content-Type: text/plain; charset=UTF-8";
-
-        mail($email, $subject, $message, $headers);
+    // Буклет не отправляем отсюда. Именной PDF собирает крон send-booklets.php.
+    $booklet = null;
+    if ($wantBooklet && $email !== '') {
+        $sent = $pdo->prepare("SELECT booklet_sent_at FROM reviews WHERE release_id = ? AND user_id = ?");
+        $sent->execute([$releaseId, $userId]);
+        $booklet = $sent->fetchColumn() ? 'sent' : 'queued';
     }
 
-    jsonResponse(['success' => true]);
+    jsonResponse(['success' => true, 'booklet' => $booklet]);
 }
 jsonError('Метод не разрешен', 405);

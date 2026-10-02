@@ -252,6 +252,15 @@ function initFinalePage() {
     }
 }
 
+function feedbackNote(status, booklet) {
+    let review = '';
+    if (status === 'approved') review = 'Ваш отзыв уже одобрен и опубликован.';
+    else if (status === 'pending') review = 'Ваш отзыв находится на модерации.';
+    if (booklet === 'queued') return ('Буклет придёт на почту в течение часа. ' + review).trim();
+    if (booklet === 'sent') return ('Буклет отправлен на почту. ' + review).trim();
+    return review;
+}
+
 function initAfterPage() {
     safeYm('reachGoal', 'after_page_view', { album: window.ALBUM_SLUG });
     
@@ -266,11 +275,7 @@ function initAfterPage() {
             reviewTextarea.value = data.review;
             submitBtn.textContent = 'Изменить';
 
-            if (data.status === 'approved') {
-                note.textContent = 'Ваш отзыв уже одобрен и опубликован.';
-            } else if (data.status === 'pending') {
-                note.textContent = 'Ваш отзыв находится на модерации.';
-            }
+            note.textContent = feedbackNote(data.status, data.booklet);
         }
     });
 
@@ -336,8 +341,9 @@ function initAfterPage() {
         const res = await apiRequest('feedback', data, submitBtn);
         if (res.success) {
             submitBtn.textContent = 'Изменить';
-            note.textContent = 'Ваш отзыв находится на модерации.';
-            toastSuccess('Спасибо! Ваш отзыв отправлен.');
+            const booklet = res.booklet ?? (data.want_booklet ? 'queued' : null);
+            note.textContent = feedbackNote('pending', booklet);
+            toastSuccess(booklet === 'queued' ? 'Спасибо! Буклет отправим на почту.' : 'Спасибо! Ваш отзыв отправлен.');
         } else {
             toastError('Ошибка. Попробуйте позже.');
         }
