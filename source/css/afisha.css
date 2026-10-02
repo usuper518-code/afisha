@@ -98,7 +98,9 @@ h1, h2, h3, h4 {
 .premiere-ribbon {
     position: absolute;
     top: var(--afisha-spacing-lg);
-    left: -1vw;
+    /* Открытый занавес оставляет штору в 5% ширины. Отрицательный
+       отступ уводил ленту под ткань, поэтому она начинается в проёме. */
+    left: max(var(--afisha-spacing-lg), 5vw);
     background: var(--theme-color-accent);
     color: var(--theme-color-text-primary);
     padding: var(--afisha-spacing-sm) var(--afisha-spacing-xl);
