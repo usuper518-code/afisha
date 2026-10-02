@@ -363,9 +363,10 @@ function has_avatar($uuid) {
 }
 
 function generateBooklet($albumId, $data, $user = null) {
-    if (file_exists(TCPDF_PATH)) {
-        require_once TCPDF_PATH;
-    }       
+    if (!file_exists(TCPDF_PATH)) {
+        return;
+    }
+    require_once TCPDF_PATH;
     
     $album = $data['album'];
     $tracks = $data['tracks'];

@@ -136,7 +136,7 @@ if ($action === 'track_video' && $id) {
         jsonError('Ошибка сохранения', 500);
     }
 
-    $url = get_cover_url($track['uuid'], 'track');
+    $url = get_video_url($track['uuid'], 'track');
     jsonResponse(['url' => $url]);
 }
 
@@ -173,7 +173,7 @@ if ($action === 'artist_cover' && $id) {
     if (!is_dir($targetDir)) {
         mkdir($targetDir, 0755, true);
     }
-    $targetPath = $targetDir . '/cover.jpg';
+    $targetPath = $targetDir . '/avatar.jpg';
 
     if (!optimizeImage($file['tmp_name'], $targetPath, 800)) {
         if (!move_uploaded_file($file['tmp_name'], $targetPath)) {

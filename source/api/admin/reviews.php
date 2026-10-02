@@ -7,6 +7,15 @@ if ($method === 'GET' && !$id) {
     $status = $_GET['status'] ?? '';
     $limit = (int) ($_GET['limit'] ?? 10);
     $offset = (int) ($_GET['offset'] ?? 0);
+    if ($limit < 1) {
+        $limit = 1;
+    }
+    if ($limit > 50) {
+        $limit = 50;
+    }
+    if ($offset < 0) {
+        $offset = 0;
+    }
     $search = $_GET['search'] ?? null; // поиск по rel.title
 
     $sql = "SELECT r.id, r.release_id, r.user_id, r.content, r.status, r.want_booklet, r.created_at,
@@ -48,7 +57,7 @@ if ($method === 'GET' && !$id) {
         $countSql .= " WHERE " . implode(' AND ', $whereConditions);
     }
     $countStmt = $pdo->prepare($countSql);
-    $stmt->execute($params);
+    $countStmt->execute($params);
     $total = $countStmt->fetchColumn();
 
     jsonResponse(['data' => $reviews, 'total' => (int) $total]);
