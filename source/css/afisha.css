@@ -308,7 +308,8 @@ h1, h2, h3, h4 {
 
 .afisha-btn-large {
     padding: var(--afisha-spacing-lg) var(--afisha-spacing-xl);
-    font-size: var(--theme-text-base);
+    /* 2.2vh на высоте 390px даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
 }
 
 /* ============================================ */
