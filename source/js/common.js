@@ -157,7 +157,7 @@ document.addEventListener('click', async (e) => {
         logEvent('share', 'track', window.CURRENT_TRACK_ID);
     } else if (window.ALBUM_SLUG) {
         safeYm('reachGoal', 'share_album', { album: window.ALBUM_SLUG, track: window.CURRENT_TRACK_SLUG });
-        logEvent('share', 'track', window.ALBUM_ID);
+        logEvent('share', 'release', window.ALBUM_ID);
     } else {
         safeYm('reachGoal', 'share_sait');
     }
@@ -313,12 +313,18 @@ function initVolumeControl(audio, name, state=0) {
 })();
 
 // ==================== Кнопки скрола ====================
-document.querySelectorAll('.scroll-buttons_').forEach(btnGroup => {
+function initScrollButtons(root) {
+  (root || document).querySelectorAll('.scroll-buttons').forEach(btnGroup => {
+    if (btnGroup.dataset.scrollReady) return;
     const targetId = btnGroup.dataset.scrollTarget;
     if (!targetId) return;
 
     const scrollable = document.getElementById(targetId);
     if (!scrollable) return;
+    btnGroup.dataset.scrollReady = '1';
+    // Шаблон прячет блок инлайн-стилем, пока скрипт не решит, нужен ли он.
+    // Дальше видимость у класса .visible: инлайн display:none победил бы CSS.
+    btnGroup.style.display = '';
 
     const upBtn = btnGroup.querySelector('.scroll-up');
     const downBtn = btnGroup.querySelector('.scroll-down');
@@ -338,13 +344,18 @@ document.querySelectorAll('.scroll-buttons_').forEach(btnGroup => {
         if (downBtn) downBtn.disabled = scrollTop >= maxScrollTop - 1;
     };
 
-    // Прокрутка с удержанием и остановкой на краях
+    // Прокрутка с удержанием и остановкой на краях.
+    // Шаг нельзя считать при инициализации: в портрете колонка скрыта
+    // и clientHeight равен нулю, после поворота кнопки крутили бы на 0.
+    // Плавный scroll-behavior перебивает частые присваивания — на время
+    // удержания листаем сразу.
     let scrollInterval = null;
-    const scrollAmount = scrollable.clientHeight/20;
 
     const startScroll = (direction) => {
         stopScroll();
+        scrollable.style.scrollBehavior = 'auto';
         scrollInterval = setInterval(() => {
+            const scrollAmount = Math.max(scrollable.clientHeight / 20, 1);
             const currentTop = scrollable.scrollTop;
             const newTop = currentTop + direction * scrollAmount;
             // Проверяем границы
@@ -366,6 +377,7 @@ document.querySelectorAll('.scroll-buttons_').forEach(btnGroup => {
             clearInterval(scrollInterval);
             scrollInterval = null;
         }
+        scrollable.style.scrollBehavior = '';
     };
 
     // Обработчики для кнопок
@@ -393,7 +405,12 @@ document.querySelectorAll('.scroll-buttons_').forEach(btnGroup => {
 
     checkOverflow();
     window.addEventListener('resize', checkOverflow);
-});
+    // Плеер дописывает строки уже после этой инициализации. Высота колонки
+    // при этом не меняется — растёт только scrollHeight, resize его не видит.
+    new MutationObserver(checkOverflow).observe(scrollable, { childList: true, subtree: true, characterData: true });
+  });
+}
+initScrollButtons();
 
 // ==================== Занавес ====================
 function openCurtain() {
@@ -911,11 +928,8 @@ const CONFIG = {
     respectReducedMotion: true // Уважать настройку ОС prefers-reduced-motion (отключать анимацию для пользователей с вестибулярными нарушениями)
   },
 
-  // ─── 🌫️ МЯГКИЙ ПЕРЕХОД НИЖНЕГО КРАЯ ───
-  bottomFade: {
-    enabled: true,            // Включить эффект плавного растворения нижнего края в фоне сцены
-    height: 0.11              // Высота зоны затемнения: 11% от высоты экрана (~85px на 768px). Должна быть больше суммы: кисти + амплитуда волны + запас
-  },
+  // Полноширинное затухание низа убрано: чёрная полоса закрывала подвал,
+  // когда шторы уже разъехались. Низ штор — бахрома по краям.
 
   // ✨ НОВОЕ: Затухание эффектов после открытия
   fadeOut: {
@@ -1106,6 +1120,7 @@ const CONFIG = {
   }
   window.addEventListener('resize', () => { resize(); if(isAnimating || !isOpen) draw(); });
   init();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => resize());
 
   function toggleCurtain() {
     if (isAnimating) return;
@@ -1292,7 +1307,7 @@ const CONFIG = {
     ctx.clearRect(0,0,w,h);
     const p = getPalette();
     const curtainH = h * CONFIG.curtain.heightPercent;
-    const topY = h * CONFIG.curtain.topOffset;
+    const topY = stageTop();
     const bottomBaseY = topY + curtainH;
     
     const margin = w * CONFIG.curtain.closeMarginPercent;
@@ -1304,7 +1319,9 @@ const CONFIG = {
     if (gap > 0) {
       // ✅ Тень растягивается до самого низа экрана
       const shadowH = h - topY + 50;
-      const shadowAlpha = (isOpen && CONFIG.fadeOut.enabled && fadeAlpha < 1) ? fadeAlpha : 1;
+      // Тень редеет вместе с проёмом. Иначе центр остаётся почти чёрным
+      // все пять секунд разъезда и афиша проявляется только после остановки штор.
+      const shadowAlpha = Math.max(0, 1 - visualProgress);
       
       const grad = ctx.createLinearGradient(w/2-gap/2, topY, w/2+gap/2, topY);
       grad.addColorStop(0, 'rgba(0,0,0,0)');
@@ -1321,15 +1338,25 @@ const CONFIG = {
     drawCurtain(w-visibleWidth, w, topY, bottomBaseY, p);
     
     if (fadeAlpha > 0.005) drawDustAndRays(ctx);
-    if(CONFIG.bottomFade.enabled) drawBottomFade(bottomBaseY);
+  }
+
+  function stageTop() {
+    const header = document.querySelector('.afisha-header');
+    if (header) {
+      const bottom = header.getBoundingClientRect().bottom;
+      if (bottom > 0 && bottom < h) return bottom;
+    }
+    return h * CONFIG.curtain.topOffset;
   }
 
   function drawRod(y, p) {
+    // Штанга целиком в полосе под шапкой, ткань начинается от её нижнего края.
     const rodH = px(0.018, 'h');
-    ctx.fillStyle=p.rodBase; ctx.fillRect(0,y-rodH/2,w,rodH); 
-    ctx.fillStyle=p.rodGold; ctx.fillRect(0,y-rodH/2+px(0.0026,'h'),w,rodH-px(0.008,'h'));
-    ctx.fillStyle=p.gold; ctx.fillRect(0,y-rodH/2+px(0.0026,'h'),w,px(0.0026,'h')); 
-    ctx.fillStyle=p.goldDark; ctx.fillRect(0,y+rodH/2-px(0.004,'h'),w,px(0.004,'h'));
+    const top = y - rodH;
+    ctx.fillStyle=p.rodBase; ctx.fillRect(0, top, w, rodH);
+    ctx.fillStyle=p.rodGold; ctx.fillRect(0, top+px(0.0026,'h'), w, Math.max(1, rodH-px(0.008,'h')));
+    ctx.fillStyle=p.gold; ctx.fillRect(0, top+px(0.0026,'h'), w, px(0.0026,'h'));
+    ctx.fillStyle=p.goldDark; ctx.fillRect(0, top+rodH-px(0.004,'h'), w, px(0.004,'h'));
   }
 
   function drawCurtain(startX, endX, topY, bottomBaseY, p) {
@@ -1389,32 +1416,12 @@ const CONFIG = {
     ctx.restore();
   }
 
-  function drawBottomFade(baseY) {
-    ctx.save();
-    ctx.globalCompositeOperation = 'source-over';
-    
-    const fadeH = px(CONFIG.bottomFade.height, 'h');
-    const startY = baseY - px(0.026, 'h');
-    
-    const grad = ctx.createLinearGradient(0, startY, 0, startY + fadeH);
-    grad.addColorStop(0, 'rgba(5,5,10,0)');
-    grad.addColorStop(0.4, 'rgba(5,5,10,0.6)');
-    grad.addColorStop(0.8, 'rgba(5,5,10,1)');
-    grad.addColorStop(1, 'rgba(5,5,10,1)');
-    
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, startY, w, fadeH + px(0.0026,'h'));
-    ctx.restore();
-  }
-
   draw();
 })();
 // ============================================
 // Переключатель «обложка ⇄ видео» — универсальный,
-// работает на любой странице с элементом [data-video],
-// внутри которого прямыми потомками лежат <img> и (создаваемый
-// на лету) <video>. На афише используется свой обработчик
-// (см. afisha.js, там другая структура карточек).
+// работает на любой странице с элементом [data-video].
+// Ролик сажается в рамку обложки, а не на всю карточку.
 // ============================================
 document.addEventListener('click', function (e) {
     const btn = e.target.closest('.media-video-toggle');
@@ -1425,12 +1432,11 @@ document.addEventListener('click', function (e) {
     const host = btn.closest('[data-video]');
     if (!host) return;
 
-    // Медиа-рамка (то, что реально показывает img/video) — это либо
-    // дочерний .poster-media (карточки афиши: кнопка вне рамки, она
-    // соседствует со ссылкой <a>, см. generate_afisha()), либо сам
-    // [data-video] (обложка альбома, сцена трека — там это одно и
-    // то же). URL видео в любом случае лежит в data-video хоста.
-    const media = host.querySelector(':scope > .poster-media') || host;
+    // Рамка — .poster-media. На премьере она прямой потомок карточки,
+    // в «Скоро» и «Архиве» она внутри ссылки, поэтому прямой потомок
+    // её не находит. На программке и на сцене рамка — сам [data-video].
+    // URL видео в любом случае лежит в data-video хоста.
+    const media = host.querySelector('.poster-media') || host;
 
     const isActive = media.classList.contains('video-active');
     if (isActive) {

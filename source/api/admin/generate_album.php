@@ -538,9 +538,11 @@ function generate_track($outputDir, $data, $track, $index) {
                 'slug' => $t['slug'],
                 'audio' => get_audio_url($t['uuid']),
                 'cover' => get_cover_url($t['uuid'], 'track'),
+                'video' => has_video($t['uuid'], 'track') ? get_video_url($t['uuid'], 'track') : '',
                 'lyrics_timed' => parseLrc($t['lyrics_timed'] ?? ''),
                 'suggested_emotions' => $t['suggested_emotions'] ?? '',
                 'duration' => (int)($t['duration'] ?? 0),
+                'is_instrumental' => (bool)(int)($t['is_instrumental'] ?? 0),
                 'artists' => implode(', ', $t['artists']),
                 'authors' => $t['authors']
             ];

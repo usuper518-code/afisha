@@ -39,6 +39,9 @@ h1, h2, h3, h4 {
     text-align: center;
     z-index: 1;
     background-color: var(--theme-color-bg);
+    /* Место под штангу занавеса: она рисуется в этой полосе,
+       сразу под слоганом и выше вкладок программки. */
+    padding-bottom: 1.8vh;
 }
 
 .afisha-logo {
@@ -95,12 +98,19 @@ h1, h2, h3, h4 {
 .premiere-ribbon {
     position: absolute;
     top: var(--afisha-spacing-lg);
-    left: -1vw;
+    /* Штора занимает 5vw viewport, а страница уже: body ограничен
+       16:9 и на низком широком экране стоит по центру, внутри проёма.
+       5vw от края обложки тогда уводил ленту вправо. Оставляем
+       обычный отступ от кадра и добавляем сдвиг, только если штору
+       ещё закрывает левый край. */
+    left: max(var(--afisha-spacing-lg), calc(5vw + var(--afisha-spacing-sm) - (100vw - min(100vw, 100vh * 16 / 9)) / 2 - 1.5vw));
+    left: max(var(--afisha-spacing-lg), calc(5vw + var(--afisha-spacing-sm) - (100vw - min(100vw, 100dvh * 16 / 9)) / 2 - 1.5vw));
     background: var(--theme-color-accent);
     color: var(--theme-color-text-primary);
     padding: var(--afisha-spacing-sm) var(--afisha-spacing-xl);
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на высоте 390px даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     letter-spacing: 0.3em;
     text-transform: uppercase;
     transform: rotate(-2deg);
@@ -122,7 +132,8 @@ h1, h2, h3, h4 {
     box-shadow: var(--theme-shadow-md);
     transition: transform var(--afisha-transition), box-shadow var(--afisha-transition);
     
-    font-size: var(--theme-text-base);
+    /* 2.2vh на высоте 390px даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
     color: var(--theme-color-text-secondary);    
 }
 
@@ -208,6 +219,18 @@ h1, h2, h3, h4 {
     align-self: center;
 }
 
+.poster-card.main-poster .poster-content {
+    /* Колонка страницы на низком широком экране уже в проёме:
+       body ограничен 16:9. 4.5vw тогда оставлял пустое поле справа.
+       Дополнительный отступ — только если правая штора ещё
+       закрывает край карточки. min-width: 0 не даёт длинному
+       слову раздвинуть колонку сетки обратно под ткань. */
+    min-width: 0;
+    overflow-wrap: anywhere;
+    padding-right: max(var(--afisha-spacing-xl), calc(5vw + var(--afisha-spacing-sm) - (100vw - min(100vw, 100vh * 16 / 9)) / 2 - 1.5vw));
+    padding-right: max(var(--afisha-spacing-xl), calc(5vw + var(--afisha-spacing-sm) - (100vw - min(100vw, 100dvh * 16 / 9)) / 2 - 1.5vw));
+}
+
 .poster-title {
     font-size: var(--theme-text-xl);
     color: var(--theme-color-accent-secondary-light);
@@ -217,14 +240,16 @@ h1, h2, h3, h4 {
 
 .poster-subtitle {
     font-family: var(--theme-font-body);
-    font-size: var(--theme-text-md);
+    /* 2.6vh на высоте 390px даёт ~10px. */
+    font-size: max(var(--theme-text-md), 0.75rem);
     font-style: italic;
     color: var(--theme-color-accent);
     margin-bottom: var(--afisha-spacing-md);
 }
 
 .poster-description {
-    font-size: var(--theme-text-base);
+    /* 2.2vh на той же высоте даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
     line-height: 1.7;
     white-space: pre-line;
     margin-bottom: var(--afisha-spacing-lg);
@@ -244,7 +269,8 @@ h1, h2, h3, h4 {
     gap: var(--afisha-spacing-xl);
     margin-bottom: var(--afisha-spacing-lg);
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* Тот же пол, что у подвала: 1.5vh на низком экране даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--theme-color-accent-secondary);
@@ -268,7 +294,8 @@ h1, h2, h3, h4 {
     text-transform: uppercase;
     letter-spacing: 0.3em;
     padding: var(--afisha-spacing-md) var(--afisha-spacing-xl);
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     text-decoration: none;
     transition: all var(--afisha-transition);
     text-align: center;
@@ -289,7 +316,8 @@ h1, h2, h3, h4 {
 
 .afisha-btn-large {
     padding: var(--afisha-spacing-lg) var(--afisha-spacing-xl);
-    font-size: var(--theme-text-base);
+    /* 2.2vh на высоте 390px даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
 }
 
 /* ============================================ */
@@ -324,7 +352,8 @@ h1, h2, h3, h4 {
     gap: var(--afisha-spacing-xs);
     padding: var(--afisha-spacing-sm) var(--afisha-spacing-md);
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* Тот же пол, что у подвала и строки длительности: 1.5vh на низком экране даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     text-transform: uppercase;
     letter-spacing: var(--theme-letter-spacing-ui);
     color: var(--theme-color-text-secondary);
@@ -443,12 +472,23 @@ h1, h2, h3, h4 {
     cursor: not-allowed;
 }
 
+/* display: flex выше перекрывает атрибут hidden из разметки,
+   и стрелки остаются на премьере, где листать нечего. */
+.spread-nav[hidden],
+.spread-dots[hidden] {
+    display: none;
+}
+
 .spread-prev {
-    left: -1vw;
+    /* Та же поправка, что у ленты: 3.5vw от края колонки на низком
+       широком экране уводит стрелку внутрь, хотя колонка уже в проёме. */
+    left: max(0px, calc(5vw - 1.5vw - (100vw - min(100vw, 100vh * 16 / 9)) / 2));
+    left: max(0px, calc(5vw - 1.5vw - (100vw - min(100vw, 100dvh * 16 / 9)) / 2));
 }
 
 .spread-next {
-    right: -1vw;
+    right: max(0px, calc(5vw - 1.5vw - (100vw - min(100vw, 100vh * 16 / 9)) / 2));
+    right: max(0px, calc(5vw - 1.5vw - (100vw - min(100vw, 100dvh * 16 / 9)) / 2));
 }
 
 .spread-dots {
@@ -507,11 +547,17 @@ h1, h2, h3, h4 {
     transform: scale(1.08);
 }
 
+/* Ширина колонки целиком. Квадрат 1/1 вместе с max-height сжимал
+   и ширину, из-за этого обложка оставалась квадратиком, а кнопка
+   ролика висела в пустом поле рядом. */
 .poster-card.coming .poster-media {
+    align-self: stretch;
+    flex: 0 0 auto;
+    width: 100%;
+    height: 40vh;
+    aspect-ratio: auto;
     border-bottom: 0.2vh solid var(--theme-color-border);
     border-right: none;
-    aspect-ratio: 1 / 1;
-    max-height: 40vh;
 }
 
 .poster-card.coming .poster-content {
@@ -525,7 +571,8 @@ h1, h2, h3, h4 {
 
 .poster-type {
     font-family: var(--theme-font-body);
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     font-style: italic;
     color: var(--theme-color-accent);
     margin-bottom: var(--afisha-spacing-sm);
@@ -533,7 +580,8 @@ h1, h2, h3, h4 {
 
 .poster-status {
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на высоте 390px даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     text-transform: uppercase;
     letter-spacing: 0.15em;
     color: var(--theme-color-accent-secondary);
@@ -564,7 +612,8 @@ h1, h2, h3, h4 {
 }
 
 .about-content p {
-    font-size: var(--theme-text-md);
+    /* 2.6vh на высоте 390px даёт ~10px. */
+    font-size: max(var(--theme-text-md), 0.75rem);
     line-height: 1.7;
     font-style: italic;
     margin-bottom: var(--afisha-spacing-lg);
@@ -575,7 +624,8 @@ h1, h2, h3, h4 {
     font-family: var(--theme-font-ui);
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на высоте 390px даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     color: var(--theme-color-accent-secondary);
     text-decoration: none;
     transition: color var(--afisha-transition);
@@ -620,7 +670,8 @@ h1, h2, h3, h4 {
 
 .announce-date {
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на высоте 390px даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     color: var(--theme-color-accent);
     min-width: 12vw;
     text-transform: uppercase;
@@ -630,7 +681,8 @@ h1, h2, h3, h4 {
 .announce-text {
     flex: 1;
     font-family: var(--theme-font-body);
-    font-size: var(--theme-text-md);
+    /* 2.6vh на высоте 390px даёт ~10px. */
+    font-size: max(var(--theme-text-md), 0.75rem);
     color: var(--theme-color-text-primary);
 }
 
@@ -654,7 +706,10 @@ h1, h2, h3, h4 {
     padding-top: var(--afisha-spacing-xl);
     border-top: 0.2vh solid var(--theme-color-border);
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на низком экране схлопывает строку до ~6px, и она
+       помещается в окно без прокрутки. Пол — читаемый размер. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
+    flex-shrink: 0;
     text-transform: uppercase;
     letter-spacing: 0.2em;
     color: var(--theme-color-text-secondary);
@@ -685,7 +740,7 @@ h1, h2, h3, h4 {
 }
 
 .afisha-footer-note {
-    font-size: var(--theme-text-xs);
+    font-size: max(var(--theme-text-xs), 0.75rem);
     opacity: 0.3;
     text-align: center;
     margin-top: var(--afisha-spacing-md);
@@ -716,7 +771,8 @@ h1, h2, h3, h4 {
 }
 
 .about-section p {
-    font-size: var(--theme-text-md);
+    /* 2.6vh на высоте 390px даёт ~10px. */
+    font-size: max(var(--theme-text-md), 0.75rem);
     line-height: 1.8;
     margin-bottom: 2.5vh;
     color: var(--theme-color-text-secondary);
@@ -764,7 +820,8 @@ h1, h2, h3, h4 {
 }
 
 .troupe-member .troupe-member-voice {
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     color: var(--theme-color-accent);
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -772,7 +829,8 @@ h1, h2, h3, h4 {
 }
 
 .troupe-member .troupe-member-bio {
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     color: var(--theme-color-text-secondary);
     line-height: 1.5;
     margin-top: 0.4vh;
@@ -793,7 +851,8 @@ h1, h2, h3, h4 {
     color: var(--theme-color-accent-secondary);
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на высоте 390px даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     font-family: var(--theme-font-ui);
 }
 
@@ -835,7 +894,8 @@ h1, h2, h3, h4 {
     font-family: var(--theme-font-ui);
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     color: var(--theme-color-accent-secondary);
     text-decoration: none;
 }
@@ -875,6 +935,24 @@ h1, h2, h3, h4 {
     .program-viewport {
         min-height: 88vh;
     }
+    /* На вкладке со списком высота берётся от карточки, а не от 88vh.
+       Иначе точки, прижатые к низу области, уезжают за край экрана. */
+    .program-viewport:has(.program-panel.active[data-paged]) {
+        min-height: 0;
+    }
+    .spread.active {
+        position: relative;
+    }
+    /* Коробка точки выше видимого кружка из-за поля нажатия.
+       -1vh оставляет кружок на кромке карточки; опускаем в зазор до футера. */
+    .program-viewport:has(.program-panel.active[data-paged]) .spread-dots {
+        bottom: -2.8vh;
+    }
+    /* Область показа выше обложки (40vh). Середина всей области
+       сажает стрелку на название, поэтому держим её на кадре. */
+    .spread-nav {
+        top: 20vh;
+    }
     /* В портрете разворот показывает 1 карточку вместо 2 —
        это гарантирует отсутствие вертикальной прокрутки на узких
        экранах (JS группирует карточки по 1 при этой ориентации,
@@ -904,12 +982,12 @@ h1, h2, h3, h4 {
         font-size: 4vh;
     }
     .afisha-tagline {
-        font-size: var(--theme-text-base);
+        font-size: max(var(--theme-text-base), 0.75rem);
     }
     .premiere-ribbon {
         top: var(--afisha-spacing-sm);
         padding: var(--afisha-spacing-xs) var(--afisha-spacing-md);
-        font-size: var(--theme-text-xs);
+        font-size: max(var(--theme-text-xs), 0.75rem);
     }
     .afisha-btn-large {
         padding: var(--afisha-spacing-md) var(--afisha-spacing-lg);
@@ -921,7 +999,7 @@ h1, h2, h3, h4 {
         padding: var(--afisha-spacing-lg) var(--afisha-spacing-md);
     }
     .about-content p {
-        font-size: var(--theme-text-base);
+        font-size: max(var(--theme-text-base), 0.75rem);
     }
     .announce-item {
         flex-wrap: wrap;

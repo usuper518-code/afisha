@@ -160,6 +160,10 @@ ul, ol {
     padding: 0 1.5vw 1.5vh ;
     display: flex;
     flex-direction: column;
+    /* Ореол искр шире надписи на 0.6em. Иначе на узкой программке
+       холст торчит за край и страницу можно сдвинуть вбок.
+       clip не делает контейнер вертикальной прокруткой. */
+    overflow-x: clip;
     /*
     background: 
         repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05) 0.3px),
@@ -373,9 +377,14 @@ textarea {
 #volume-control {
     position: fixed;
     top: 1vh;
-    right: 2vh;
+    /* Колонка на низком широком экране уже окна: body ограничен 16:9
+       и стоит по центру. right: 2vh от края viewport уводил значок
+       в пустое поле справа от колонки. На полном окне остаётся 2vh. */
+    right: max(2vh, calc((100vw - min(100vw, 100vh * 16 / 9)) / 2 + 1.5vw));
+    right: max(2vh, calc((100vw - min(100vw, 100dvh * 16 / 9)) / 2 + 1.5vw));
     z-index: 100;
-    font-size: 2.5vh;
+    /* 2.5vh на высоте 390px даёт ~10px. */
+    font-size: max(2.5vh, 0.75rem);
     opacity: 0.8;
     cursor: pointer;
     transition: opacity 0.3s, transform 0.3s;
@@ -498,7 +507,10 @@ textarea {
     color: var(--theme-color-bg);
     transform: translate(-50%, -50%) scale(1.08);
 }
-[data-video].video-active .media-video-toggle {
+/* На премьере video-active висит на .poster-media, а не на [data-video],
+   поэтому кнопка «к обложке» оставалась по центру кадра. */
+[data-video].video-active .media-video-toggle,
+.poster-media.video-active .media-video-toggle {
     top: auto;
     left: auto;
     bottom: var(--spacing-sm);
@@ -508,7 +520,8 @@ textarea {
     height: 4.4vh;
     font-size: var(--theme-text-sm);
 }
-[data-video].video-active .media-video-toggle:hover {
+[data-video].video-active .media-video-toggle:hover,
+.poster-media.video-active .media-video-toggle:hover {
     transform: scale(1.08);
 }
 
@@ -564,7 +577,8 @@ textarea {
     animation: slideIn 0.3s ease;
     color: var(--theme-color-text-primary);
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
 }
 
 .toast-content {
@@ -699,7 +713,8 @@ textarea {
     left: 50%;
     transform: translateX(-50%);
     color: var(--theme-color-accent-secondary);
-    font-size: 3vh;
+    /* 3vh на высоте 390px даёт ~12px впритык, чуть ниже пола остальных подписей. */
+    font-size: max(3vh, 0.75rem);
     letter-spacing: 0.5vw;
     text-transform: uppercase;
     opacity: 0.75;
@@ -707,7 +722,12 @@ textarea {
     text-shadow: 0 0.25vh 1.4vh rgba(0, 0, 0, 0.8);
     transition: opacity 0.5s ease, transform 0.5s ease;
     z-index: 20;
-    white-space: nowrap;
+    text-align: center;
+    width: max-content;
+    /* nowrap уводил фразу за оба края телефона. 90vw — тот же
+       проём, что оставляют открытые шторы. */
+    max-width: 90vw;
+    white-space: normal;
 }
 .hint.hidden {
     opacity: 0;
@@ -731,7 +751,7 @@ textarea {
     outline-offset: 0.2vh;
 }
 
-.old-paper-css {
+.feedback-section.old-paper-css {
     
     /* 1. Базовый выцветший тон */
     background-color: #e6d5b3;

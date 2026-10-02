@@ -50,13 +50,15 @@ function initProgramNav() {
     }
 
     function buildSpreads(panel) {
-        const cards = Array.from(panel.querySelectorAll(':scope > .poster-card'));
         panel.querySelectorAll(':scope > .spread').forEach(s => {
             // возвращаем карточки обратно в панель перед пересборкой,
             // чтобы не потерять их при смене ориентации
             while (s.firstChild) panel.appendChild(s.firstChild);
             s.remove();
         });
+        // Список снимаем после разбора: до него карточки лежат внутри
+        // .spread и в выборку прямых потомков не попадают.
+        const cards = Array.from(panel.querySelectorAll(':scope > .poster-card'));
         if (!cards.length) return [];
         const size = groupSize();
         const spreads = [];
@@ -128,20 +130,41 @@ function initProgramNav() {
         updateNavButtons(spreads, index);
     }
 
-    function initPanelPaging(panel) {
+    function spreadIndexForCard(spreads, cardIndex) {
+        let seen = 0;
+        for (let i = 0; i < spreads.length; i++) {
+            const count = spreads[i].querySelectorAll(':scope > .poster-card').length;
+            if (cardIndex < seen + count) return i;
+            seen += count;
+        }
+        return Math.max(0, spreads.length - 1);
+    }
+
+    // Номер первой карточки открытого разворота в плоском списке.
+    // После смены ориентации группа другая, индекс разворота сам
+    // по себе указывал бы на другую карточку.
+    function visibleCardIndex(panel) {
+        const state = pagingState.get(panel.id);
+        if (!state || !state.spreads.length) return 0;
+        const active = state.spreads[state.index] || state.spreads[0];
+        const first = active && active.querySelector(':scope > .poster-card');
+        if (!first) return 0;
+        const cards = [];
+        state.spreads.forEach(spread => {
+            spread.querySelectorAll(':scope > .poster-card').forEach(card => cards.push(card));
+        });
+        const idx = cards.indexOf(first);
+        return idx < 0 ? 0 : idx;
+    }
+
+    function initPanelPaging(panel, keepCard) {
         const spreads = buildSpreads(panel);
-        pagingState.set(panel.id, { spreads, index: 0 });
-        if (spreads.length) spreads[0].classList.add('active');
+        const index = spreads.length ? spreadIndexForCard(spreads, keepCard || 0) : 0;
+        pagingState.set(panel.id, { spreads, index });
+        spreads.forEach((spread, i) => spread.classList.toggle('active', i === index));
     }
 
-    function currentPagedPanel() {
-        return panels.find(p => p.classList.contains('active') && p.dataset.paged);
-    }
-
-    function activatePanel(id) {
-        tabs.forEach(t => t.classList.toggle('active', t.dataset.panel === id));
-        panels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
-        stopAnyPlayingVideo();
+    function syncPagingChrome() {
         const panel = currentPagedPanel();
         if (panel) {
             const state = pagingState.get(panel.id);
@@ -154,6 +177,17 @@ function initProgramNav() {
             if (nextBtn) nextBtn.hidden = true;
             if (dotsEl) { dotsEl.hidden = true; dotsEl.innerHTML = ''; }
         }
+    }
+
+    function currentPagedPanel() {
+        return panels.find(p => p.classList.contains('active') && p.dataset.paged);
+    }
+
+    function activatePanel(id) {
+        tabs.forEach(t => t.classList.toggle('active', t.dataset.panel === id));
+        panels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
+        stopAnyPlayingVideo();
+        syncPagingChrome();
         if (history.replaceState) history.replaceState(null, '', '#' + id);
         safeYm('reachGoal', 'afisha_tab_' + id);
     }
@@ -204,21 +238,41 @@ function initProgramNav() {
     }, { passive: true });
 
     // При смене ориентации (портрет ⇄ альбом) — пересобрать развороты
-    // с новым размером группы (1 или 2), не потеряв активную вкладку
+    // с новым размером группы (1 или 2). Вкладка и открытая карточка
+    // остаются: индекс разворота после пересборки указывал бы на другую.
     let currentGroupSize = groupSize();
     portraitQuery.addEventListener('change', () => {
         const newSize = groupSize();
         if (newSize === currentGroupSize) return;
         currentGroupSize = newSize;
-        panels.forEach(p => { if (p.dataset.paged) initPanelPaging(p); });
-        const activeTab = tabs.find(t => t.classList.contains('active'));
-        if (activeTab) activatePanel(activeTab.dataset.panel);
+        stopAnyPlayingVideo();
+        panels.forEach(p => {
+            if (!p.dataset.paged) return;
+            const keep = visibleCardIndex(p);
+            initPanelPaging(p, keep);
+        });
+        syncPagingChrome();
     });
 
-    // Открытие нужной вкладки по якорю в адресной строке
+    // Открытие нужной вкладки по якорю в адресной строке.
+    // Якорь читается и при загрузке, и когда его меняют на уже открытой
+    // афише (ссылка, правка адреса). replaceState внутри activatePanel
+    // событие hashchange не шлёт, так что повторного вызова нет.
     const validIds = tabs.map(t => t.dataset.panel);
-    const initialId = (window.location.hash || '').replace('#', '');
-    activatePanel(validIds.includes(initialId) ? initialId : validIds[0]);
+    const hashPanel = () => (window.location.hash || '').replace('#', '');
+    const applyHash = (fallback) => {
+        const id = hashPanel();
+        if (validIds.includes(id)) return id;
+        return fallback ? validIds[0] : '';
+    };
+    activatePanel(applyHash(true));
+    window.addEventListener('hashchange', () => {
+        const id = applyHash(false);
+        if (!id) return;
+        const current = document.querySelector('.program-tab.active');
+        if (current && current.dataset.panel === id) return;
+        activatePanel(id);
+    });
 }
 
 
