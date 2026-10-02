@@ -39,6 +39,9 @@ h1, h2, h3, h4 {
     text-align: center;
     z-index: 1;
     background-color: var(--theme-color-bg);
+    /* Место под штангу занавеса: она рисуется в этой полосе,
+       сразу под слоганом и выше вкладок программки. */
+    padding-bottom: 1.8vh;
 }
 
 .afisha-logo {
