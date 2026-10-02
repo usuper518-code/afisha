@@ -325,8 +325,8 @@ try {
     check('qr буклета ведёт на альбом', qr === 'https://site/albums/suite-show/', qr);
 
     const differ = (a, b) => a && b && a.some((channel, i) => Math.abs(channel - b[i]) > 20);
-    check('темы красят занавес по-разному', differ(pixels.night, pixels.ember) && differ(pixels.ghost, pixels['art-rock']), JSON.stringify({
-      night: pixels.night, ember: pixels.ember, ghost: pixels.ghost, art: pixels['art-rock'],
+    check('темы красят занавес по-разному', differ(pixels.night, pixels.ember) && differ(pixels.vampire, pixels['art-rock']), JSON.stringify({
+      night: pixels.night, ember: pixels.ember, vampire: pixels.vampire, art: pixels['art-rock'],
     }));
 
     const orient = await browser.newPage();
