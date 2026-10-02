@@ -50,13 +50,15 @@ function initProgramNav() {
     }
 
     function buildSpreads(panel) {
-        const cards = Array.from(panel.querySelectorAll(':scope > .poster-card'));
         panel.querySelectorAll(':scope > .spread').forEach(s => {
             // возвращаем карточки обратно в панель перед пересборкой,
             // чтобы не потерять их при смене ориентации
             while (s.firstChild) panel.appendChild(s.firstChild);
             s.remove();
         });
+        // Список снимаем после разбора: до него карточки лежат внутри
+        // .spread и в выборку прямых потомков не попадают.
+        const cards = Array.from(panel.querySelectorAll(':scope > .poster-card'));
         if (!cards.length) return [];
         const size = groupSize();
         const spreads = [];
