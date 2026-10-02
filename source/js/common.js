@@ -913,8 +913,8 @@ const CONFIG = {
 
   // ─── 🌫️ МЯГКИЙ ПЕРЕХОД НИЖНЕГО КРАЯ ───
   bottomFade: {
-    enabled: true,            // Включить эффект плавного растворения нижнего края в фоне сцены
-    height: 0.11              // Высота зоны затемнения: 11% от высоты экрана (~85px на 768px). Должна быть больше суммы: кисти + амплитуда волны + запас
+    enabled: false,           // Полноширинная чёрная полоса закрывала подвал после открытия. Низ штор — это бахрома по краям.
+    height: 0.11
   },
 
   // ✨ НОВОЕ: Затухание эффектов после открытия
@@ -1106,6 +1106,7 @@ const CONFIG = {
   }
   window.addEventListener('resize', () => { resize(); if(isAnimating || !isOpen) draw(); });
   init();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => resize());
 
   function toggleCurtain() {
     if (isAnimating) return;
@@ -1292,7 +1293,7 @@ const CONFIG = {
     ctx.clearRect(0,0,w,h);
     const p = getPalette();
     const curtainH = h * CONFIG.curtain.heightPercent;
-    const topY = h * CONFIG.curtain.topOffset;
+    const topY = stageTop();
     const bottomBaseY = topY + curtainH;
     
     const margin = w * CONFIG.curtain.closeMarginPercent;
@@ -1324,12 +1325,23 @@ const CONFIG = {
     if(CONFIG.bottomFade.enabled) drawBottomFade(bottomBaseY);
   }
 
+  function stageTop() {
+    const header = document.querySelector('.afisha-header');
+    if (header) {
+      const bottom = header.getBoundingClientRect().bottom;
+      if (bottom > 0 && bottom < h) return bottom;
+    }
+    return h * CONFIG.curtain.topOffset;
+  }
+
   function drawRod(y, p) {
+    // Штанга целиком в полосе под шапкой, ткань начинается от её нижнего края.
     const rodH = px(0.018, 'h');
-    ctx.fillStyle=p.rodBase; ctx.fillRect(0,y-rodH/2,w,rodH); 
-    ctx.fillStyle=p.rodGold; ctx.fillRect(0,y-rodH/2+px(0.0026,'h'),w,rodH-px(0.008,'h'));
-    ctx.fillStyle=p.gold; ctx.fillRect(0,y-rodH/2+px(0.0026,'h'),w,px(0.0026,'h')); 
-    ctx.fillStyle=p.goldDark; ctx.fillRect(0,y+rodH/2-px(0.004,'h'),w,px(0.004,'h'));
+    const top = y - rodH;
+    ctx.fillStyle=p.rodBase; ctx.fillRect(0, top, w, rodH);
+    ctx.fillStyle=p.rodGold; ctx.fillRect(0, top+px(0.0026,'h'), w, Math.max(1, rodH-px(0.008,'h')));
+    ctx.fillStyle=p.gold; ctx.fillRect(0, top+px(0.0026,'h'), w, px(0.0026,'h'));
+    ctx.fillStyle=p.goldDark; ctx.fillRect(0, top+rodH-px(0.004,'h'), w, px(0.004,'h'));
   }
 
   function drawCurtain(startX, endX, topY, bottomBaseY, p) {
