@@ -563,6 +563,9 @@ await page.click('#next-btn');
 await page.waitForFunction(() => location.pathname.endsWith('/track-2.html'), { timeout: 4000 });
 await snap();
 await page.click('#next-btn');
+await page.waitForFunction(() => location.pathname.endsWith('/finale.html'), { timeout: 8000 });
+check('после сцены занавес', await page.evaluate(() => document.body.textContent.includes('ЗАНАВЕС')));
+await page.click('a[href="after.html"]');
 await page.waitForFunction(() => location.pathname.endsWith('/after.html'), { timeout: 8000 });
 
 check('бумага отзыва', await page.$eval('.feedback-section', (el) => getComputedStyle(el).backgroundColor === 'rgb(230, 213, 179)'));
