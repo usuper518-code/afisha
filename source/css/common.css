@@ -751,7 +751,7 @@ textarea {
     outline-offset: 0.2vh;
 }
 
-.old-paper-css {
+.feedback-section.old-paper-css {
     
     /* 1. Базовый выцветший тон */
     background-color: #e6d5b3;
