@@ -7,6 +7,15 @@ if ($method === 'GET' && !$id) {
     $limit = (int) ($_GET['limit'] ?? 10);
     $offset = (int) ($_GET['offset'] ?? 0);
     $order = $_GET['order'] ?? 'id';
+    if ($limit < 1) {
+        $limit = 1;
+    }
+    if ($limit > 50) {
+        $limit = 50;
+    }
+    if ($offset < 0) {
+        $offset = 0;
+    }
     $direction = strtoupper($_GET['direction'] ?? 'DESC');
 
     $fieldsParam = $_GET['fields'] ?? '';
@@ -83,7 +92,7 @@ if ($method === 'GET' && $id) {
         (SELECT COUNT(*) FROM events WHERE user_id = ? AND event_type = 'play') AS plays,
         (SELECT COUNT(*) FROM events WHERE user_id = ? AND event_type = 'rating') AS ratings,
         (SELECT COUNT(*) FROM reviews WHERE user_id = ?) AS reviews,
-        (SELECT COUNT(*) FROM events WHERE user_id = ? AND event_type = 'reaction') AS reactions,
+        (SELECT COUNT(*) FROM events WHERE user_id = ? AND event_type IN ('reaction_add', 'reaction_remove')) AS reactions,
         (SELECT COUNT(*) FROM events WHERE user_id = ? AND event_type = 'share') AS shares
     ");
     $stmtStats->execute([$id, $id, $id, $id, $id]);
