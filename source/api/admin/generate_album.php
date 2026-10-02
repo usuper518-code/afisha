@@ -542,6 +542,7 @@ function generate_track($outputDir, $data, $track, $index) {
                 'lyrics_timed' => parseLrc($t['lyrics_timed'] ?? ''),
                 'suggested_emotions' => $t['suggested_emotions'] ?? '',
                 'duration' => (int)($t['duration'] ?? 0),
+                'is_instrumental' => (bool)(int)($t['is_instrumental'] ?? 0),
                 'artists' => implode(', ', $t['artists']),
                 'authors' => $t['authors']
             ];
