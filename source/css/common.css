@@ -377,9 +377,14 @@ textarea {
 #volume-control {
     position: fixed;
     top: 1vh;
-    right: 2vh;
+    /* Колонка на низком широком экране уже окна: body ограничен 16:9
+       и стоит по центру. right: 2vh от края viewport уводил значок
+       в пустое поле справа от колонки. На полном окне остаётся 2vh. */
+    right: max(2vh, calc((100vw - min(100vw, 100vh * 16 / 9)) / 2 + 1.5vw));
+    right: max(2vh, calc((100vw - min(100vw, 100dvh * 16 / 9)) / 2 + 1.5vw));
     z-index: 100;
-    font-size: 2.5vh;
+    /* 2.5vh на высоте 390px даёт ~10px. */
+    font-size: max(2.5vh, 0.75rem);
     opacity: 0.8;
     cursor: pointer;
     transition: opacity 0.3s, transform 0.3s;
