@@ -589,7 +589,7 @@ function generate_after($outputDir, $data) {
 
     $metaData = [
         'TITLE' => 'После спектакля · ' . $album['title'],
-        'DESCRIPTION' => 'Оставьте отзыв и получите буклет',
+        'DESCRIPTION' => 'Получите буклет спектакля',
         'IMAGE' => get_cover_url($album['uuid']),
         'URL' => $baseUrl . '/after.html',
         'THEME_COLOR' => get_theme_bg_color($album['theme'] ?? 'default')

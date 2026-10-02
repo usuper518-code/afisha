@@ -497,6 +497,24 @@ body {
     justify-content: center;
 }
 
+.finale-exit {
+    margin: 2.2vh 0 0;
+}
+
+.finale-exit a {
+    color: var(--theme-color-text-secondary);
+    font-family: var(--theme-font-ui);
+    font-size: max(var(--theme-text-xs), 0.75rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    opacity: 0.55;
+}
+
+.finale-exit a:hover {
+    opacity: 1;
+}
+
 /* ============================================ */
 /* ФОРМА ОТЗЫВА (after.html)                    */
 /* ============================================ */

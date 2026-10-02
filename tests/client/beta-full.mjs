@@ -565,6 +565,8 @@ await snap();
 await page.click('#next-btn');
 await page.waitForFunction(() => location.pathname.endsWith('/finale.html'), { timeout: 8000 });
 check('после сцены занавес', await page.evaluate(() => document.body.textContent.includes('ЗАНАВЕС')));
+check('с занавеса за буклетом', await page.$eval('a[href="after.html"]', (el) => el.classList.contains('album-btn-primary') && el.textContent.includes('Получить буклет')));
+check('афиша тише буклета', await page.$eval('.finale-exit a[href="/"]', (el) => !el.classList.contains('album-btn') && getComputedStyle(el).opacity !== '1'));
 await page.click('a[href="after.html"]');
 await page.waitForFunction(() => location.pathname.endsWith('/after.html'), { timeout: 8000 });
 
@@ -589,10 +591,11 @@ await page.click('#feedback-form button[type="submit"]');
 await sleep(80);
 check('отзыв без имени', await page.evaluate(() => document.body.textContent.includes('укажите ваше имя')));
 await page.evaluate(() => { document.querySelector('[name="name"]').value = 'Анна'; });
+await page.click('#want_booklet');
 await page.click('#feedback-form button[type="submit"]');
 await sleep(80);
 check('отзыв без текста', await page.evaluate(() => document.body.textContent.includes('напишите отзыв')));
-await page.evaluate(() => { document.querySelector('[name="review"]').value = 'Браво'; });
+await page.click('#want_booklet');
 await page.click('#feedback-form button[type="submit"]');
 await sleep(80);
 check('буклет просит почту', await page.evaluate(() => document.body.textContent.includes('укажите email')));
@@ -600,7 +603,14 @@ await page.evaluate(() => { document.querySelector('[name="email"]').value = 'an
 apiMode = 'ok';
 await page.click('#feedback-form button[type="submit"]');
 await sleep(200);
-check('отзыв принят', await page.evaluate(() => document.body.textContent.includes('Буклет отправим на почту')));
+check('буклет без отзыва', await page.evaluate(() => {
+  const hint = document.querySelector('p.action-hint').textContent;
+  return document.body.textContent.includes('Буклет отправим на почту') && hint.includes('в течение часа') && !hint.includes('модерации');
+}));
+await page.evaluate(() => { document.querySelector('[name="review"]').value = 'Браво'; });
+await page.click('#feedback-form button[type="submit"]');
+await sleep(200);
+check('отзыв принят', await page.evaluate(() => document.body.textContent.includes('Буклет отправим на почту') && document.querySelector('p.action-hint').textContent.includes('модерации')));
 const feedbackPost = posts.filter((p) => p.path === 'feedback').pop();
 check('отзыв не записан в базу', feedbackPost && feedbackPost.body.review === 'Браво');
 apiMode = 'fail';

@@ -18,7 +18,7 @@ if ($offset < 0) {
     $offset = 0;
 }
 
-$where = "WHERE r.status = 'approved'";
+$where = "WHERE r.status = 'approved' AND TRIM(r.content) <> ''";
 $params = [];
 
 if ($releaseId) {
