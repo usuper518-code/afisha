@@ -47,13 +47,17 @@ function snapshotDir(dir) {
   try { return new Set(readdirSync(dir)); } catch { return new Set(); }
 }
 
+// Роутер отдаёт файл, только если realpath лежит внутри корня.
+// Симлинк на source/ он отвергает, поэтому стили, скрипты и шрифты копируем.
+const copyExt = new Set(['.php', '.css', '.js', '.mjs', '.woff', '.woff2']);
+
 function mirrorTree(src, dest) {
   mkdirSync(dest, { recursive: true });
   for (const entry of readdirSync(src, { withFileTypes: true })) {
     const from = path.join(src, entry.name);
     const to = path.join(dest, entry.name);
     if (entry.isDirectory()) mirrorTree(from, to);
-    else if (entry.name.endsWith('.php')) writeFileSync(to, readFileSync(from));
+    else if (copyExt.has(path.extname(entry.name).toLowerCase())) writeFileSync(to, readFileSync(from));
     else symlinkSync(from, to);
   }
 }
@@ -195,12 +199,15 @@ try {
 
   const themes = readdirSync(path.join(root, 'source/css/themes')).filter((name) => name.startsWith('theme-') && name.endsWith('.css'));
   const pixels = {};
-  let puppeteer;
-  try {
-    puppeteer = await import(pathToFileURL(path.join(root, 'tests/client/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js')).href);
-  } catch {
-    puppeteer = await import(pathToFileURL('/tmp/client-suite/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js').href);
-  }
+  const puppeteerFiles = [
+    path.join(root, 'tests/client/node_modules/puppeteer-core/lib/puppeteer/puppeteer-core.js'),
+    path.join(root, 'tests/client/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js'),
+    '/tmp/client-suite/node_modules/puppeteer-core/lib/puppeteer/puppeteer-core.js',
+    '/tmp/client-suite/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js',
+  ];
+  const puppeteerFile = puppeteerFiles.find((file) => existsSync(file));
+  if (!puppeteerFile) throw new Error('puppeteer-core не найден: npm ci в tests/client');
+  const puppeteer = await import(pathToFileURL(puppeteerFile).href);
   const browser = await puppeteer.launch({
     executablePath: process.env.CHROME_PATH || '/usr/local/bin/google-chrome',
     headless: 'new',
