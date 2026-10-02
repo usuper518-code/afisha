@@ -192,6 +192,17 @@ try {
   });
   check('почта с переводом строки', injected.status === 400, JSON.stringify(injected.json));
 
+  const bare = await api('a', 'POST', '/api/feedback', {
+    release_id: Number(pastId), name: 'Анна', review: '   ', email: 'anna@example.com', want_booklet: false,
+  });
+  check('пустой отзыв без буклета', bare.status === 400, JSON.stringify(bare.json));
+
+  const bookletOnly = await api('c', 'POST', '/api/feedback', {
+    release_id: Number(pastId), name: 'Борис', review: '', email: 'boris@example.com', want_booklet: true, subscribe: false,
+  });
+  check('буклет без отзыва', bookletOnly.status === 200 && bookletOnly.json?.booklet === 'queued', JSON.stringify(bookletOnly.json));
+  check('пустой буклет не пишется как отзыв', sql(`SELECT COUNT(*) FROM events WHERE event_type = 'review' AND user_id = (SELECT id FROM users WHERE email = 'boris@example.com')`) === '0');
+
   const feedback = await api('a', 'POST', '/api/feedback', {
     release_id: Number(pastId), name: 'Анна', review: 'Браво', email: 'anna@example.com', want_booklet: false, subscribe: false,
   });
@@ -212,8 +223,8 @@ try {
     release_id: Number(pastId), name: 'Анна', review: 'Бис', email: 'anna@example.com',
   });
   check('повторный отзыв обновляет строку', updated.status === 200, JSON.stringify(updated.json));
-  check('отзыв один', sql(`SELECT COUNT(*) FROM reviews`) === '1');
-  check('текст заменён', sql(`SELECT content FROM reviews`) === 'Бис');
+  check('отзыв один', sql(`SELECT COUNT(*) FROM reviews WHERE TRIM(content) <> ''`) === '1');
+  check('текст заменён', sql(`SELECT content FROM reviews WHERE TRIM(content) <> ''`) === 'Бис');
 
   sql(`UPDATE reviews SET status = 'approved' WHERE release_id = ${pastId}`);
   const published = await api('b', 'GET', `/api/reviews?release_id=${pastId}`);

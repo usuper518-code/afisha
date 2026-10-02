@@ -28,11 +28,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Ваш отзыв</label>
-                            <textarea name="review" rows="4" required placeholder="Поделитесь впечатлениями..."></textarea>
-                        </div>
-
-                        <div class="form-group">
                             <label>Email (для буклета)</label>
                             <input type="email" name="email" placeholder="user@example">
                         </div>
@@ -47,17 +42,22 @@
                             <label for="subscribe">Присылать приглашения на будущие премьеры</label>
                         </div>
 
+                        <div class="form-group">
+                            <label>Отзыв, если хотите</label>
+                            <textarea name="review" rows="4" placeholder="Можно не писать"></textarea>
+                        </div>
+
                         <div class="form-actions">
                             <p class="action-hint"></p>
-                            <button type="submit" class="album-btn album-btn-primary">Отправить</button>
+                            <button type="submit" class="album-btn album-btn-primary">Получить буклет</button>
                         </div>
                     </form>
                 </div>
 
                 <div class="finale-actions">
                     <a href="finale.html" class="album-btn"><i class="fas fa-chevron-left"></i> К занавесу</a>
-                    <a href="/" class="album-btn"><i class="fas fa-home"></i> Вернуться к афише</a>
-                </div>                
+                </div>
+                <p class="finale-exit"><a href="/"><i class="fas fa-home"></i> Вернуться к афише</a></p>                
             </main>
             {{FOOTER}}    
         </div>

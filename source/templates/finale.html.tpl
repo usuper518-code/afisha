@@ -44,9 +44,9 @@
                 </div>
 
                 <div class="finale-actions">
-                    <a href="after.html" class="album-btn"><i class="fas fa-book"></i> Оставить отзыв и получить буклет</a>
-                    <a href="/" class="album-btn"><i class="fas fa-home"></i> Вернуться к афише</a>
+                    <a href="after.html" class="album-btn album-btn-primary"><i class="fas fa-book"></i> Получить буклет</a>
                 </div>
+                <p class="finale-exit"><a href="/"><i class="fas fa-home"></i> Вернуться к афише</a></p>
             </main>
             {{FOOTER}}
         </div>

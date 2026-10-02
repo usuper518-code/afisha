@@ -252,10 +252,12 @@ function initFinalePage() {
     }
 }
 
-function feedbackNote(status, booklet) {
+function feedbackNote(status, booklet, reviewText) {
     let review = '';
-    if (status === 'approved') review = 'Ваш отзыв уже одобрен и опубликован.';
-    else if (status === 'pending') review = 'Ваш отзыв находится на модерации.';
+    if (reviewText && String(reviewText).trim()) {
+        if (status === 'approved') review = 'Ваш отзыв уже одобрен и опубликован.';
+        else if (status === 'pending') review = 'Ваш отзыв находится на модерации.';
+    }
     if (booklet === 'queued') return ('Буклет придёт на почту в течение часа. ' + review).trim();
     if (booklet === 'sent') return ('Буклет отправлен на почту. ' + review).trim();
     return review;
@@ -268,14 +270,20 @@ function initAfterPage() {
     const submitBtn = form.querySelector('button[type="submit"]');
     const note = form.querySelector('p.action-hint');
     const reviewTextarea = form.querySelector('[name="review"]');
+    const bookletToggle = form.querySelector('#want_booklet');
+    bookletToggle.addEventListener('change', () => {
+        if (submitBtn.dataset.kept === '1') return;
+        submitBtn.textContent = bookletToggle.checked ? 'Получить буклет' : 'Отправить отзыв';
+    });
 
     // Загружаем старый отзыв
     apiRequest(`feedback/?release_id=${window.ALBUM_ID}`, {}, null, {method: 'GET'}).then(data => {
-        if (data && data.review) {
-            reviewTextarea.value = data.review;
+        if (!data) return;
+        if (data.review) reviewTextarea.value = data.review;
+        if (data.review || data.booklet) {
+            submitBtn.dataset.kept = '1';
             submitBtn.textContent = 'Изменить';
-
-            note.textContent = feedbackNote(data.status, data.booklet);
+            note.textContent = feedbackNote(data.status, data.booklet, data.review);
         }
     });
 
@@ -320,7 +328,7 @@ function initAfterPage() {
             toastWarning('Пожалуйста, укажите ваше имя');
             return;
         }
-        if (!data.review || !data.review.trim()) {
+        if ((!data.review || !data.review.trim()) && !data.want_booklet) {
             toastWarning('Пожалуйста, напишите отзыв');
             return;
         }
@@ -340,9 +348,10 @@ function initAfterPage() {
         safeYm('reachGoal', 'feedback_sent', { album: window.ALBUM_SLUG });
         const res = await apiRequest('feedback', data, submitBtn);
         if (res.success) {
+            submitBtn.dataset.kept = '1';
             submitBtn.textContent = 'Изменить';
             const booklet = res.booklet ?? (data.want_booklet ? 'queued' : null);
-            note.textContent = feedbackNote('pending', booklet);
+            note.textContent = feedbackNote('pending', booklet, data.review);
             toastSuccess(booklet === 'queued' ? 'Спасибо! Буклет отправим на почту.' : 'Спасибо! Ваш отзыв отправлен.');
         } else {
             toastError('Ошибка. Попробуйте позже.');

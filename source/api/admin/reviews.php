@@ -26,7 +26,7 @@ if ($method === 'GET' && !$id) {
             JOIN releases rel ON r.release_id = rel.id";
 
     $params = [];
-    $whereConditions = [];
+    $whereConditions = ["TRIM(r.content) <> ''"];
     if ($search) {
         $whereConditions[] = "rel.title LIKE ?";
         $params[] = '%' . $search . '%';

@@ -50,9 +50,6 @@ if ($method === 'POST') {
     if (!$releaseId) {
         jsonError('Необходим ИД релиза', 400);
     }
-    if (!$review) {
-        jsonError('Необходим текст отзыва', 400);
-    }
     if (mb_strlen($review) > 5000) {
         jsonError('Слишком длинный отзыв', 400);
     }
@@ -61,6 +58,13 @@ if ($method === 'POST') {
     $email = trim($data['email'] ?? '');
     $wantBooklet = !empty($data['want_booklet']);
     $subscribe = !empty($data['subscribe']);
+
+    if ($nickname === '') {
+        jsonError('Укажите имя', 400);
+    }
+    if ($review === '' && !$wantBooklet) {
+        jsonError('Необходим текст отзыва', 400);
+    }
 
     if (mb_strlen($nickname) > 100) {
         jsonError('Имя слишком длинное', 400);
@@ -87,8 +91,10 @@ if ($method === 'POST') {
                               want_booklet = VALUES(want_booklet)");
     $stmt->execute([$releaseId, $userId, $review, $wantBooklet ? 1 : 0]);
 
-    $stmt = $pdo->prepare("INSERT INTO events (user_id, event_type, entity_type, entity_id) VALUES (?, ?, ?, ?)");
-    $stmt->execute([$userId, 'review', 'release', $releaseId]);
+    if ($review !== '') {
+        $stmt = $pdo->prepare("INSERT INTO events (user_id, event_type, entity_type, entity_id) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$userId, 'review', 'release', $releaseId]);
+    }
 
     // Буклет не отправляем отсюда. Именной PDF собирает крон send-booklets.php.
     $booklet = null;
