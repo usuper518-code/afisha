@@ -131,6 +131,35 @@
         }
     }
 
+    syncStageVideo(track) {
+        const stage = document.querySelector('.stage-visual');
+        if (!stage) return;
+        stage.classList.remove('video-active');
+        const clip = stage.querySelector(':scope > video');
+        if (clip) {
+            clip.pause();
+            clip.remove();
+        }
+        let btn = stage.querySelector(':scope > .media-video-toggle');
+        if (track.video) {
+            stage.dataset.video = track.video;
+            if (!btn) {
+                btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'media-video-toggle';
+                const overlay = stage.querySelector('.lyrics-overlay');
+                stage.insertBefore(btn, overlay);
+            }
+            btn.innerHTML = '<i class="fas fa-play"></i>';
+            btn.setAttribute('aria-label', 'Смотреть видео');
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        } else if (typeof track.video === 'string') {
+            delete stage.dataset.video;
+            if (btn) btn.remove();
+        }
+    }
+
     updateUI(track) {
         document.getElementById('track-num-display').textContent = `Сцена ${(this.currentIndex+1)}`;
         document.getElementById('track-title-display').textContent = track.title;
@@ -164,7 +193,8 @@
             applyColor();
         } else {
             coverImg.addEventListener('load', applyColor, { once: true });
-        }        
+        }
+        this.syncStageVideo(track);        
 
         // Текст и таймкоды
         const lyricsContainer = document.getElementById('lyrics-container');
