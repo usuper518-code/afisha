@@ -77,15 +77,20 @@
     switchTo(index) {
         if (index < 0) return;
         if (index >= this.tracks.length) {
-            location.href = 'finale.html';
+            location.href = 'after.html';
             return;
         }
         
         const track = this.tracks[index];
 
         const player = this.getActive();
-        player.src = track.audio;
-        player.load();
+        const handed = player.dataset.handoff === '1';
+        if (handed) {
+            delete player.dataset.handoff;
+        } else {
+            player.src = track.audio;
+            player.load();
+        }
         
         this.playReported = false;
         this.currentIndex = index;
@@ -99,7 +104,11 @@
         
         setTimeout(() => {
             initVolumeControl(null, 'albumPlayer', 1);
-            this.activePlayer.play().catch(() => {});
+            if (handed) {
+                if (!player.paused) this.play();
+            } else {
+                this.activePlayer.play().catch(() => {});
+            }
         }, 10);
         
         history.replaceState(null, '', `track-${index + 1}.html`);

@@ -475,6 +475,7 @@ function generate_index($outputDir, $data) {
         'TRACKLIST' => $tracklistHtml,
         'DURATION_TOTAL' => h(format_duration($album['duration_total'])),
         'ALBUM_DESCRIPTION' => h($album['description']),
+        'FIRST_TRACK_AUDIO' => h(!empty($data['tracks'][0]['uuid']) ? get_audio_url($data['tracks'][0]['uuid']) : ''),
         
         'PREMIERE_DATE_JS' => json_for_script($album['premiere_date'])
     ]);
