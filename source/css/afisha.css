@@ -132,7 +132,8 @@ h1, h2, h3, h4 {
     box-shadow: var(--theme-shadow-md);
     transition: transform var(--afisha-transition), box-shadow var(--afisha-transition);
     
-    font-size: var(--theme-text-base);
+    /* 2.2vh на высоте 390px даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
     color: var(--theme-color-text-secondary);    
 }
 
@@ -293,7 +294,8 @@ h1, h2, h3, h4 {
     text-transform: uppercase;
     letter-spacing: 0.3em;
     padding: var(--afisha-spacing-md) var(--afisha-spacing-xl);
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     text-decoration: none;
     transition: all var(--afisha-transition);
     text-align: center;
@@ -610,7 +612,8 @@ h1, h2, h3, h4 {
 }
 
 .about-content p {
-    font-size: var(--theme-text-md);
+    /* 2.6vh на высоте 390px даёт ~10px. */
+    font-size: max(var(--theme-text-md), 0.75rem);
     line-height: 1.7;
     font-style: italic;
     margin-bottom: var(--afisha-spacing-lg);
@@ -678,7 +681,8 @@ h1, h2, h3, h4 {
 .announce-text {
     flex: 1;
     font-family: var(--theme-font-body);
-    font-size: var(--theme-text-md);
+    /* 2.6vh на высоте 390px даёт ~10px. */
+    font-size: max(var(--theme-text-md), 0.75rem);
     color: var(--theme-color-text-primary);
 }
 
@@ -767,7 +771,8 @@ h1, h2, h3, h4 {
 }
 
 .about-section p {
-    font-size: var(--theme-text-md);
+    /* 2.6vh на высоте 390px даёт ~10px. */
+    font-size: max(var(--theme-text-md), 0.75rem);
     line-height: 1.8;
     margin-bottom: 2.5vh;
     color: var(--theme-color-text-secondary);
@@ -815,7 +820,8 @@ h1, h2, h3, h4 {
 }
 
 .troupe-member .troupe-member-voice {
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     color: var(--theme-color-accent);
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -823,7 +829,8 @@ h1, h2, h3, h4 {
 }
 
 .troupe-member .troupe-member-bio {
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     color: var(--theme-color-text-secondary);
     line-height: 1.5;
     margin-top: 0.4vh;
@@ -844,7 +851,8 @@ h1, h2, h3, h4 {
     color: var(--theme-color-accent-secondary);
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на высоте 390px даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     font-family: var(--theme-font-ui);
 }
 
@@ -886,7 +894,8 @@ h1, h2, h3, h4 {
     font-family: var(--theme-font-ui);
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     color: var(--theme-color-accent-secondary);
     text-decoration: none;
 }
@@ -973,7 +982,7 @@ h1, h2, h3, h4 {
         font-size: 4vh;
     }
     .afisha-tagline {
-        font-size: var(--theme-text-base);
+        font-size: max(var(--theme-text-base), 0.75rem);
     }
     .premiere-ribbon {
         top: var(--afisha-spacing-sm);
@@ -990,7 +999,7 @@ h1, h2, h3, h4 {
         padding: var(--afisha-spacing-lg) var(--afisha-spacing-md);
     }
     .about-content p {
-        font-size: var(--theme-text-base);
+        font-size: max(var(--theme-text-base), 0.75rem);
     }
     .announce-item {
         flex-wrap: wrap;

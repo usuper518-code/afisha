@@ -572,7 +572,8 @@ textarea {
     animation: slideIn 0.3s ease;
     color: var(--theme-color-text-primary);
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
 }
 
 .toast-content {

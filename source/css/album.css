@@ -18,7 +18,8 @@ body {
 /* ---------- ХЛЕБНЫЕ КРОШКИ ---------- */
 .breadcrumbs {
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на высоте 390px даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     text-transform: uppercase;
     letter-spacing: 0.2em;
     line-height: 1.4;
@@ -65,7 +66,8 @@ body {
 .lyrics-text {
     user-select: text;
     -webkit-user-select: text;
-    font-size: var(--theme-text-base);
+    /* 2.2vh на высоте 390px даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
     flex: 1;
     padding: 1vh 1.5vw 1.5vh 1.5vw;
     overflow-y: auto;
@@ -86,7 +88,8 @@ body {
 
 .track-page-meta {
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на высоте 390px даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--theme-color-accent);
@@ -283,7 +286,8 @@ body {
     flex-wrap: wrap;
     gap: 0.6vh 1vw;
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на высоте 390px даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     text-transform: uppercase;
     letter-spacing: 0.15em;
     padding-top: 1vh;
@@ -296,7 +300,8 @@ body {
 /* Эмоции */
 .emotion-selector-label {
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     text-transform: uppercase;
     letter-spacing: 0.2em;
     color: var(--theme-color-accent-secondary);
@@ -396,7 +401,8 @@ body {
 .emotion-track {
     width: 24vw;
     font-family: var(--theme-font-body);
-    font-size: var(--theme-text-base);
+    /* 2.2vh на высоте 390px даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
     text-align: left;
     color: var(--theme-color-text-primary);
 }
@@ -428,7 +434,8 @@ body {
 
 .applause-label {
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на высоте 390px даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     text-transform: uppercase;
     letter-spacing: 0.3em;
     color: var(--theme-color-accent-secondary);
@@ -462,7 +469,8 @@ body {
     font-family: var(--theme-font-ui);
     text-transform: uppercase;
     letter-spacing: 0.3em;
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     background: transparent;
     border: var(--border-width-thin) solid var(--theme-color-accent-secondary);
     color: var(--theme-color-accent-secondary);
@@ -510,7 +518,8 @@ body {
 
 .form-group label {
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на высоте 390px даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--theme-color-accent-secondary);
@@ -524,7 +533,8 @@ body {
     padding: 1vh 0.5vw;
     color: var(--theme-color-text-primary);
     font-family: var(--theme-font-body);
-    font-size: var(--theme-text-base);
+    /* 2.2vh на высоте 390px даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
     outline: none;
     transition: border-color 0.3s ease;
     width: 100%;
@@ -555,7 +565,8 @@ body {
 .checkbox-group label {
     text-transform: none;
     letter-spacing: normal;
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     color: var(--theme-color-text-primary);
 }
 
@@ -571,7 +582,8 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.3em;
     padding: 1vh 2vw;
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     cursor: pointer;
     text-decoration: none;
     transition: all 0.3s ease;
@@ -660,7 +672,8 @@ body {
     gap: 2vw;
     margin: 1.5vh 0;
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--theme-color-accent-secondary);
@@ -676,7 +689,8 @@ body {
     -webkit-user-select: text;
     max-width: 70vw;
     margin: 1.5vh auto;
-    font-size: var(--theme-text-base);
+    /* 2.2vh на высоте 390px даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
     line-height: 1.6;
     opacity: 0.9;
 }
@@ -698,7 +712,8 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.3em;
     padding: 1.5vh 3vw;
-    font-size: var(--theme-text-base);
+    /* 2.2vh на высоте 390px даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
     text-decoration: none;
     transition: all 0.3s ease;
     border-radius: var(--theme-radius-sm);
@@ -727,7 +742,8 @@ body {
 .action-hint {
     font-style: italic;
     opacity: 0.6;
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
 }
 
 /* Программа (треклист) */
@@ -1020,7 +1036,8 @@ body {
     border-bottom: var(--border-width-thin) solid var(--theme-color-border);
 }
 .reviews h3 {
-    font-size: var(--theme-text-base);
+    /* 2.2vh на высоте 390px даёт ~9px. */
+    font-size: max(var(--theme-text-base), 0.75rem);
     color: var(--theme-color-accent-secondary);
     margin-bottom: 1.5rem;
     display: flex;
@@ -1039,13 +1056,15 @@ body {
     user-select: text;
     -webkit-user-select: text;
     font-style: italic;
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     line-height: 1.6;
     margin-bottom: 0.25rem;
 }
 .review-author {
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-sm);
+    /* 1.8vh на высоте 390px даёт ~7px. */
+    font-size: max(var(--theme-text-sm), 0.75rem);
     text-transform: uppercase;
     letter-spacing: 0.15em;
     color: var(--theme-color-accent);
