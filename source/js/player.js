@@ -80,7 +80,7 @@
     switchTo(index) {
         if (index < 0) return;
         if (index >= this.tracks.length) {
-            location.href = 'after.html';
+            location.href = 'finale.html';
             return;
         }
         
