@@ -146,7 +146,8 @@ function toastWarning(message) {
 }
 
 // ==================== Обработчик поделиться ====================
-document.getElementById('share-btn')?.addEventListener('click', async (e) => {
+document.addEventListener('click', async (e) => {
+    if (!e.target.closest('#share-btn')) return;
     e.preventDefault();
     const url = window.location.href;
     const title = document.title;
@@ -1068,8 +1069,7 @@ const CONFIG = {
   // ⚙️ CANVAS & ЛОГИКА
   // ═══════════════════════════════════════════════════════
   const canvas = document.getElementById('curtain-canvas');
-  // В афише холст отключён (id с подчёркиванием). Без проверки
-  // исключение обрывает остаток common.js, включая переключатель видео.
+  // Занавес рисует этот скрипт на своём холсте. На страницах без холста его нет.
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const hintEl = document.getElementById('hint');
@@ -1121,7 +1121,7 @@ const CONFIG = {
     if (isOpen) {
       playChime(); playFabricSlide();
       canvas.classList.add('open');
-      hintEl.classList.add('hidden');
+      hintEl?.classList.add('hidden');
 
       if (CONFIG.fadeOut.enabled) {
         clearTimeout(fadeOutTimer);
@@ -1136,7 +1136,7 @@ const CONFIG = {
     } else {
       playFabricSlide();
       canvas.classList.add('open');
-      hintEl.classList.remove('hidden');
+      hintEl?.classList.remove('hidden');
       
       // Сброс при закрытии
       clearTimeout(fadeOutTimer);

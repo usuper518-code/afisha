@@ -115,7 +115,9 @@ function initIndexPage() {
                 toastError('Ошибка. Попробуйте позже.');
             }
         });        
-    }  
+    } else if (btn.dataset.audio) {
+        btn.addEventListener('click', (e) => beginShow(e, btn));
+    }
     
     fetch(`/api/reviews?release_id=${window.ALBUM_ID}&limit=3`)
         .then(res => res.json())
@@ -132,6 +134,51 @@ function initIndexPage() {
                 reviewsСontainer.innerHTML = html;
             }
         }).catch(() => {});    
+}
+
+
+function beginShow(e, btn) {
+    const src = btn.dataset.audio;
+    const href = btn.getAttribute('href');
+    if (!src || !href) return;
+    if (btn.dataset.starting) return;
+    btn.dataset.starting = '1';
+    e.preventDefault();
+
+    let stage = document.getElementById('player-A');
+    if (!stage) {
+        stage = document.createElement('audio');
+        stage.id = 'player-A';
+        stage.preload = 'auto';
+        document.body.appendChild(stage);
+    }
+    stage.dataset.handoff = '1';
+    stage.src = src;
+    stage.play().catch(() => {});
+
+    fetch(href).then((res) => res.text()).then((html) => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const inline = [...doc.querySelectorAll('script')].find((s) => !s.src && s.textContent.includes('ALBUM_TRACKS'));
+        doc.querySelectorAll('script, audio').forEach((node) => node.remove());
+        document.body.replaceChildren(...doc.body.childNodes);
+        document.body.appendChild(stage);
+        if (!document.getElementById('player-B')) {
+            const second = document.createElement('audio');
+            second.id = 'player-B';
+            second.preload = 'none';
+            document.body.appendChild(second);
+        }
+        if (doc.title) document.title = doc.title;
+        if (inline) (0, eval)(inline.textContent);
+        if (typeof openCurtain === 'function') openCurtain();
+        window.addEventListener('popstate', () => location.reload());
+        history.pushState({ stage: true }, '', href);
+        const script = document.createElement('script');
+        script.src = '/js/player.js';
+        document.body.appendChild(script);
+    }).catch(() => {
+        window.location.href = href;
+    });
 }
 
 function initFinalePage() {

@@ -46,7 +46,7 @@
                     <p class="album-description">{{ALBUM_DESCRIPTION}}</p>
 
                     <div class="action-center">
-                        <a href="track-1.html" class="btn-premiere" id="action-button">
+                        <a href="track-1.html" class="btn-premiere" id="action-button" data-audio="{{FIRST_TRACK_AUDIO}}">
                             <i class="fas fa-ticket-alt swing-on-hover"></i> НАЧАТЬ ПРЕДСТАВЛЕНИЕ</a>
                         <p class="action-hint">Занавес открывается...</p>
                         <p class="action-hint">Кликните и услышите шорохи зала...</p>

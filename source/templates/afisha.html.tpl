@@ -32,10 +32,8 @@
         </div>
         <canvas id="dust-canvas" aria-hidden="true" class="canvas"></canvas>
         <canvas id="fire-canvas" aria-hidden="true" class="canvas"></canvas>
-        <canvas id="curtain-canvas_"></canvas>
-        <!--
+        <canvas id="curtain-canvas"></canvas>
         <div class="hint" id="hint">Нажмите, чтобы открыть занавес</div>
-        -->
         <script>
             window.ALBUM_ID = {{ALBUM_ID}};
             window.ALBUM_SLUG = {{ALBUM_SLUG_JS}};
