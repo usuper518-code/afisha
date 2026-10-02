@@ -1305,7 +1305,9 @@ const CONFIG = {
     if (gap > 0) {
       // ✅ Тень растягивается до самого низа экрана
       const shadowH = h - topY + 50;
-      const shadowAlpha = (isOpen && CONFIG.fadeOut.enabled && fadeAlpha < 1) ? fadeAlpha : 1;
+      // Тень редеет вместе с проёмом. Иначе центр остаётся почти чёрным
+      // все пять секунд разъезда и афиша проявляется только после остановки штор.
+      const shadowAlpha = Math.max(0, 1 - visualProgress);
       
       const grad = ctx.createLinearGradient(w/2-gap/2, topY, w/2+gap/2, topY);
       grad.addColorStop(0, 'rgba(0,0,0,0)');
