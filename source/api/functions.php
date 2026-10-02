@@ -366,6 +366,9 @@ function generateBooklet($albumId, $data, $user = null) {
     if (!file_exists(TCPDF_PATH)) {
         return;
     }
+    if (!defined('TCPDF_SILENCE_DEPRECATION')) {
+        define('TCPDF_SILENCE_DEPRECATION', true);
+    }
     require_once TCPDF_PATH;
     
     $album = $data['album'];
@@ -563,12 +566,13 @@ function generateBooklet($albumId, $data, $user = null) {
 
     // --- QR-КОД НА АЛЬБОМ ---
     $albumUrl = BASE_URL . '/albums/' . $album['slug'] . '/';
+    // Модули тёмные на белом. Светлый код на фоне темы сканер не читает.
     $style = [
-        'border' => 2,
-        'vpadding' => 'auto',
-        'hpadding' => 'auto',
-        'fgcolor' => $goldRgb,
-        'bgcolor' => $bgRgb,
+        'border' => false,
+        'vpadding' => 2,
+        'hpadding' => 2,
+        'fgcolor' => [0, 0, 0],
+        'bgcolor' => [255, 255, 255],
         'module_width' => 1,
         'module_height' => 1
     ];

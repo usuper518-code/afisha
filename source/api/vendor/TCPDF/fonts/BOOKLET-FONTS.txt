@@ -1,0 +1,14 @@
+Шрифты буклета собраны TCPDF_FONTS::addTTFfont() из файлов сайта.
+
+Из source/webfonts (SIL OFL 1.1, latin + cyrillic):
+  PlayfairDisplay-Bold.woff2      -> playfairdisplayb
+  PlayfairDisplay-Black.woff2     -> playfairdisplayblack
+  CormorantGaramond-Regular.woff2 -> cormorantgaramond
+  CormorantGaramond-SemiBold.woff2 -> cormorantgaramondsemib
+  Montserrat-Regular.woff2        -> montserrat
+  Montserrat-SemiBold.woff2       -> montserratsemib
+  RussoOne-Regular.woff2          -> russoone
+
+Marck Script (рукописное обращение и подпись автора), SIL OFL 1.1:
+  Copyright (c) 2011, Denis Masharov, Marck Fogel.
+  Текст лицензии: OFL.txt в этом каталоге.

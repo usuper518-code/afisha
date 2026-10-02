@@ -66,6 +66,33 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function pdfInspect(file) {
+  const raw = readFileSync(file);
+  const text = execFileSync('python3', ['-c', `
+from pypdf import PdfReader
+import sys
+r = PdfReader(sys.argv[1])
+parts = [(p.extract_text() or "") for p in r.pages]
+fonts = set()
+uris = set()
+for p in r.pages:
+    res = p.get("/Resources")
+    if res and "/Font" in res:
+        for item in res["/Font"].get_object().values():
+            fonts.add(str(item.get_object().get("/BaseFont")))
+    annots = p.get("/Annots") or []
+    for annot in annots:
+        action = annot.get_object().get("/A")
+        if action and action.get("/URI"):
+            uris.add(str(action.get("/URI")))
+sys.stdout.write("\\n".join(parts))
+sys.stdout.write("\\n---FONTS---\\n" + " ".join(sorted(fonts)))
+sys.stdout.write("\\n---URIS---\\n" + " ".join(sorted(uris)))
+sys.stdout.write("\\n---PAGES---\\n" + str(len(r.pages)))
+`, file], { encoding: 'utf8' });
+  return { raw, text };
+}
+
 const prodBefore = counts('catalog');
 const rateBefore = snapshotDir(path.join(root, 'source/storage/ratelimit'));
 const sessionBefore = snapshotDir(path.join(root, 'source/storage/sessions'));
@@ -197,6 +224,14 @@ try {
   check('название экранировано', albumHtml.includes('&lt;script&gt;') && !albumHtml.includes('<script>alert'), albumHtml.slice(0, 120));
   check('афиша собрана', indexHtml.includes('suite-show') && existsSync(path.join(mirror, 'albums/suite-show/track-1.html')) && existsSync(path.join(mirror, 'albums/suite-show/after.html')));
 
+  const bookletPath = path.join(mirror, 'albums/suite-show/booklet.pdf');
+  const booklet = existsSync(bookletPath) ? pdfInspect(bookletPath) : { raw: Buffer.alloc(0), text: '' };
+  check('буклет это pdf', booklet.raw.subarray(0, 4).toString() === '%PDF' && booklet.text.includes('---PAGES---\n4'), booklet.text.slice(-40));
+  check('буклет держит название текстом', booklet.text.includes('Спектакль <script>alert(1)</script>') && booklet.text.includes('Сцена <i>раз</i>') && booklet.text.includes('Голос <script>'), booklet.text.slice(0, 240));
+  check('в буклете описание, труппа и адрес', booklet.text.includes('описание') && booklet.text.includes('О спектакле') && booklet.text.includes('https://site/albums/suite-show/') && booklet.text.includes('ТТТ') && !booklet.text.includes('Этот буклет создан для'));
+  check('обложка попала в буклет', booklet.raw.includes(Buffer.from('/Image')));
+  check('шрифт буклета темы default', booklet.text.includes('CormorantGaramond-SemiBold'));
+
   const themes = readdirSync(path.join(root, 'source/css/themes')).filter((name) => name.startsWith('theme-') && name.endsWith('.css'));
   const pixels = {};
   const puppeteerFiles = [
@@ -243,7 +278,39 @@ try {
       });
       pixels[theme] = pixel;
       check(`занавес ${theme} нарисован`, Array.isArray(pixel) && pixel.some((channel) => channel > 20), JSON.stringify(pixel));
+      const fontByTheme = { 'art-rock': 'RussoOne', night: 'PlayfairDisplay-Bold', romance: 'CormorantGaramond-SemiBold' };
+      if (fontByTheme[theme] && existsSync(bookletPath)) {
+        const themed = pdfInspect(bookletPath);
+        check(`шрифт буклета ${theme}`, themed.text.includes(fontByTheme[theme]) && themed.text.includes('https://site/albums/suite-show/'), themed.text.slice(themed.text.indexOf('---FONTS---')));
+      }
     }
+    writeFileSync(path.join(mirror, 'booklet-personal.php'), `<?php
+require __DIR__ . '/api/config.php';
+require __DIR__ . '/api/functions.php';
+$id = ${Number(releaseId)};
+$db = getDB();
+$stmt = $db->prepare('SELECT * FROM releases WHERE id = ?');
+$stmt->execute([$id]);
+$album = $stmt->fetch(PDO::FETCH_ASSOC);
+$stmtT = $db->prepare('SELECT t.* FROM release_tracks rt JOIN tracks t ON rt.track_id = t.id WHERE rt.release_id = ? ORDER BY rt.track_number');
+$stmtT->execute([$id]);
+$tracks = $stmtT->fetchAll(PDO::FETCH_ASSOC);
+foreach ($tracks as &$track) {
+    $stmtA = $db->prepare('SELECT a.name FROM track_artists ta JOIN artists a ON ta.artist_id = a.id WHERE ta.track_id = ?');
+    $stmtA->execute([$track['id']]);
+    $track['artists'] = $stmtA->fetchAll(PDO::FETCH_COLUMN);
+}
+unset($track);
+generateBooklet($id, ['album' => $album, 'tracks' => $tracks], ['nickname' => 'Анна']);
+echo "ok\\n";
+`);
+    execFileSync('php', [path.join(mirror, 'booklet-personal.php')], { encoding: 'utf8' });
+    const personal = pdfInspect(bookletPath);
+    check('именной буклет', personal.text.includes('Этот буклет создан для') && personal.text.includes('Анна') && personal.text.includes('Спектакль <script>alert(1)</script>'), personal.text.slice(0, 200));
+    execFileSync('pdftoppm', ['-png', '-r', '200', '-f', '4', '-l', '4', bookletPath, '/tmp/booklet-qr']);
+    const qr = execFileSync('zbarimg', ['--raw', '-q', '/tmp/booklet-qr-4.png'], { encoding: 'utf8' }).trim();
+    check('qr буклета ведёт на альбом', qr === 'https://site/albums/suite-show/', qr);
+
     const differ = (a, b) => a && b && a.some((channel, i) => Math.abs(channel - b[i]) > 20);
     check('темы красят занавес по-разному', differ(pixels.night, pixels.ember) && differ(pixels.ghost, pixels['art-rock']), JSON.stringify({
       night: pixels.night, ember: pixels.ember, ghost: pixels.ghost, art: pixels['art-rock'],
