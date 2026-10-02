@@ -170,6 +170,7 @@ function beginShow(e, btn) {
         }
         if (doc.title) document.title = doc.title;
         if (inline) (0, eval)(inline.textContent);
+        if (typeof initScrollButtons === 'function') initScrollButtons();
         if (typeof openCurtain === 'function') openCurtain();
         window.addEventListener('popstate', () => location.reload());
         history.pushState({ stage: true }, '', href);
@@ -275,8 +276,16 @@ function initAfterPage() {
 
     apiRequest('get-user-profile', {}, null, {method: 'GET'}).then(data => {
         if (data && data.success) {
-            sessionStorage.setItem('twit_name', data.name || '');
-            sessionStorage.setItem('twit_email', data.email || '');
+            const name = data.name || '';
+            const email = data.email || '';
+            sessionStorage.setItem('twit_name', name);
+            sessionStorage.setItem('twit_email', email);
+            const nameInput = form.querySelector('[name="name"]');
+            const emailInput = form.querySelector('[name="email"]');
+            // Ответ приходит позже синхронного чтения sessionStorage.
+            // Пустые поля заполняем сразу, уже набранное не затираем.
+            if (nameInput && name && !nameInput.value.trim()) nameInput.value = name;
+            if (emailInput && email && !emailInput.value.trim()) emailInput.value = email;
         }
     });
 

@@ -20,7 +20,7 @@
                 <h1 class="finale-title">После спектакля</h1>
                 <h1 class="album-title">{{ALBUM_TITLE}}</h1>
 
-                <div class="feedback-section old-paper-css_">
+                <div class="feedback-section old-paper-css">
                     <form class="feedback-form" id="feedback-form">
                         <div class="form-group">
                             <label>Ваше имя</label>

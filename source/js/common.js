@@ -157,7 +157,7 @@ document.addEventListener('click', async (e) => {
         logEvent('share', 'track', window.CURRENT_TRACK_ID);
     } else if (window.ALBUM_SLUG) {
         safeYm('reachGoal', 'share_album', { album: window.ALBUM_SLUG, track: window.CURRENT_TRACK_SLUG });
-        logEvent('share', 'track', window.ALBUM_ID);
+        logEvent('share', 'release', window.ALBUM_ID);
     } else {
         safeYm('reachGoal', 'share_sait');
     }
@@ -313,12 +313,18 @@ function initVolumeControl(audio, name, state=0) {
 })();
 
 // ==================== Кнопки скрола ====================
-document.querySelectorAll('.scroll-buttons_').forEach(btnGroup => {
+function initScrollButtons(root) {
+  (root || document).querySelectorAll('.scroll-buttons').forEach(btnGroup => {
+    if (btnGroup.dataset.scrollReady) return;
     const targetId = btnGroup.dataset.scrollTarget;
     if (!targetId) return;
 
     const scrollable = document.getElementById(targetId);
     if (!scrollable) return;
+    btnGroup.dataset.scrollReady = '1';
+    // Шаблон прячет блок инлайн-стилем, пока скрипт не решит, нужен ли он.
+    // Дальше видимость у класса .visible: инлайн display:none победил бы CSS.
+    btnGroup.style.display = '';
 
     const upBtn = btnGroup.querySelector('.scroll-up');
     const downBtn = btnGroup.querySelector('.scroll-down');
@@ -338,13 +344,18 @@ document.querySelectorAll('.scroll-buttons_').forEach(btnGroup => {
         if (downBtn) downBtn.disabled = scrollTop >= maxScrollTop - 1;
     };
 
-    // Прокрутка с удержанием и остановкой на краях
+    // Прокрутка с удержанием и остановкой на краях.
+    // Шаг нельзя считать при инициализации: в портрете колонка скрыта
+    // и clientHeight равен нулю, после поворота кнопки крутили бы на 0.
+    // Плавный scroll-behavior перебивает частые присваивания — на время
+    // удержания листаем сразу.
     let scrollInterval = null;
-    const scrollAmount = scrollable.clientHeight/20;
 
     const startScroll = (direction) => {
         stopScroll();
+        scrollable.style.scrollBehavior = 'auto';
         scrollInterval = setInterval(() => {
+            const scrollAmount = Math.max(scrollable.clientHeight / 20, 1);
             const currentTop = scrollable.scrollTop;
             const newTop = currentTop + direction * scrollAmount;
             // Проверяем границы
@@ -366,6 +377,7 @@ document.querySelectorAll('.scroll-buttons_').forEach(btnGroup => {
             clearInterval(scrollInterval);
             scrollInterval = null;
         }
+        scrollable.style.scrollBehavior = '';
     };
 
     // Обработчики для кнопок
@@ -393,7 +405,12 @@ document.querySelectorAll('.scroll-buttons_').forEach(btnGroup => {
 
     checkOverflow();
     window.addEventListener('resize', checkOverflow);
-});
+    // Плеер дописывает строки уже после этой инициализации. Высота колонки
+    // при этом не меняется — растёт только scrollHeight, resize его не видит.
+    new MutationObserver(checkOverflow).observe(scrollable, { childList: true, subtree: true, characterData: true });
+  });
+}
+initScrollButtons();
 
 // ==================== Занавес ====================
 function openCurtain() {
@@ -911,11 +928,8 @@ const CONFIG = {
     respectReducedMotion: true // Уважать настройку ОС prefers-reduced-motion (отключать анимацию для пользователей с вестибулярными нарушениями)
   },
 
-  // ─── 🌫️ МЯГКИЙ ПЕРЕХОД НИЖНЕГО КРАЯ ───
-  bottomFade: {
-    enabled: false,           // Полноширинная чёрная полоса закрывала подвал после открытия. Низ штор — это бахрома по краям.
-    height: 0.11
-  },
+  // Полноширинное затухание низа убрано: чёрная полоса закрывала подвал,
+  // когда шторы уже разъехались. Низ штор — бахрома по краям.
 
   // ✨ НОВОЕ: Затухание эффектов после открытия
   fadeOut: {
@@ -1324,7 +1338,6 @@ const CONFIG = {
     drawCurtain(w-visibleWidth, w, topY, bottomBaseY, p);
     
     if (fadeAlpha > 0.005) drawDustAndRays(ctx);
-    if(CONFIG.bottomFade.enabled) drawBottomFade(bottomBaseY);
   }
 
   function stageTop() {
@@ -1400,24 +1413,6 @@ const CONFIG = {
       ctx.strokeStyle=p.gold.replace(')',',0.65)').replace('rgb','rgba'); ctx.lineWidth=px(0.0012,'h');
       for(let t=-2;t<=2;t++) { ctx.beginPath(); ctx.moveTo(x+sway,wy+fringeH*0.55); ctx.quadraticCurveTo(x+sway+t*px(0.003,'w'),wy+fringeH*0.75,x+sway+t*px(0.0065,'w'),wy+fringeH); ctx.stroke(); }
     }
-    ctx.restore();
-  }
-
-  function drawBottomFade(baseY) {
-    ctx.save();
-    ctx.globalCompositeOperation = 'source-over';
-    
-    const fadeH = px(CONFIG.bottomFade.height, 'h');
-    const startY = baseY - px(0.026, 'h');
-    
-    const grad = ctx.createLinearGradient(0, startY, 0, startY + fadeH);
-    grad.addColorStop(0, 'rgba(5,5,10,0)');
-    grad.addColorStop(0.4, 'rgba(5,5,10,0.6)');
-    grad.addColorStop(0.8, 'rgba(5,5,10,1)');
-    grad.addColorStop(1, 'rgba(5,5,10,1)');
-    
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, startY, w, fadeH + px(0.0026,'h'));
     ctx.restore();
   }
 
