@@ -90,8 +90,8 @@ function attachedPdf(letter) {
   if (!boundary) return null;
   const pdfPart = letter.split(`--${boundary[1]}`).find((part) => /application\/pdf/i.test(part));
   if (!pdfPart) return null;
-  const b64 = (pdfPart.split(/base64\s*/i)[1] || '').replace(/\s/g, '');
-  const bytes = Buffer.from(b64, 'base64');
+  const body = pdfPart.split(/\r?\n\r?\n/).slice(1).join('\n');
+  const bytes = Buffer.from(body.replace(/\s/g, ''), 'base64');
   return bytes.subarray(0, 4).toString() === '%PDF' ? bytes : null;
 }
 
