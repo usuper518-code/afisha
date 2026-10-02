@@ -32,7 +32,7 @@
                     <p class="author-name">{{AUTHOR_NAME}}</p>
                     {{AUTHOR_BIO}}
                 </div>
-                <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Вернуться к афише</a>
+                <p class="finale-exit"><a href="/"><i class="fas fa-home"></i> Вернуться к афише</a></p>
             </main>
             {{FOOTER}}
         </div>

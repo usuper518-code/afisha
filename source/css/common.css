@@ -709,17 +709,24 @@ textarea {
 }
 .hint {
     position: fixed;
-    bottom: 18%;
+    /* Выше бахромы: низ шторы занимает около 10% кадра. */
+    bottom: 15%;
     left: 50%;
     transform: translateX(-50%);
-    color: var(--theme-color-accent-secondary);
-    /* 3vh на высоте 390px даёт ~12px впритык, чуть ниже пола остальных подписей. */
-    font-size: max(3vh, 0.75rem);
-    letter-spacing: 0.5vw;
+    /* Светлые буквы на тёмной подложке читаются и на золотой,
+       и на тёмной ткани. Цвет темы здесь сливается со шторой. */
+    color: #f4efe6;
+    background: rgba(12, 8, 10, 0.62);
+    padding: 0.8vh 1.6vw;
+    border-radius: 2vh;
+    font-family: var(--theme-font-ui);
+    font-weight: 600;
+    /* 2.2vh на высоте 390px даёт ~9px. */
+    font-size: max(2.2vh, 0.8rem);
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    opacity: 0.75;
+    opacity: 1;
     pointer-events: none;
-    text-shadow: 0 0.25vh 1.4vh rgba(0, 0, 0, 0.8);
     transition: opacity 0.5s ease, transform 0.5s ease;
     z-index: 20;
     text-align: center;
@@ -751,7 +758,8 @@ textarea {
     outline-offset: 0.2vh;
 }
 
-.feedback-section.old-paper-css {
+.feedback-section.old-paper-css,
+#remind-modal .modal-content {
     
     /* 1. Базовый выцветший тон */
     background-color: #e6d5b3;
