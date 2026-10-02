@@ -160,6 +160,10 @@ ul, ol {
     padding: 0 1.5vw 1.5vh ;
     display: flex;
     flex-direction: column;
+    /* Ореол искр шире надписи на 0.6em. Иначе на узкой программке
+       холст торчит за край и страницу можно сдвинуть вбок.
+       clip не делает контейнер вертикальной прокруткой. */
+    overflow-x: clip;
     /*
     background: 
         repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05) 0.3px),
