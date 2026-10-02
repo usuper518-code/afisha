@@ -254,10 +254,25 @@ function initProgramNav() {
         syncPagingChrome();
     });
 
-    // Открытие нужной вкладки по якорю в адресной строке
+    // Открытие нужной вкладки по якорю в адресной строке.
+    // Якорь читается и при загрузке, и когда его меняют на уже открытой
+    // афише (ссылка, правка адреса). replaceState внутри activatePanel
+    // событие hashchange не шлёт, так что повторного вызова нет.
     const validIds = tabs.map(t => t.dataset.panel);
-    const initialId = (window.location.hash || '').replace('#', '');
-    activatePanel(validIds.includes(initialId) ? initialId : validIds[0]);
+    const hashPanel = () => (window.location.hash || '').replace('#', '');
+    const applyHash = (fallback) => {
+        const id = hashPanel();
+        if (validIds.includes(id)) return id;
+        return fallback ? validIds[0] : '';
+    };
+    activatePanel(applyHash(true));
+    window.addEventListener('hashchange', () => {
+        const id = applyHash(false);
+        if (!id) return;
+        const current = document.querySelector('.program-tab.active');
+        if (current && current.dataset.panel === id) return;
+        activatePanel(id);
+    });
 }
 
 
