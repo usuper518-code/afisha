@@ -45,6 +45,9 @@
 
         window.matchMedia('(orientation: portrait)').addEventListener('change', (e) => {
             this.karaoke = e.matches;
+            // Иначе оверлей караоке остаётся от прошлой ориентации,
+            // пока плеер сам не пришлёт timeupdate.
+            if (document.getElementById('lyrics-overlay-text')) this.updateProgress();
         });
         const progressContainer = document.getElementById('progress-container');
         progressContainer.addEventListener('click', (e) => {

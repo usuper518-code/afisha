@@ -713,7 +713,8 @@ textarea {
     left: 50%;
     transform: translateX(-50%);
     color: var(--theme-color-accent-secondary);
-    font-size: 3vh;
+    /* 3vh на высоте 390px даёт ~12px впритык, чуть ниже пола остальных подписей. */
+    font-size: max(3vh, 0.75rem);
     letter-spacing: 0.5vw;
     text-transform: uppercase;
     opacity: 0.75;
