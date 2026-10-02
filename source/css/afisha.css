@@ -213,6 +213,16 @@ h1, h2, h3, h4 {
     align-self: center;
 }
 
+.poster-card.main-poster .poster-content {
+    /* Карточка уже сдвинута на padding контейнера (1.5vw), а открытая
+       штора занимает 5vw. Правый край колонки доводим до проёма,
+       с небольшим зазором до бахромы. min-width: 0 не даёт длинному
+       слову раздвинуть колонку сетки обратно под ткань. */
+    min-width: 0;
+    overflow-wrap: anywhere;
+    padding-right: max(var(--afisha-spacing-xl), 4.5vw);
+}
+
 .poster-title {
     font-size: var(--theme-text-xl);
     color: var(--theme-color-accent-secondary-light);
