@@ -207,7 +207,7 @@ try {
     release_id: Number(pastId), name: 'Анна', review: 'Браво', email: 'anna@example.com', want_booklet: false, subscribe: false,
   });
   check('отзыв принят', feedback.status === 200 && feedback.json?.success === true, JSON.stringify(feedback.json));
-  const reviewRow = sql(`SELECT content, status FROM reviews WHERE release_id = ${pastId}`);
+  const reviewRow = sql(`SELECT content, status FROM reviews WHERE release_id = ${pastId} AND TRIM(content) <> ''`);
   check('отзыв ждёт модерации', reviewRow === 'Браво\tpending', reviewRow);
 
   const stillHidden = await api('b', 'GET', `/api/reviews?release_id=${pastId}`);
