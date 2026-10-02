@@ -340,7 +340,8 @@ h1, h2, h3, h4 {
     gap: var(--afisha-spacing-xs);
     padding: var(--afisha-spacing-sm) var(--afisha-spacing-md);
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* Тот же пол, что у подвала и строки длительности: 1.5vh на низком экране даёт ~6px. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
     text-transform: uppercase;
     letter-spacing: var(--theme-letter-spacing-ui);
     color: var(--theme-color-text-secondary);
