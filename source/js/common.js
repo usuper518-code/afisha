@@ -1306,9 +1306,17 @@ const CONFIG = {
   function draw() {
     ctx.clearRect(0,0,w,h);
     const p = getPalette();
-    const curtainH = h * CONFIG.curtain.heightPercent;
     const topY = stageTop();
-    const bottomBaseY = topY + curtainH;
+    // Бахрома и волна рисуются НИЖЕ линии низа. Если считать высоту
+    // от шапки как 85% экрана, край уходит за окно. Держим бахрому
+    // внутри кадра, с небольшим полом под ней.
+    const amplitude = h * CONFIG.wave.amplitude;
+    const fringe = h * 0.055;
+    const floorGap = h * 0.028;
+    const bottomBaseY = Math.min(
+      topY + h * CONFIG.curtain.heightPercent,
+      h - amplitude - fringe - floorGap
+    );
     
     const margin = w * CONFIG.curtain.closeMarginPercent;
     const halfW = w / 2;
@@ -1386,6 +1394,14 @@ const CONFIG = {
       ctx.strokeStyle='rgba(0,0,0,0.35)'; ctx.lineWidth=px(0.0013,'h'); ctx.beginPath(); ctx.moveTo(fx+foldW/2,topY); ctx.lineTo(fx+foldW/2,bottomBaseY); ctx.stroke();
     }
     ctx.restore();
+
+    // Пол под бахромой того же цвета, что сцена: иначе подвал
+    // просвечивает в щели закрытой шторы.
+    const floorTop = bottomBaseY + px(CONFIG.wave.amplitude, 'h');
+    if (floorTop < h) {
+      ctx.fillStyle = p.rodBase;
+      ctx.fillRect(startX, floorTop, width, h - floorTop + 2);
+    }
 
     drawFringe(startX, endX, bottomBaseY, p);
     if(CONFIG.wave.hemLine) drawWaveHem(startX, endX, bottomBaseY, p);

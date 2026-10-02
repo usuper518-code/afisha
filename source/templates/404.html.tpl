@@ -18,9 +18,7 @@
             </div>
             <h1 class="page-404-title">404</h1>
             <p class="page-404-text">Сцена пуста. Страница не найдена.</p>
-            <a href="/" class="page-404-link">
-                <i class="fas fa-arrow-left"></i> Вернуться к афише
-            </a>
+            <p class="finale-exit"><a href="/"><i class="fas fa-home"></i> Вернуться к афише</a></p>
         </div>
     </div>
     <canvas id="dust-canvas" aria-hidden="true" class="canvas"></canvas>

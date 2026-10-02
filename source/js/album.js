@@ -2,6 +2,14 @@
 
 function initIndexPage() {
     safeYm('reachGoal', 'album_view', { album: window.ALBUM_SLUG });
+    // Зерно бумаги для окна подписки. На уже собранных страницах
+    // фильтра в разметке нет — без него url(#old-paper-grain) гасит блок.
+    if (!document.getElementById('old-paper-grain')) {
+        const grain = document.createElement('div');
+        grain.hidden = true;
+        grain.innerHTML = '<svg aria-hidden="true"><filter id="old-paper-grain" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch" result="noise"/><feColorMatrix type="saturate" values="0" result="bw"/><feColorMatrix type="matrix" values="1.05 0 0 0 0  0 1 0 0 0  0 0 0.95 0 0  0 0 0 0.15 0" in="bw" result="tint"/><feBlend in="SourceGraphic" in2="tint" mode="multiply"/></filter></svg>';
+        document.body.appendChild(grain);
+    }
     
     // Фоновый шум зала — по умолчанию выключен (state=0), включается
     // только явным действием пользователя через регулятор громкости.

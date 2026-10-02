@@ -437,7 +437,8 @@ await page.evaluate(() => document.body.click());
 abortStageFetch = true;
 await cdp.send('Debugger.enable');
 const { breakpointId } = await cdp.send('Debugger.setBreakpointByUrl', {
-  lineNumber: 180,
+  // 0-based: album.js, catch в beginShow, window.location.href
+  lineNumber: 188,
   urlRegex: 'album\\.js',
 });
 const paused = new Promise((resolve) => cdp.once('Debugger.paused', resolve));

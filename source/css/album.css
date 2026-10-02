@@ -591,25 +591,36 @@ body {
 
 /* На бежевой бумаге светлый цвет темы пропадает.
    Заголовки — тёмно-коричневые, набранный текст — тёмно-синие чернила. */
-.feedback-section.old-paper-css {
+.feedback-section.old-paper-css,
+#remind-modal .modal-content {
     --paper-ink: #16356b;
     --paper-heading: #3f2a16;
 }
 
 .feedback-section.old-paper-css .form-group label,
-.feedback-section.old-paper-css .checkbox-group label {
+.feedback-section.old-paper-css .checkbox-group label,
+#remind-modal .form-group label,
+#remind-modal .checkbox-group label,
+#remind-modal .modal-content h3,
+#remind-modal .modal-close {
     color: var(--paper-heading);
 }
 
 .feedback-section.old-paper-css .form-group input,
-.feedback-section.old-paper-css .form-group textarea {
+.feedback-section.old-paper-css .form-group textarea,
+#remind-modal .form-group input {
     color: var(--paper-ink);
     caret-color: var(--paper-ink);
 }
 
 .feedback-section.old-paper-css .form-group input::placeholder,
-.feedback-section.old-paper-css .form-group textarea::placeholder {
+.feedback-section.old-paper-css .form-group textarea::placeholder,
+#remind-modal .form-group input::placeholder {
     color: rgba(63, 42, 22, 0.55);
+}
+
+#remind-modal .modal-close:hover {
+    color: #16356b;
 }
 
 /* ============================================ */
