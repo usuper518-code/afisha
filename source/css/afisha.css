@@ -98,9 +98,13 @@ h1, h2, h3, h4 {
 .premiere-ribbon {
     position: absolute;
     top: var(--afisha-spacing-lg);
-    /* Открытый занавес оставляет штору в 5% ширины. Отрицательный
-       отступ уводил ленту под ткань, поэтому она начинается в проёме. */
-    left: max(var(--afisha-spacing-lg), 5vw);
+    /* Штора занимает 5vw viewport, а страница уже: body ограничен
+       16:9 и на низком широком экране стоит по центру, внутри проёма.
+       5vw от края обложки тогда уводил ленту вправо. Оставляем
+       обычный отступ от кадра и добавляем сдвиг, только если штору
+       ещё закрывает левый край. */
+    left: max(var(--afisha-spacing-lg), calc(5vw + var(--afisha-spacing-sm) - (100vw - min(100vw, 100vh * 16 / 9)) / 2 - 1.5vw));
+    left: max(var(--afisha-spacing-lg), calc(5vw + var(--afisha-spacing-sm) - (100vw - min(100vw, 100dvh * 16 / 9)) / 2 - 1.5vw));
     background: var(--theme-color-accent);
     color: var(--theme-color-text-primary);
     padding: var(--afisha-spacing-sm) var(--afisha-spacing-xl);
