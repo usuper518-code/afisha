@@ -684,7 +684,10 @@ h1, h2, h3, h4 {
     padding-top: var(--afisha-spacing-xl);
     border-top: 0.2vh solid var(--theme-color-border);
     font-family: var(--theme-font-ui);
-    font-size: var(--theme-text-xs);
+    /* 1.5vh на низком экране схлопывает строку до ~6px, и она
+       помещается в окно без прокрутки. Пол — читаемый размер. */
+    font-size: max(var(--theme-text-xs), 0.75rem);
+    flex-shrink: 0;
     text-transform: uppercase;
     letter-spacing: 0.2em;
     color: var(--theme-color-text-secondary);
@@ -715,7 +718,7 @@ h1, h2, h3, h4 {
 }
 
 .afisha-footer-note {
-    font-size: var(--theme-text-xs);
+    font-size: max(var(--theme-text-xs), 0.75rem);
     opacity: 0.3;
     text-align: center;
     margin-top: var(--afisha-spacing-md);
