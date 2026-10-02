@@ -159,7 +159,6 @@ document.getElementById('share-btn')?.addEventListener('click', async (e) => {
         logEvent('share', 'track', window.ALBUM_ID);
     } else {
         safeYm('reachGoal', 'share_sait');
-        logEvent('share', 'sait', 0);
     }
 });
 
@@ -202,6 +201,26 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function loadEmotions() {
+    try {
+        return JSON.parse(localStorage.getItem(`emotions_${window.ALBUM_ID}`)) || {};
+    } catch {
+        return {};
+    }
+}
+function saveEmotions(emotions) {
+    localStorage.setItem(`emotions_${window.ALBUM_ID}`, JSON.stringify(emotions));
+}
+function getTrackEmotions(trackId) {
+    const emotions = loadEmotions();
+    return emotions[trackId] || [];
+}
+function setTrackEmotions(trackId, emotionCodes) {
+    const emotions = loadEmotions();
+    emotions[trackId] = emotionCodes;
+    saveEmotions(emotions);
 }
 
 function formatDuration(seconds) {
@@ -1049,6 +1068,9 @@ const CONFIG = {
   // ⚙️ CANVAS & ЛОГИКА
   // ═══════════════════════════════════════════════════════
   const canvas = document.getElementById('curtain-canvas');
+  // В афише холст отключён (id с подчёркиванием). Без проверки
+  // исключение обрывает остаток common.js, включая переключатель видео.
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const hintEl = document.getElementById('hint');
 

@@ -294,25 +294,6 @@
     }
 }
 
-function loadEmotions() {
-    try {
-        return JSON.parse(localStorage.getItem(`emotions_${window.ALBUM_ID}`)) || {};
-    } catch {
-        return {};
-    }
-}
-function saveEmotions(emotions) {
-    localStorage.setItem(`emotions_${window.ALBUM_ID}`, JSON.stringify(emotions));
-}
-function getTrackEmotions(trackId) {
-    const emotions = loadEmotions();
-    return emotions[trackId] || [];
-}
-function setTrackEmotions(trackId, emotionCodes) {
-    const emotions = loadEmotions();
-    emotions[trackId] = emotionCodes;
-    saveEmotions(emotions);
-}
 
 /**
  * Вычисляет насыщенный контрастный цвет текста для караоке/субтитров.
