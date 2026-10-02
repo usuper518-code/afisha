@@ -498,7 +498,10 @@ textarea {
     color: var(--theme-color-bg);
     transform: translate(-50%, -50%) scale(1.08);
 }
-[data-video].video-active .media-video-toggle {
+/* На премьере video-active висит на .poster-media, а не на [data-video],
+   поэтому кнопка «к обложке» оставалась по центру кадра. */
+[data-video].video-active .media-video-toggle,
+.poster-media.video-active .media-video-toggle {
     top: auto;
     left: auto;
     bottom: var(--spacing-sm);
@@ -508,7 +511,8 @@ textarea {
     height: 4.4vh;
     font-size: var(--theme-text-sm);
 }
-[data-video].video-active .media-video-toggle:hover {
+[data-video].video-active .media-video-toggle:hover,
+.poster-media.video-active .media-video-toggle:hover {
     transform: scale(1.08);
 }
 
