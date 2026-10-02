@@ -588,6 +588,28 @@ body {
     color: var(--theme-color-text-primary);
 }
 
+/* На бежевой бумаге светлый цвет темы пропадает. Пишем чернилами. */
+.feedback-section.old-paper-css {
+    --paper-ink: #1c140e;
+}
+
+.feedback-section.old-paper-css .form-group label,
+.feedback-section.old-paper-css .form-group input,
+.feedback-section.old-paper-css .form-group textarea,
+.feedback-section.old-paper-css .checkbox-group label {
+    color: var(--paper-ink);
+}
+
+.feedback-section.old-paper-css .form-group input,
+.feedback-section.old-paper-css .form-group textarea {
+    caret-color: var(--paper-ink);
+}
+
+.feedback-section.old-paper-css .form-group input::placeholder,
+.feedback-section.old-paper-css .form-group textarea::placeholder {
+    color: rgba(28, 20, 14, 0.55);
+}
+
 /* ============================================ */
 /* ОБЩИЕ КНОПКИ АЛЬБОМА                         */
 /* ============================================ */
