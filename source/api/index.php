@@ -38,8 +38,11 @@ try {
         checkAdminAuth();
         $resource = $parts[1] ?? '';
         $action = $parts[2] ?? '';
+        if (!preg_match('/^[a-z0-9_-]{1,64}$/', $resource)) {
+            jsonError('Обработчик не найден', 404);
+        }
         $adminFile = __DIR__ . '/admin/' . $resource . '.php';
-        if (file_exists($adminFile)) {
+        if (is_file($adminFile)) {
             require_once $adminFile;
             exit;
         }

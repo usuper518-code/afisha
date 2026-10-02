@@ -1,18 +1,54 @@
 <?php
-// Роутер встроенного сервера PHP для беты:
+// Роутер встроенного сервера PHP:
 //   php -S 0.0.0.0:8080 -t source source/router.php
 // Статику отдаём сами: встроенный сервер не умеет Range, и браузер
 // тогда не даёт перематывать уже скачанное аудио и видео.
-// /api/* уходит в api/index.php. Скрипты .php по-прежнему исполняет сервер.
+// /api и /api/* всегда идут в api/index.php. Соседние .php не исполняются.
+// storage, logs, sql, cron, templates и vendor по HTTP закрыты.
 
-$uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/');
+$uri = rawurldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/');
+$uri = str_replace('\\', '/', $uri);
+if (str_contains($uri, "\0")) {
+    betaDeny(400, 'Bad request');
+    return true;
+}
+$uri = preg_replace('#/+#', '/', $uri) ?? '/';
+if ($uri === '' || $uri[0] !== '/') {
+    $uri = '/' . ltrim($uri, '/');
+}
+if (preg_match('#(^|/)\.\.(/|$)#', $uri) === 1) {
+    betaDeny(400, 'Bad request');
+    return true;
+}
+
+$blocked = ['/storage', '/logs', '/sql', '/cron', '/templates', '/api/vendor'];
+foreach ($blocked as $prefix) {
+    if ($uri === $prefix || str_starts_with($uri, $prefix . '/')) {
+        betaDeny(403, 'Forbidden');
+        return true;
+    }
+}
+
+$leaf = basename($uri);
+if ($leaf !== '' && $leaf[0] === '.') {
+    betaDeny(403, 'Forbidden');
+    return true;
+}
+
+if ($uri === '/api' || str_starts_with($uri, '/api/')) {
+    require __DIR__ . '/api/index.php';
+    return true;
+}
+
+$ext = strtolower(pathinfo($uri, PATHINFO_EXTENSION));
+if (in_array($ext, ['php', 'phtml', 'phar', 'phps', 'sql', 'log', 'tpl', 'ini'], true)) {
+    betaDeny(403, 'Forbidden');
+    return true;
+}
+
 $file = __DIR__ . $uri;
 
 if ($uri !== '/' && is_file($file)) {
-    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-    if ($ext === 'php') {
-        return false;
-    }
     if (betaServeFile($file)) {
         return true;
     }
@@ -22,15 +58,10 @@ if ($uri !== '/' && is_file($file)) {
 $dir = rtrim($file, '/');
 if ($uri !== '/' && is_dir($dir)) {
     $index = $dir . '/index.html';
-    if (is_file($index)) {
-        header('Content-Type: text/html; charset=utf-8');
-        readfile($index);
+    if (is_file($index) && betaServeFile($index)) {
         return true;
     }
-}
-
-if (str_starts_with($uri, '/api/') || $uri === '/api') {
-    require __DIR__ . '/api/index.php';
+    betaDeny(403, 'Forbidden');
     return true;
 }
 
@@ -49,6 +80,13 @@ if (is_file(__DIR__ . '/404.html')) {
 
 echo 'Not found';
 return true;
+
+function betaDeny(int $code, string $message): void
+{
+    http_response_code($code);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo $message;
+}
 
 function betaContentType(string $path): string
 {
@@ -72,6 +110,7 @@ function betaContentType(string $path): string
         'woff2' => 'font/woff2',
         'ttf' => 'font/ttf',
         'txt' => 'text/plain; charset=utf-8',
+        'pdf' => 'application/pdf',
     ];
     $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
     if (isset($map[$ext])) {

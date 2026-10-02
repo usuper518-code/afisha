@@ -1,0 +1,4 @@
+# Загруженные файлы не исполняются как PHP
+<FilesMatch "\.(php|phtml|phar|phps)$">
+    Require all denied
+</FilesMatch>

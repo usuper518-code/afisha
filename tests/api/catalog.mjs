@@ -1,8 +1,9 @@
-// Каталог админки и длительность mp3 на базе catalog_suite.
+// Каталог админки, длительность mp3 и закрытые служебные пути на базе catalog_suite.
 // Рабочая catalog только сверяется по числу строк.
 //
 //   node tests/api/catalog.mjs
 
+import http from 'node:http';
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
@@ -105,7 +106,25 @@ async function api(method, urlPath, { json, form, key = '12345' } = {}) {
   const text = await res.text();
   let parsed = null;
   try { parsed = JSON.parse(text); } catch { parsed = null; }
-  return { status: res.status, json: parsed, text };
+  return { status: res.status, json: parsed, text, type: res.headers.get('content-type') || '' };
+}
+
+
+function httpGet(urlPath, headers = {}) {
+  return new Promise((resolve, reject) => {
+    const req = http.request({ hostname: '127.0.0.1', port: Number(port), path: urlPath, method: 'GET', headers }, (res) => {
+      const chunks = [];
+      res.on('data', (chunk) => chunks.push(chunk));
+      res.on('end', () => resolve({
+        status: res.statusCode,
+        type: res.headers['content-type'] || '',
+        range: res.headers['content-range'] || '',
+        body: Buffer.concat(chunks).toString('utf8'),
+      }));
+    });
+    req.on('error', reject);
+    req.end();
+  });
 }
 
 try {
@@ -113,6 +132,44 @@ try {
   const news = await api('GET', '/api/news', { key: '' });
   const marker = news.json?.data?.find((row) => row.title === 'suite-marker-catalog');
   if (!marker) throw new Error('сервер смотрит не в catalog_suite, записи остановлены');
+
+  check('новости остаются json', news.status === 200 && news.type.includes('application/json'), `${news.status} ${news.type}`);
+
+  writeFileSync(path.join(mirror, 'uploads', 'evil.php'), '<?php echo "PWNED";');
+  writeFileSync(path.join(mirror, 'media', 'range-probe.bin'), Buffer.alloc(80, 0x41));
+  const hidden = [
+    ['/api/config.php', 'DB_PASS'],
+    ['/api/functions.php', 'function getDB'],
+    ['/api/vendor/getid3/license.txt', 'getID3'],
+    ['/api/vendor/TCPDF/tcpdf.php', 'TCPDF'],
+    ['/sql/catalog.sql', 'CREATE TABLE'],
+    ['/logs/php_errors.log', '[php]'],
+    ['/cron/send-reminders.php', 'MAIL_FROM'],
+    ['/router.php', 'betaServeFile'],
+    ['/templates/afisha.html.tpl', 'theme-color'],
+    ['/storage/sessions/sess_probe', 'client_id'],
+    ['/storage/ratelimit/x.json', '"hits"'],
+    ['/.htaccess', 'RewriteEngine'],
+    ['/uploads/evil.php', 'PWNED'],
+  ];
+  for (const [urlPath, secret] of hidden) {
+    const res = await httpGet(urlPath);
+    const leaked = secret !== '' && res.body.includes(secret);
+    check(`закрыто ${urlPath}`, (res.status === 403 || res.status === 404) && !leaked, `${res.status} ${res.type} ${res.body.slice(0, 80)}`);
+  }
+
+  const directAdmin = await httpGet('/api/admin/releases.php');
+  check('прямой скрипт админки без ключа', directAdmin.status === 401 && directAdmin.type.includes('application/json') && !directAdmin.body.includes('DB_PASS'), `${directAdmin.status} ${directAdmin.type} ${directAdmin.body.slice(0, 80)}`);
+
+  const slipped = await httpGet('/api/admin/%2e%2e/config.php');
+  check('обход имени обработчика', (slipped.status === 400 || slipped.status === 401 || slipped.status === 404) && !slipped.body.includes('DB_PASS'), `${slipped.status} ${slipped.body.slice(0, 80)}`);
+
+  const map = await httpGet('/api/sitemap');
+  check('карта сайта остаётся xml', map.status === 200 && map.type.includes('application/xml') && map.body.includes('<urlset'), `${map.status} ${map.type}`);
+
+  const ranged = await httpGet('/media/range-probe.bin', { Range: 'bytes=0-9' });
+  check('range статики', ranged.status === 206 && (ranged.range || '') === 'bytes 0-9/80' && ranged.body === 'A'.repeat(10), `${ranged.status} ${ranged.range} ${ranged.body.length}`);
+
 
   const denied = await api('POST', '/api/admin/releases', { key: '', json: { title: 'x', slug: 'x' } });
   check('каталог без ключа', denied.status === 401, JSON.stringify(denied.json));
