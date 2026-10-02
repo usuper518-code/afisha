@@ -6,6 +6,15 @@ $pdo = getDB();
 if ($method === 'GET' && !$id) {
     $limit = (int) ($_GET['limit'] ?? 10);
     $offset = (int) ($_GET['offset'] ?? 0);
+    if ($limit < 1) {
+        $limit = 1;
+    }
+    if ($limit > 50) {
+        $limit = 50;
+    }
+    if ($offset < 0) {
+        $offset = 0;
+    }
     $order = $_GET['order'] ?? 'id';
     $direction = strtoupper($_GET['direction'] ?? 'DESC');
 

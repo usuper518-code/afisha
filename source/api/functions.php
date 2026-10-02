@@ -21,6 +21,10 @@ function getDB(): PDO {
 }
 
 // JSON-ответ
+function jsonResponseWithWarnings(array $result, int $code = 200): void {
+    jsonResponse($result, $code);
+}
+
 function jsonResponse($result, int $code = 200): void {
     //error_log("$code=" . $code);
     //error_log("release=" . var_export($data, true));
