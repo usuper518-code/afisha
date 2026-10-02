@@ -639,6 +639,10 @@ body {
     font-size: var(--theme-text-2xl);
     margin-bottom: 0.5rem;
     text-shadow: var(--theme-shadow-glow);
+    /* Длинный кусок без пробелов иначе раздвигает страницу вбок. */
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
 }
 
 .album-subtitle {
