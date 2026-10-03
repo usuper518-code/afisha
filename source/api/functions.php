@@ -277,13 +277,14 @@ function optimizeImage(string $sourcePath, string $targetPath): bool {
 function fitSquareVideo(string $sourcePath, string $targetPath): bool {
     $side = MEDIA_SIDE;
     $tmp = $targetPath . '.tmp.mp4';
-    $filter = 'scale=' . $side . ':' . $side . ':force_original_aspect_ratio=increase,crop=' . $side . ':' . $side;
+    $filter = 'scale=' . $side . ':' . $side . ':force_original_aspect_ratio=increase,crop=' . $side . ':' . $side . ',setsar=1';
     $cmd = 'ffmpeg -y -i ' . escapeshellarg($sourcePath)
-        . ' -vf ' . escapeshellarg($filter)
+        . ' -map 0:v:0 -vf ' . escapeshellarg($filter)
         . ' -c:v libx264 -pix_fmt yuv420p -an -movflags +faststart '
-        . escapeshellarg($tmp) . ' 2>/dev/null';
+        . escapeshellarg($tmp) . ' 2>&1';
     exec($cmd, $out, $code);
     if ($code !== 0 || !is_file($tmp)) {
+        error_log('fitSquareVideo: ' . implode("\n", array_slice($out, -8)));
         if (is_file($tmp)) {
             unlink($tmp);
         }

@@ -314,14 +314,12 @@ function bindFormEvents() {
             btnVideo.classList.remove('active');
             coverCard.style.display = 'block';
             videoCard.style.display = 'none';
-            document.getElementById('media-type').value = 'image'; // для отправки формы
         });
         btnVideo.addEventListener('click', function () {
             this.classList.add('active');
             btnImage.classList.remove('active');
             coverCard.style.display = 'none';
             videoCard.style.display = 'block';
-            document.getElementById('media-type').value = 'video'; // для отправки формы
         });
     }
 

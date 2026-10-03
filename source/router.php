@@ -1,6 +1,6 @@
 <?php
 // Роутер встроенного сервера PHP:
-//   php -S 0.0.0.0:8080 -t source source/router.php
+//   php -d upload_max_filesize=64M -d post_max_size=64M -S 0.0.0.0:8080 -t source source/router.php
 // Статику отдаём сами: встроенный сервер не умеет Range, и браузер
 // тогда не даёт перематывать уже скачанное аудио и видео.
 // /api и /api/* всегда идут в api/index.php. Соседние .php не исполняются.
