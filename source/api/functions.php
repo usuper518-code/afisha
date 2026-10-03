@@ -6,9 +6,9 @@ function afisha_defaults(): array {
     return [
         'site_title' => 'Студия',
         'site_tagline' => 'Акустический театр.',
-        'about_text' => 'Студия — это театр.',
+        'about_text' => '',
         'slogan' => '',
-        'default_author' => 'ТТТ',
+        'default_author' => '',
         'author_bio' => '',
         'metrika_id' => '0',
         'stihi_url' => '',
@@ -27,13 +27,17 @@ function afisha_settings(bool $refresh = false): array {
     $cache = afisha_defaults();
     try {
         $rows = getDB()->query('SELECT setting_key, setting_value FROM settings')->fetchAll(PDO::FETCH_KEY_PAIR);
-        foreach ($rows as $key => $value) {
-            if (array_key_exists($key, $cache)) {
-                $cache[$key] = (string) $value;
-            }
-        }
     } catch (Throwable $e) {
-        // Таблицы ещё нет — остаются значения по умолчанию.
+        error_log('afisha_settings: ' . $e->getMessage());
+        return $cache;
+    }
+    foreach ($rows as $key => $value) {
+        if (!array_key_exists($key, $cache)) {
+            continue;
+        }
+        // NULL нельзя приводить к строке при включённом обработчике ошибок:
+        // исключение обрывало чтение и в страницы попадали заглушки.
+        $cache[$key] = $value === null ? '' : (string) $value;
     }
     return $cache;
 }
