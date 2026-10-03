@@ -33,7 +33,7 @@
 
                     <div class="album-meta">
                         <span><i class="fas fa-clock"></i> {{DURATION_TOTAL}}</span>
-                        <span><i class="fas fa-users"></i> Труппа голосов</span>
+                        <a href="troupe.html" class="troupe-btn"><i class="fas fa-users"></i> Труппа голосов</a>
                     </div>
 
                     <p class="album-description">{{ALBUM_DESCRIPTION}}</p>

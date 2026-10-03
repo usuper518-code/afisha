@@ -679,7 +679,7 @@ h1, h2, h3, h4 {
 }
 
 /* ============================================ */
-/* АНОНСЫ (внутри панели «О театре»)            */
+/* АНОНСЫ (внутри панели «О студии»)           */
 /* ============================================ */
 
 .announce-list {
@@ -777,6 +777,11 @@ h1, h2, h3, h4 {
 
 .afisha-social a:hover {
     color: var(--theme-color-accent-light);
+}
+
+/* Вкладка «О студии» уже открыта: ссылка в подвале ведёт сюда же. */
+body:has(#panel-about.active) .afisha-footer a[href="/#about"] {
+    display: none;
 }
 
 .afisha-footer-note {

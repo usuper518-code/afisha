@@ -18,8 +18,9 @@
                 
             <main class="about-page">
                 <div class="about-section">
-                    <h2>Манифест</h2>
-                    <p>{{ABOUT_TEXT}}</p>
+                    <h2>Автор</h2>
+                    <p class="author-name">{{AUTHOR_NAME}}</p>
+                    {{AUTHOR_BIO}}
                 </div>
                 <div class="about-section">
                     <h2>Труппа</h2>
@@ -27,12 +28,7 @@
                         {{TROUPE_GRID}}
                     </div>
                 </div>
-                <div class="about-section">
-                    <h2>Автор</h2>
-                    <p class="author-name">{{AUTHOR_NAME}}</p>
-                    {{AUTHOR_BIO}}
-                </div>
-                <p class="finale-exit"><a href="/"><i class="fas fa-home"></i> Вернуться к афише</a></p>
+                <p class="finale-exit"><a href="{{BACK_HREF}}"><i class="fas fa-home"></i> {{BACK_LABEL}}</a></p>
             </main>
             {{FOOTER}}
         </div>

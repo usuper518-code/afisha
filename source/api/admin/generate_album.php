@@ -25,7 +25,7 @@ if (($resource ?? '') === 'generate_album') {
 function generate_footer($page='') {
     $about = '';
     if ($page !== 'about') {
-        $about = '<a href="/about.html" aria-label="О студии" data-ym-goal="about_click">О студии</a>';
+        $about = '<a href="/#about" aria-label="О студии" data-ym-goal="about_click">О студии</a>';
     }
     $content = <<<HTML
 <footer class="afisha-footer">
@@ -225,16 +225,13 @@ HTML;
     }
 
     // ---------- ПРОГРАММКА: вкладки + панели ----------
-    // Премьера и «О театре» показываются всегда, «Скоро»/«Архив» —
+    // Премьера и «О студии» показываются всегда, «Скоро»/«Архив» —
     // только если в них реально что-то есть (см. п. «пустые разделы
     // не показываем»).
     $aboutPanelHtml = <<<HTML
 <div class="about-content">
     <i class="fas fa-quote-left"></i>
     <p>{ABOUT_TEXT}</p>
-    <a href="/about.html" class="about-link" data-ym-goal="about_click">
-        О труппе и манифесте <i class="fas fa-arrow-right"></i>
-    </a>
 </div>
 <h3 class="panel-subtitle"><i class="fas fa-bullhorn swing-on-hover"></i> Анонсы и вести</h3>
 <div class="announce-list" id="news-container">
@@ -255,13 +252,13 @@ HTML;
     if ($archiveHtml !== '') {
         $tabs[] = ['id' => 'archive', 'icon' => 'fa-box-archive', 'label' => 'Архив', 'short' => 'Архив', 'body' => $archiveHtml, 'paged' => true];
     }
-    $tabs[] = ['id' => 'about', 'icon' => 'fa-masks-theater', 'label' => 'О театре', 'short' => 'Театр', 'body' => $aboutPanelHtml, 'paged' => false];
+    $tabs[] = ['id' => 'about', 'icon' => 'fa-masks-theater', 'label' => 'О студии', 'short' => 'Студия', 'body' => $aboutPanelHtml, 'paged' => false];
 
     $navHtml = '';
     $panelsHtml = '';
     // Панель вкладок нужна только когда есть реальный выбор — при
-    // минимальном наборе (Премьера + О театре, без анонсов/архива)
-    // отдельная навигация не добавляет ценности, доступ к «О театре»
+    // минимальном наборе (Премьера + О студии, без анонсов/архива)
+    // отдельная навигация не добавляет ценности, доступ к «О студии»
     // и так есть через футер.
     $showNav = count($tabs) > 2;
     foreach ($tabs as $i => $tab) {
@@ -299,57 +296,8 @@ HTML;
 
     file_put_contents(ROOT_DIR . '/index.html', $html);
 
-    // Генерация страницы «О студии»
-    $troupeStmt = $db->prepare("
-        SELECT name, voice_type, description, uuid
-        FROM artists
-        WHERE is_active = 1
-        ORDER BY sort_order ASC, name ASC
-    ");
-    $troupeStmt->execute();
-    $troupeMembers = $troupeStmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $troupeHtml = '';
-    foreach ($troupeMembers as $member) {
-        $avatarHtml = has_avatar($member['uuid'])
-            ? '<img src="' . h(get_avatar_url($member['uuid'])) . '" alt="' . h($member['name']) . '" loading="lazy">'
-            : '<i class="fas fa-theater-masks swing-on-hover"></i>';
-        $voiceTypeHtml = $member['voice_type']
-            ? '<p class="troupe-member-voice">' . h($member['voice_type']) . '</p>'
-            : '';
-        $descriptionHtml = $member['description']
-            ? '<p class="troupe-member-bio">' . h($member['description']) . '</p>'
-            : '';
-        $memberName = h($member['name']);
-        $monogram = h(mb_substr($member['name'], 0, 1));
-        $troupeHtml .= <<<HTML
-<div class="troupe-member">
-    <div class="troupe-member-avatar">{$avatarHtml}<span class="troupe-monogram" aria-hidden="true">{$monogram}</span></div>
-    <h3>{$memberName}</h3>
-    {$voiceTypeHtml}
-    {$descriptionHtml}
-</div>
-HTML;
-    }
-    $troupeHtml = $troupeHtml ?: '<p class="text-muted">Состав труппы скоро будет объявлен</p>';
-
-    $authorBioHtml = afisha_setting('author_bio') !== ''
-        ? '<p>' . h(afisha_setting('author_bio')) . '</p>'
-        : '';
-
-    $aboutHtml = render_template('about.html.tpl', [
-        'META' => generate_meta($metaData),
-        'HEADER' => generate_header(),
-        'FOOTER' => generate_footer('about'),
-        'THEME_CSS' => $themeCss,
-        'METRIKA_ID' => (int) afisha_setting('metrika_id'),
-
-        'ABOUT_TEXT' => h(afisha_setting('about_text')),
-        'TROUPE_GRID' => $troupeHtml,
-        'AUTHOR_NAME' => h(afisha_setting('default_author')),
-        'AUTHOR_BIO' => $authorBioHtml
-    ]);
-    file_put_contents(ROOT_DIR . '/about.html', $aboutHtml);
+    // Старый адрес «О студии» вёл на манифест. Текст студии живёт на вкладке афиши.
+    file_put_contents(ROOT_DIR . '/about.html', "<!DOCTYPE html>\n<html lang=\"ru\"><head><meta charset=\"UTF-8\"><title>О студии</title><meta http-equiv=\"refresh\" content=\"0; url=/#about\"><link rel=\"canonical\" href=\"/#about\"></head><body><p><a href=\"/#about\">О студии</a></p></body></html>\n");
 
     // Генерация страницы «404»
     $html = render_template('404.html.tpl', [
@@ -373,6 +321,7 @@ function generate_album($albumId) {
     }
 
     generate_index($outputDir, $data);
+    generate_troupe($outputDir, $data);
     generate_finale($outputDir, $data);
     generate_after($outputDir, $data);
 
@@ -432,6 +381,74 @@ function load_album_data($albumId) {
 // ============================================
 // ФУНКЦИИ ГЕНЕРАЦИИ ОТДЕЛЬНЫХ ФАЙЛОВ
 // ============================================
+function album_troupe_members(int $albumId): array {
+    $db = getDB();
+    $stmt = $db->prepare("
+        SELECT DISTINCT a.name, a.voice_type, a.description, a.uuid, a.sort_order
+        FROM artists a
+        JOIN track_artists ta ON ta.artist_id = a.id
+        JOIN release_tracks rt ON rt.track_id = ta.track_id
+        WHERE rt.release_id = ? AND a.is_active = 1
+        ORDER BY a.sort_order ASC, a.name ASC
+    ");
+    $stmt->execute([$albumId]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function render_troupe_grid(array $members): string {
+    $html = '';
+    foreach ($members as $member) {
+        $avatarHtml = has_avatar($member['uuid'])
+            ? '<img src="' . h(get_avatar_url($member['uuid'])) . '" alt="' . h($member['name']) . '" loading="lazy">'
+            : '<i class="fas fa-theater-masks swing-on-hover"></i>';
+        $voiceTypeHtml = $member['voice_type']
+            ? '<p class="troupe-member-voice">' . h($member['voice_type']) . '</p>'
+            : '';
+        $descriptionHtml = $member['description']
+            ? '<p class="troupe-member-bio">' . h($member['description']) . '</p>'
+            : '';
+        $memberName = h($member['name']);
+        $monogram = h(mb_substr($member['name'], 0, 1));
+        $html .= <<<HTML
+<div class="troupe-member">
+    <div class="troupe-member-avatar">{$avatarHtml}<span class="troupe-monogram" aria-hidden="true">{$monogram}</span></div>
+    <h3>{$memberName}</h3>
+    {$voiceTypeHtml}
+    {$descriptionHtml}
+</div>
+HTML;
+    }
+    return $html !== '' ? $html : '<p class="text-muted">Состав труппы скоро будет объявлен</p>';
+}
+
+function generate_troupe($outputDir, $data) {
+    $album = $data['album'];
+    $baseUrl = BASE_URL . '/albums/' . $album['slug'];
+    $authorBioHtml = afisha_setting('author_bio') !== ''
+        ? '<p>' . h(afisha_setting('author_bio')) . '</p>'
+        : '';
+    $metaData = [
+        'TITLE' => 'Труппа · ' . $album['title'] . ' · ' . afisha_setting('site_title'),
+        'DESCRIPTION' => afisha_setting('author_bio'),
+        'IMAGE' => get_cover_url($album['uuid']),
+        'URL' => $baseUrl . '/troupe.html',
+        'THEME_COLOR' => get_theme_bg_color($album['theme'] ?? 'default')
+    ];
+    $html = render_template('about.html.tpl', [
+        'META' => generate_meta($metaData),
+        'HEADER' => generate_header(),
+        'FOOTER' => generate_footer(),
+        'THEME_CSS' => getThemeCss($album),
+        'METRIKA_ID' => (int) afisha_setting('metrika_id'),
+        'TROUPE_GRID' => render_troupe_grid(album_troupe_members((int) $album['id'])),
+        'AUTHOR_NAME' => h(afisha_setting('default_author')),
+        'AUTHOR_BIO' => $authorBioHtml,
+        'BACK_HREF' => 'index.html',
+        'BACK_LABEL' => 'Вернуться к программке'
+    ]);
+    file_put_contents($outputDir . '/troupe.html', $html);
+}
+
 function generate_index($outputDir, $data) {
     $album = $data['album'];
     $baseUrl = BASE_URL . '/albums/' . $album['slug'];
