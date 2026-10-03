@@ -506,10 +506,10 @@ await page.evaluate(() => {
   audio.dispatchEvent(new Event('playing'));
 });
 check('эмоции на сцене', await page.$$eval('.emotion-option', (els) => els.length === 7));
-await page.click('.emotion-option');
+await page.click('.emotion-legend-item');
 await sleep(50);
 check('эмоция выбирается', await page.$eval('.emotion-option', (el) => el.classList.contains('selected')));
-await page.click('.emotion-option');
+await page.click('.emotion-legend-item');
 check('эмоция снимается', await page.$eval('.emotion-option', (el) => !el.classList.contains('selected')));
 const reaction = posts.filter((p) => p.path === 'reactions').pop();
 check('реакция не пишется в базу', !!reaction);

@@ -133,14 +133,17 @@ body {
     border: var(--border-width-thin) solid var(--theme-color-border);
     background: var(--theme-color-bg);
     aspect-ratio: 1/1;
+    width: min(100%, 50vh);
     max-height: 50vh;
+    height: auto;
+    align-self: center;
     flex-shrink: 0;
 }
 
 .stage-visual img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     /*opacity: 0;*/
     transition: opacity 0.4s ease;
 }
@@ -356,11 +359,50 @@ body {
 }
 
 .emotion-legend {
-    font-size: 1.2rem; 
-    opacity: 0.7; 
-    margin-bottom: 0.5rem; 
-    text-align: center; 
+    font-size: 1.2rem;
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+    text-align: center;
     line-height: 1.5;
+}
+
+#emotion-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.15rem 0.35rem;
+}
+
+.emotion-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.emotion-legend-item:not(:last-child)::after {
+    content: "·";
+    margin-left: 0.35rem;
+    opacity: 0.7;
+}
+
+.emotion-legend-item.selected {
+    opacity: 1;
+}
+
+.emotion-legend-item.bounce {
+    animation: emotionBounce 0.6s ease-in-out;
 }
 
 .emotion-selector {
@@ -554,6 +596,11 @@ body {
 }
 
 .finale-exit a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 0.6em;
     color: var(--theme-color-text-secondary);
     font-family: var(--theme-font-ui);
     font-size: max(var(--theme-text-xs), 0.75rem);
@@ -1022,7 +1069,7 @@ body {
 
     .stage-visual {
         flex: 1 1 auto;
-        min-height: 0;
+        min-height: 22vh;
         max-height: none;
         aspect-ratio: auto;
         position: relative;
@@ -1042,15 +1089,63 @@ body {
     }
 
     .player-section {
-        flex: 0 1 auto;
+        flex: 0 0 auto;
         width: 100%;
-        max-height: 48vh;
-        max-height: 48dvh;
-        overflow-y: auto;
+        max-height: none;
+        overflow: visible;
+        gap: 0.35vh;
         background: rgba(0, 0, 0, 0.7);
         border-radius: 0;
         z-index: 10;
-        padding-bottom: calc(1.5vh + env(safe-area-inset-bottom));
+        padding: 0.6vh 3vw calc(0.6vh + env(safe-area-inset-bottom));
+    }
+
+    .player-section .player-note {
+        margin: 0;
+    }
+
+    .player-section .progress-container::before,
+    .player-section .progress-bar {
+        height: 8px;
+        border-radius: 4px;
+    }
+
+    .player-section .progress-container::before {
+        background: color-mix(in srgb, var(--theme-color-text-primary) 55%, transparent);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--theme-color-accent-secondary) 65%, transparent);
+    }
+
+    .player-section .track-credits {
+        padding-top: 0.3vh;
+    }
+
+    .player-section .finale-actions {
+        margin-top: 0.2vh;
+    }
+
+    .player-section .emotion-selector-label {
+        margin-bottom: 0;
+    }
+
+    .player-section .emotion-selector {
+        display: none;
+    }
+
+    .player-section #emotion-legend {
+        margin-bottom: 0;
+        opacity: 1;
+        font-size: max(0.95rem, 3.5vw);
+        gap: 0 0.2rem;
+    }
+
+    .player-section .emotion-legend-item {
+        min-height: 44px;
+        padding: 0 0.1rem;
+    }
+
+    .player-section .emotion-legend-item.selected {
+        opacity: 1;
+        filter: drop-shadow(0 0 0.6vh currentColor);
     }
 
     .album-premiere,
@@ -1261,11 +1356,27 @@ body {
     color: var(--theme-color-accent);
 }
 
-/* Телефон лёжа: обложка 50vh съедает плеер, и подпись эмоций
-   обрезается краем кадра. Ниже — место для времени и кнопок. */
+/* Телефон лёжа: квадрат не шире колонки и не выше слота,
+   в котором ещё видны время и кнопки. Ширина равна высоте,
+   иначе квадратный кадр режется в широкую полосу. */
 @media (max-height: 520px) and (orientation: landscape) {
     .stage-visual {
-        max-height: 32vh;
+        width: min(100%, 42vh);
+        max-height: 42vh;
+    }
+    /* Квадрат сжимается до ~34vh, и кнопка в углу закрывает подпись на кадре. */
+    .album-cover-wrapper {
+        overflow: visible;
+    }
+    .album-cover-wrapper .media-video-toggle {
+        top: 50%;
+        left: calc(100% + 1vh);
+        right: auto;
+        bottom: auto;
+        transform: translateY(-50%);
+    }
+    .album-cover-wrapper .media-video-toggle:hover {
+        transform: translateY(-50%) scale(1.08);
     }
     .lyrics-column {
         height: auto;
