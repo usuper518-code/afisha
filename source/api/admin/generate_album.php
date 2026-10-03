@@ -247,14 +247,14 @@ HTML;
     $aboutPanelHtml = str_replace('{ABOUT_TEXT}', h(ABOUT_TEXT), $aboutPanelHtml);
 
     $tabs = [];
-    $tabs[] = ['id' => 'premiere', 'icon' => 'fa-star', 'label' => 'Премьера', 'body' => $premiereHtml, 'paged' => false];
+    $tabs[] = ['id' => 'premiere', 'icon' => 'fa-star', 'label' => 'Премьера', 'short' => 'Премьера', 'body' => $premiereHtml, 'paged' => false];
     if ($comingHtml !== '') {
-        $tabs[] = ['id' => 'coming', 'icon' => 'fa-hourglass-half', 'label' => 'Готовятся к постановке', 'body' => $comingHtml, 'paged' => true];
+        $tabs[] = ['id' => 'coming', 'icon' => 'fa-hourglass-half', 'label' => 'Готовятся к постановке', 'short' => 'Скоро', 'body' => $comingHtml, 'paged' => true];
     }
     if ($archiveHtml !== '') {
-        $tabs[] = ['id' => 'archive', 'icon' => 'fa-box-archive', 'label' => 'Архив', 'body' => $archiveHtml, 'paged' => true];
+        $tabs[] = ['id' => 'archive', 'icon' => 'fa-box-archive', 'label' => 'Архив', 'short' => 'Архив', 'body' => $archiveHtml, 'paged' => true];
     }
-    $tabs[] = ['id' => 'about', 'icon' => 'fa-masks-theater', 'label' => 'О театре', 'body' => $aboutPanelHtml, 'paged' => false];
+    $tabs[] = ['id' => 'about', 'icon' => 'fa-masks-theater', 'label' => 'О театре', 'short' => 'Театр', 'body' => $aboutPanelHtml, 'paged' => false];
 
     $navHtml = '';
     $panelsHtml = '';
@@ -266,7 +266,8 @@ HTML;
     foreach ($tabs as $i => $tab) {
         $activeClass = $i === 0 ? ' active' : '';
         if ($showNav) {
-            $navHtml .= '<button type="button" class="program-tab' . $activeClass . '" data-panel="' . $tab['id'] . '"><i class="fas ' . $tab['icon'] . '"></i><span>' . $tab['label'] . '</span></button>';
+            $short = $tab['short'] ?? $tab['label'];
+            $navHtml .= '<button type="button" class="program-tab' . $activeClass . '" data-panel="' . $tab['id'] . '"><i class="fas ' . $tab['icon'] . '"></i><span class="tab-long">' . $tab['label'] . '</span><span class="tab-short">' . $short . '</span></button>';
         }
         $pagedAttr = $tab['paged'] ? ' data-paged="1"' : '';
         $panelsHtml .= '<section class="program-panel' . $activeClass . '" id="panel-' . $tab['id'] . '"' . $pagedAttr . '>' . $tab['body'] . '</section>';
@@ -319,9 +320,10 @@ HTML;
             ? '<p class="troupe-member-bio">' . h($member['description']) . '</p>'
             : '';
         $memberName = h($member['name']);
+        $monogram = h(mb_substr($member['name'], 0, 1));
         $troupeHtml .= <<<HTML
 <div class="troupe-member">
-    <div class="troupe-member-avatar">{$avatarHtml}</div>
+    <div class="troupe-member-avatar">{$avatarHtml}<span class="troupe-monogram" aria-hidden="true">{$monogram}</span></div>
     <h3>{$memberName}</h3>
     {$voiceTypeHtml}
     {$descriptionHtml}
@@ -539,6 +541,7 @@ function generate_track($outputDir, $data, $track, $index) {
                 'cover' => get_cover_url($t['uuid'], 'track'),
                 'video' => has_video($t['uuid'], 'track') ? get_video_url($t['uuid'], 'track') : '',
                 'lyrics_timed' => parseLrc($t['lyrics_timed'] ?? ''),
+                'lyrics' => $t['lyrics'] ?? '',
                 'suggested_emotions' => $t['suggested_emotions'] ?? '',
                 'duration' => (int)($t['duration'] ?? 0),
                 'is_instrumental' => (bool)(int)($t['is_instrumental'] ?? 0),

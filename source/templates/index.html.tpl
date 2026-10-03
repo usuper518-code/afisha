@@ -31,13 +31,6 @@
                     <h1 class="album-title smolder-text">{{ALBUM_TITLE}}</h1>
                     <p class="album-subtitle">{{ALBUM_SUBTITLE}}</p>
 
-                    <div class="program">
-                        <h2 class="program-title"><i class="fas fa-scroll swing-on-hover"></i> Программа</h2>
-                        <ul class="tracklist">
-                            {{TRACKLIST}}
-                        </ul>
-                    </div>
-
                     <div class="album-meta">
                         <span><i class="fas fa-clock"></i> {{DURATION_TOTAL}}</span>
                         <span><i class="fas fa-users"></i> Труппа голосов</span>
@@ -50,6 +43,13 @@
                             <i class="fas fa-ticket-alt swing-on-hover"></i> НАЧАТЬ ПРЕДСТАВЛЕНИЕ</a>
                         <p class="action-hint">Занавес открывается...</p>
                         <p class="action-hint">Кликните и услышите шорохи зала...</p>
+                    </div>
+
+                    <div class="program">
+                        <h2 class="program-title"><i class="fas fa-scroll swing-on-hover"></i> Программа</h2>
+                        <ul class="tracklist">
+                            {{TRACKLIST}}
+                        </ul>
                     </div>
                     <div class="text-center mt-4">
                         <a href="/" class="album-btn">
@@ -76,22 +76,23 @@
         <div id="remind-modal" class="modal" style="display:none;">
             <div class="modal-content">
                 <span class="modal-close">✕</span>
-                <h3>Управление подпиской</h3>
+                <h3>Напомнить о премьере</h3>
+                <p class="remind-show"></p>
                 <form id="remind-form">
                     <div class="form-group">
-                        <label>Ваше имя</label>
-                        <input type="text" id="remind-name" name="name" required>
+                        <label for="remind-name">Ваше имя</label>
+                        <input type="text" id="remind-name" name="name" placeholder="Как к вам обращаться" required>
                     </div>
                     <div class="form-group">
-                        <label>Ваш email</label>
-                        <input type="email" id="remind-email" name="email" required>
+                        <label for="remind-email">Ваш email</label>
+                        <input type="email" id="remind-email" name="email" placeholder="name@example.com" required>
                     </div>
                     <div class="checkbox-group">
                         <input type="checkbox" id="remind-subscribe" name="subscribe" checked>
                         <label for="remind-subscribe">Сообщать о событиях</label>
                     </div>
                     <div class="form-actions">
-                        <button type="submit" class="album-btn album-btn-primary">Подписаться</button>
+                        <button type="submit" class="album-btn album-btn-primary">Напомнить</button>
                     </div>
                 </form>
             </div>
