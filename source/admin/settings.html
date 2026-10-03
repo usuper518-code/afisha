@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Афиша | Либретто Админ</title>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="/admin/css/common.css">
+        <link rel="stylesheet" href="/admin/css/admin-style.css">
+    </head>
+    <body>
+        <header>
+            <div class="container header-inner">
+                <div class="logo"><a href="/admin/">АДМИН-ПАНЕЛЬ</a></div>
+                <nav></nav>
+            </div>
+        </header>
+        <main class="container">
+            <h2>Афиша</h2>
+            <form id="afisha-form" class="form-container">
+                <label for="site_title">Название</label>
+                <input type="text" id="site_title" maxlength="255" required>
+
+                <label for="site_tagline">Подзаголовок в шапке</label>
+                <input type="text" id="site_tagline" maxlength="255">
+
+                <label for="slogan">Слоган в подвале</label>
+                <input type="text" id="slogan" maxlength="255">
+
+                <label for="about_text">Текст «О студии»</label>
+                <textarea id="about_text" rows="5"></textarea>
+
+                <label for="default_author">Автор по умолчанию</label>
+                <input type="text" id="default_author" maxlength="255">
+
+                <label for="author_bio">Коротко об авторе</label>
+                <textarea id="author_bio" rows="3"></textarea>
+
+                <label for="metrika_id">Номер Метрики</label>
+                <input type="text" id="metrika_id" maxlength="20" inputmode="numeric">
+
+                <label for="telegram_url">Ссылка Telegram</label>
+                <input type="url" id="telegram_url" placeholder="https://t.me/…">
+
+                <label for="stihi_url">Ссылка на стихи</label>
+                <input type="url" id="stihi_url" placeholder="https://…">
+
+                <div class="form-actions">
+                    <button type="submit" id="save-btn" class="btn">Сохранить</button>
+                </div>
+                <p id="afisha-note"></p>
+            </form>
+        </main>
+        <script src="/admin/js/common.js"></script>
+        <script src="/admin/js/admin-script.js"></script>
+        <script>
+            requireAdminAuth();
+            const fields = [
+                'site_title', 'site_tagline', 'slogan', 'about_text',
+                'default_author', 'author_bio', 'metrika_id',
+                'telegram_url', 'stihi_url'
+            ];
+
+            async function loadAfisha() {
+                const res = await adminApiRequest('/settings');
+                if (res.error) {
+                    document.getElementById('afisha-note').textContent = res.error;
+                    return;
+                }
+                const data = res.data || {};
+                fields.forEach((name) => {
+                    document.getElementById(name).value = data[name] || '';
+                });
+            }
+
+            document.getElementById('afisha-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const body = {};
+                fields.forEach((name) => {
+                    body[name] = document.getElementById(name).value;
+                });
+                setButtonsLoading(true, 'save-btn');
+                const res = await adminApiRequest('/settings', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(body)
+                });
+                setButtonsLoading(false, 'save-btn');
+                document.getElementById('afisha-note').textContent = res.error
+                    ? res.error
+                    : 'Сохранено. Страницы афиши собраны заново.';
+            });
+
+            loadAfisha();
+        </script>
+    </body>
+</html>

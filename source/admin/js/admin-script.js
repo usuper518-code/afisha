@@ -92,6 +92,7 @@ function setButtonLoading(buttonId, loading, text=null) {
 
 function renderAdminNav() {
     const navItems = [
+        {href: '/admin/settings.html', label: 'Афиша'},
         {href: '/admin/news.html', label: 'Новости'},
         {href: '/admin/releases.html', label: 'Релизы'},
         {href: '/admin/tracks.html', label: 'Треки'},

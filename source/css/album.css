@@ -762,6 +762,20 @@ body {
     display: block;
 }
 
+/* Название нарисовано по центру квадрата. Кнопка ролика — в углу,
+   чтобы не закрывать его. Бейдж премьеры сидит справа сверху. */
+.album-cover-wrapper .media-video-toggle {
+    top: auto;
+    left: auto;
+    bottom: var(--spacing-sm);
+    right: var(--spacing-sm);
+    transform: none;
+    z-index: 3;
+}
+.album-cover-wrapper .media-video-toggle:hover {
+    transform: scale(1.08);
+}
+
 .premiere-badge {
     position: absolute;
     top: 1.5vh;

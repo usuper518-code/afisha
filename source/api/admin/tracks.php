@@ -189,7 +189,7 @@ function chkData($data, $method) {
     if (isset($data['authors'])) {
         $data['authors'] = trim($data['authors']);
         if ($data['authors'] === '' && $method === 'POST') {
-            $data['authors'] = DEFAULT_AUTHOR;
+            $data['authors'] = afisha_setting('default_author');
             $newData['authors'] = $data['authors'];
         }
         $maxLen = 500;
@@ -274,7 +274,7 @@ if ($method === 'POST' && !$id) {
         $stmt->execute([
             $data['title'],
             $data['slug'],
-            $data['authors'] ?? DEFAULT_AUTHOR,
+            $data['authors'] ?? afisha_setting('default_author'),
             $data['lyrics'] ?? '',
             $data['suggested_emotions'] ?? '',
             $data['is_instrumental'] ?? 0,

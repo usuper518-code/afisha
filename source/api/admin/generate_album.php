@@ -4,22 +4,23 @@
 // Вызывается из админки: /admin/generate_album?id=1
 // ============================================
 
-if ($method !== 'GET') {
-    jsonError('Метод не разрешен', 405);
+if (($resource ?? '') === 'generate_album') {
+    if ($method !== 'GET') {
+        jsonError('Метод не разрешен', 405);
+    }
+
+    if (!$id) {
+        jsonError('Необходим ИД релиза', 400);
+    }
+
+    generate_afisha($id);
+    generate_album($id);
+
+    echo json_encode([
+        'success' => true
+    ]);
+    exit;
 }
-
-if (!$id) {
-    jsonError('Необходим ИД релиза', 400);
-}
-
-//error_log("!".get_meta_template()."!");
-
-generate_afisha($id);
-generate_album($id);
-
-echo json_encode([
-    'success' => true
-]);
 
 function generate_footer($page='') {
     $about = '';
@@ -40,11 +41,11 @@ function generate_footer($page='') {
 </footer>
 HTML;
     return render_content($content, [
-        'SITE_TITLE' => h(SITE_TITLE), 
-        'TELEGRAM_URL' => defined('TELEGRAM_URL') && TELEGRAM_URL ? '<a href="' . h(TELEGRAM_URL) . '" aria-label="Telegram" data-ym-goal="telegram_click"><i class="fab fa-telegram"></i></a>' : '',
-        'STIHI_URL' => defined('STIHI_URL') && STIHI_URL ? '<a href="' . h(STIHI_URL) . '" aria-label="Стихи" data-ym-goal="stihi_click"><i class="fas fa-book"></i></a>' : '',
+        'SITE_TITLE' => h(afisha_setting('site_title')), 
+        'TELEGRAM_URL' => afisha_setting('telegram_url') !== '' ? '<a href="' . h(afisha_setting('telegram_url')) . '" aria-label="Telegram" data-ym-goal="telegram_click"><i class="fab fa-telegram"></i></a>' : '',
+        'STIHI_URL' => afisha_setting('stihi_url') !== '' ? '<a href="' . h(afisha_setting('stihi_url')) . '" aria-label="Стихи" data-ym-goal="stihi_click"><i class="fas fa-book"></i></a>' : '',
         'CURRENT_YEAR' => date('Y'),
-        'SLOGAN' => h(SLOGAN),
+        'SLOGAN' => h(afisha_setting('slogan')),
         'ABOUT' => $about
     ]);
 }
@@ -63,8 +64,8 @@ function generate_header() {
 </header>
 HTML;
     return render_content($content, [
-        'SITE_TITLE' => h(SITE_TITLE), 
-        'SITE_TAGLINE' => h(SITE_TAGLINE)
+        'SITE_TITLE' => h(afisha_setting('site_title')), 
+        'SITE_TAGLINE' => h(afisha_setting('site_tagline'))
     ]);
 }
 
@@ -244,7 +245,7 @@ HTML;
     </div>
 </div>
 HTML;
-    $aboutPanelHtml = str_replace('{ABOUT_TEXT}', h(ABOUT_TEXT), $aboutPanelHtml);
+    $aboutPanelHtml = str_replace('{ABOUT_TEXT}', h(afisha_setting('about_text')), $aboutPanelHtml);
 
     $tabs = [];
     $tabs[] = ['id' => 'premiere', 'icon' => 'fa-star', 'label' => 'Премьера', 'short' => 'Премьера', 'body' => $premiereHtml, 'paged' => false];
@@ -274,8 +275,8 @@ HTML;
     }
 
     $metaData = [
-        'TITLE' => SITE_TITLE,
-        'DESCRIPTION' => SITE_TAGLINE,
+        'TITLE' => afisha_setting('site_title'),
+        'DESCRIPTION' => afisha_setting('site_tagline'),
         'IMAGE' => BASE_URL . '/media/preview.jpg',
         'URL' => BASE_URL,
         'THEME_COLOR' => get_theme_bg_color($theme)
@@ -290,7 +291,7 @@ HTML;
         
         'ALBUM_ID' => (int) $premiere['id'],
         'ALBUM_SLUG_JS' => json_for_script($premiere['slug']),
-        'METRIKA_ID' => (int) METRIKA_ID,
+        'METRIKA_ID' => (int) afisha_setting('metrika_id'),
         
         'PROGRAM_NAV' => $navHtml,
         'PROGRAM_PANELS' => $panelsHtml
@@ -332,8 +333,8 @@ HTML;
     }
     $troupeHtml = $troupeHtml ?: '<p class="text-muted">Состав труппы скоро будет объявлен</p>';
 
-    $authorBioHtml = AUTHOR_BIO !== ''
-        ? '<p>' . h(AUTHOR_BIO) . '</p>'
+    $authorBioHtml = afisha_setting('author_bio') !== ''
+        ? '<p>' . h(afisha_setting('author_bio')) . '</p>'
         : '';
 
     $aboutHtml = render_template('about.html.tpl', [
@@ -341,11 +342,11 @@ HTML;
         'HEADER' => generate_header(),
         'FOOTER' => generate_footer('about'),
         'THEME_CSS' => $themeCss,
-        'METRIKA_ID' => (int) METRIKA_ID,
+        'METRIKA_ID' => (int) afisha_setting('metrika_id'),
 
-        'ABOUT_TEXT' => h(ABOUT_TEXT),
+        'ABOUT_TEXT' => h(afisha_setting('about_text')),
         'TROUPE_GRID' => $troupeHtml,
-        'AUTHOR_NAME' => h(DEFAULT_AUTHOR),
+        'AUTHOR_NAME' => h(afisha_setting('default_author')),
         'AUTHOR_BIO' => $authorBioHtml
     ]);
     file_put_contents(ROOT_DIR . '/about.html', $aboutHtml);
@@ -354,7 +355,7 @@ HTML;
     $html = render_template('404.html.tpl', [
         'META' => generate_meta($metaData),
         'THEME_CSS' => $themeCss,
-        'METRIKA_ID' => (int) METRIKA_ID,
+        'METRIKA_ID' => (int) afisha_setting('metrika_id'),
     ]);
     file_put_contents(ROOT_DIR . '/404.html', $html);
 }
@@ -436,7 +437,7 @@ function generate_index($outputDir, $data) {
     $baseUrl = BASE_URL . '/albums/' . $album['slug'];
 
     $metaData = [
-        'TITLE' => $album['title'] . ' · ' . SITE_TITLE,
+        'TITLE' => $album['title'] . ' · ' . afisha_setting('site_title'),
         'DESCRIPTION' => $album['description'],
         'IMAGE' => get_cover_url($album['uuid']),
         'URL' => $baseUrl . '/',
@@ -465,7 +466,7 @@ function generate_index($outputDir, $data) {
         
         'ALBUM_ID' => (int) $album['id'],
         'ALBUM_SLUG_JS' => json_for_script($album['slug']),
-        'METRIKA_ID' => (int) METRIKA_ID,
+        'METRIKA_ID' => (int) afisha_setting('metrika_id'),
         'EMOTION_MAP_JSON' => json_for_script(getEmotionMapSimple()),
         
         'ALBUM_COVER' => h(get_cover_url($album['uuid'])),
@@ -511,7 +512,7 @@ function generate_track($outputDir, $data, $track, $index) {
         
         'ALBUM_ID' => (int) $album['id'],
         'ALBUM_SLUG_JS' => json_for_script($album['slug']),
-        'METRIKA_ID' => (int) METRIKA_ID,
+        'METRIKA_ID' => (int) afisha_setting('metrika_id'),
 
         //для интерфейса
         'TRACK_NUM' => (int) $trackNum,  
@@ -576,7 +577,7 @@ function generate_finale($outputDir, $data) {
         
         'ALBUM_ID' => (int) $album['id'],
         'ALBUM_SLUG_JS' => json_for_script($album['slug']),
-        'METRIKA_ID' => (int) METRIKA_ID,
+        'METRIKA_ID' => (int) afisha_setting('metrika_id'),
         'TRACKS_JSON' => $tracksJson,
         'EMOTION_MAP_JSON' => json_for_script(getEmotionMapSimple()),
         
@@ -606,7 +607,7 @@ function generate_after($outputDir, $data) {
         
         'ALBUM_ID' => (int) $album['id'],
         'ALBUM_SLUG_JS' => json_for_script($album['slug']),
-        'METRIKA_ID' => (int) METRIKA_ID,
+        'METRIKA_ID' => (int) afisha_setting('metrika_id'),
 
         'ALBUM_TITLE' => h($album['title'])
     ]);

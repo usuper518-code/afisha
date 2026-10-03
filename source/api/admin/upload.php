@@ -40,10 +40,8 @@ if ($action === 'release_cover' && $id) {
     }
     $targetPath = $targetDir . '/cover.jpg';
 
-    if (!optimizeImage($file['tmp_name'], $targetPath, 1200)) {
-        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-            jsonError('Ошибка сохранения', 500);
-        }
+    if (!optimizeImage($file['tmp_name'], $targetPath)) {
+        jsonError('Ошибка сохранения', 500);
     }
 
     $url = get_cover_url($release['uuid']);
@@ -86,10 +84,8 @@ if ($action === 'track_cover' && $id) {
     }
     $targetPath = $targetDir . '/cover.jpg';
 
-    if (!optimizeImage($file['tmp_name'], $targetPath, 1200)) {
-        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-            jsonError('Ошибка сохранения', 500);
-        }
+    if (!optimizeImage($file['tmp_name'], $targetPath)) {
+        jsonError('Ошибка сохранения', 500);
     }
 
     $url = get_cover_url($track['uuid'], 'track');
@@ -132,7 +128,7 @@ if ($action === 'track_video' && $id) {
     }
     $targetPath = $targetDir . '/video.mp4';
 
-    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+    if (!fitSquareVideo($file['tmp_name'], $targetPath)) {
         jsonError('Ошибка сохранения', 500);
     }
 
@@ -175,10 +171,8 @@ if ($action === 'artist_cover' && $id) {
     }
     $targetPath = $targetDir . '/avatar.jpg';
 
-    if (!optimizeImage($file['tmp_name'], $targetPath, 800)) {
-        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-            jsonError('Ошибка сохранения', 500);
-        }
+    if (!optimizeImage($file['tmp_name'], $targetPath)) {
+        jsonError('Ошибка сохранения', 500);
     }
 
     $url = get_avatar_url($artist['uuid']);
