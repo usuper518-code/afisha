@@ -338,7 +338,37 @@ function bindFormEvents() {
         if (field.ajaxSearch) {
             initAjaxSearch(field);
         }
-    });    
+    });
+
+    bindAutoSlug();
+}
+
+// Код заполняется из названия. У тега и артиста поле называется name, у альбома и трека — title.
+function bindAutoSlug() {
+    if (!formConfig.autoSlug) return;
+    const slugInput = document.getElementById('slug');
+    const source = document.getElementById('title') || document.getElementById('name');
+    if (!slugInput || !source) return;
+
+    let slugTouched = slugInput.value.trim() !== '';
+    slugInput.addEventListener('input', () => {
+        slugTouched = slugInput.value.trim() !== '';
+    });
+    const fill = () => {
+        if (slugTouched) return;
+        const text = source.value.trim();
+        slugInput.value = text ? generateSlug(text) : '';
+    };
+    source.addEventListener('input', fill);
+}
+
+function fillSlugFromTitle(data) {
+    if (!formConfig.autoSlug || data.slug) return;
+    const source = data.title || data.name;
+    if (!source) return;
+    data.slug = generateSlug(source);
+    const slugInput = document.getElementById('slug');
+    if (slugInput) slugInput.value = data.slug;
 }
 
 async function saveEntity() {
@@ -357,10 +387,7 @@ async function saveEntity() {
         }
     });
 
-    if (formConfig.autoSlug && !data.slug && data.title) {
-        data.slug = generateSlug(data.title);
-        document.getElementById('slug').value = data.slug;
-    }
+    fillSlugFromTitle(data);
 
     // связанные таблицы
     if (formConfig.relatedLists) {
