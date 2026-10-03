@@ -24,6 +24,8 @@ define('MAX_COVER_SIZE', 10); // MB
 define('MAX_VIDEO_SIZE', 10); // MB
 // Обложки и ролики приводим к одному квадрату. Других размеров в загрузке нет.
 define('MEDIA_SIDE', 628);
+// Путь к ffmpeg. Пустая строка — ролик сохраняется как загружен, без обрезки в квадрат.
+define('FFMPEG_PATH', '/usr/bin/ffmpeg');
 define('MAX_MP3_SIZE', 50); // MB
 // Путь к библиотеке getID3
 define('GETID3_PATH', __DIR__ . '/vendor/getid3/getid3.php');
