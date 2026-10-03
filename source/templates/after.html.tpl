@@ -23,8 +23,8 @@
                 <div class="feedback-section old-paper-css">
                     <form class="feedback-form" id="feedback-form">
                         <div class="form-group">
-                            <label>Ваше имя</label>
-                            <input type="text" name="name" required autofocus>
+                            <label for="guest-name">Ваше имя</label>
+                            <input type="text" id="guest-name" name="name" placeholder="Как к вам обращаться" required autofocus>
                         </div>
 
                         <div class="form-group">

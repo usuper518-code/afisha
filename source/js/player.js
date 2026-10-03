@@ -9,6 +9,16 @@
         this.playReported = false;
         this.playBtn = document.getElementById('play-pause-btn');
         this.bounceInterval = null;
+        this.timeEl = document.getElementById('player-time');
+        if (!this.timeEl) {
+            const bar = document.getElementById('progress-container');
+            if (bar) {
+                this.timeEl = document.createElement('p');
+                this.timeEl.id = 'player-time';
+                this.timeEl.className = 'player-time';
+                bar.insertAdjacentElement('afterend', this.timeEl);
+            }
+        }
 
         // Инициализируем плееры
         this.playerA = document.getElementById('player-A');
@@ -205,18 +215,46 @@
         }
         this.syncStageVideo(track);        
 
-        // Текст и таймкоды
+        // Текст и таймкоды. Караоке — только из таймкодов.
+        // Обычный текст (куплет или пометка) не называем инструменталом.
         const lyricsContainer = document.getElementById('lyrics-container');
-        lyricsContainer.innerHTML = '<p class="no-lyrics"><i class="fas fa-music"></i> Инструментальная композиция</p>';
-        overlayText.innerHTML = '';        
-        if (track.lyrics_timed && track.lyrics_timed.length) {
+        const note = document.getElementById('player-note');
+        if (note) note.remove();
+        overlayText.innerHTML = '';
+        const plain = (track.lyrics || '').trim();
+        const timed = track.lyrics_timed || [];
+        if (track.is_instrumental || (!timed.length && !plain)) {
+            lyricsContainer.innerHTML = '<p class="no-lyrics"><i class="fas fa-music"></i> Инструментальная композиция</p>';
+        } else if (timed.length) {
             lyricsContainer.innerHTML = '';
-            track.lyrics_timed.forEach(item => {
+            timed.forEach(item => {
                 const p = document.createElement('p');
                 p.className = 'lyric-line';
                 p.textContent = item.text;
                 lyricsContainer.appendChild(p);
             });
+        } else {
+            lyricsContainer.innerHTML = '';
+            plain.split(/\n+/).forEach(line => {
+                const p = document.createElement('p');
+                p.className = 'lyric-line';
+                p.textContent = line;
+                lyricsContainer.appendChild(p);
+            });
+            if (this.karaoke && plain.includes('\n')) {
+                plain.split(/\n+/).slice(0, 6).forEach(line => {
+                    const p = document.createElement('p');
+                    p.className = 'lyrics-overlay-line';
+                    p.textContent = line;
+                    overlayText.appendChild(p);
+                });
+            } else if (this.karaoke) {
+                const hint = document.createElement('p');
+                hint.id = 'player-note';
+                hint.className = 'player-note';
+                hint.textContent = plain;
+                document.querySelector('.player-section')?.prepend(hint);
+            }
         }
 
         this.renderEmotions(track);
@@ -298,13 +336,16 @@
             logEvent('play', 'track', window.CURRENT_TRACK_ID);
         }
         
+        this.paintTime(player);
         const lyricsLines = document.querySelectorAll('.lyric-line');
         const overlayText = document.getElementById('lyrics-overlay-text');
         const track = this.tracks[this.currentIndex];
+        const timed = track.lyrics_timed || [];
+        if (!timed.length) return;
         
         const t = player.currentTime;
         let active = -1;
-        for (let i = track.lyrics_timed.length - 1; i >= 0; i--) {
+        for (let i = timed.length - 1; i >= 0; i--) {
             if (track.lyrics_timed[i].time <= t) {
                 active = i;
                 break;
@@ -313,7 +354,7 @@
 
         if (this.karaoke) {
             const start = Math.max(0, active - 2);
-            const end = Math.min(track.lyrics_timed.length, start + 5);
+            const end = Math.min(timed.length, start + 5);
             overlayText.replaceChildren();
             for (let i = start; i < end; i++) {
                 if (!lyricsLines[i]) continue;
@@ -331,6 +372,17 @@
                 lyricsLines[active].scrollIntoView({ behavior: 'smooth', block: 'center' });
             }          
         }
+    }
+
+    paintTime(player) {
+        if (!this.timeEl) return;
+        const clock = (sec) => {
+            const safe = Number.isFinite(sec) && sec > 0 ? sec : 0;
+            const whole = Math.floor(safe);
+            return Math.floor(whole / 60) + ':' + String(whole % 60).padStart(2, '0');
+        };
+        const total = player.duration || this.tracks[this.currentIndex]?.duration || 0;
+        this.timeEl.textContent = clock(player.currentTime) + ' / ' + clock(total);
     }
 
     updateVolume(value=null) {

@@ -33,18 +33,18 @@
                         <span class="palm" data-rating="5">👏</span>
                     </div>
                     <div class="bravo-bis">
-                        <button class="btn-bravo" data-rating="6">✦ БРАВО ✦</button>
-                        <button class="btn-bis" data-rating="7">✦ БИС ✦</button>
+                        <button class="btn-bravo" data-rating="6">Браво</button>
+                        <button class="btn-bis" data-rating="7">Бис</button>
                     </div>
+                </div>
+
+                <div class="finale-actions">
+                    <a href="after.html" class="album-btn album-btn-primary"><i class="fas fa-book"></i> Получить буклет</a>
                 </div>
 
                 <div class="finale-emotions-container">
                     <p class="emotion-selector-label">Ваши эмоции</p>
                     <div id="finale-emotions-table"></div>
-                </div>
-
-                <div class="finale-actions">
-                    <a href="after.html" class="album-btn album-btn-primary"><i class="fas fa-book"></i> Получить буклет</a>
                 </div>
                 <p class="finale-exit"><a href="/"><i class="fas fa-home"></i> Вернуться к афише</a></p>
             </main>

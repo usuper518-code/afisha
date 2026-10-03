@@ -38,6 +38,17 @@ function initIndexPage() {
     const premiere = new Date(window.PREMIERE_DATE + 'T00:00:00');
     const btn = document.getElementById('action-button');
     const remindModal = document.getElementById('remind-modal');
+    const remindTitle = remindModal && remindModal.querySelector('h3');
+    if (remindTitle) remindTitle.textContent = 'Напомнить о премьере';
+    const showName = document.querySelector('.album-title')?.textContent?.trim();
+    if (remindModal && showName && !remindModal.querySelector('.remind-show')) {
+        const caption = document.createElement('p');
+        caption.className = 'remind-show';
+        caption.textContent = showName;
+        remindTitle.after(caption);
+    } else if (remindModal && showName) {
+        remindModal.querySelector('.remind-show').textContent = showName;
+    }
     const reviewsСontainer = document.getElementById('reviews-container');
     
     // Если дата премьеры в будущем
@@ -67,7 +78,7 @@ function initIndexPage() {
                     if (userData.email) savedEmail = userData.email;
                 }
             }
-            document.getElementById('remind-name').value = savedName;
+            document.getElementById('remind-name').value = usableName(savedName);
             document.getElementById('remind-email').value = savedEmail;
             remindModal.style.display = 'flex';        
         });
@@ -233,6 +244,13 @@ function initFinalePage() {
         const allEmotions = Object.keys(emojis);
         const savedAll = loadEmotions();
 
+        if (!container.previousElementSibling?.classList.contains('emotion-legend')) {
+            const legend = document.createElement('p');
+            legend.className = 'emotion-legend';
+            legend.textContent = Object.values(emojis).map((data) => data.emoji + ' ' + data.name).join(' · ');
+            container.before(legend);
+        }
+
         window.ALBUM_TRACKS.forEach(track => {
             const trackEmotions = savedAll[track.id] || [];
 
@@ -251,6 +269,7 @@ function initFinalePage() {
                 const icon = document.createElement('span');
                 icon.className = `emotion-icon ${code} ${trackEmotions.includes(code) ? 'selected' : ''}`;
                 icon.textContent = emojis[code].emoji;
+                icon.title = emojis[code].name || '';
                 iconsDiv.appendChild(icon);
             });
 
@@ -258,6 +277,12 @@ function initFinalePage() {
             container.appendChild(row);
         });
     }
+}
+
+function usableName(name) {
+    const value = (name || '').trim();
+    if (!value || value === 'Гость') return '';
+    return value;
 }
 
 function feedbackNote(status, booklet, reviewText) {
@@ -291,7 +316,7 @@ function initAfterPage() {
 
     apiRequest('get-user-profile', {}, null, {method: 'GET'}).then(data => {
         if (data && data.success) {
-            const name = data.name || '';
+            const name = usableName(data.name);
             const email = data.email || '';
             sessionStorage.setItem('twit_name', name);
             sessionStorage.setItem('twit_email', email);
@@ -305,7 +330,7 @@ function initAfterPage() {
     });
 
     // Восстанавливаем имя и email из sessionStorage
-    const savedName = sessionStorage.getItem('twit_name');
+    const savedName = usableName(sessionStorage.getItem('twit_name'));
     const savedEmail = sessionStorage.getItem('twit_email');
 
     if (savedName) {
