@@ -1058,6 +1058,30 @@ body {
     .finale-message {
         max-width: 92vw;
     }
+
+    .finale-title {
+        /* 5.2vh и 0.3em растягивают «СПЕКТАКЛЯ» шире телефона. */
+        font-size: min(var(--theme-text-2xl), 8vw);
+        letter-spacing: 0.08em;
+        margin-right: -0.08em;
+        padding-inline: 2vw;
+        box-sizing: border-box;
+    }
+
+    .premiere-badge {
+        top: 1.2vh;
+        right: 3%;
+        left: auto;
+        width: max-content;
+        max-width: 94%;
+        letter-spacing: 0.05em;
+        font-size: max(1.6vh, 0.75rem);
+        line-height: 1.3;
+        text-align: center;
+        white-space: normal;
+        transform: none;
+        box-sizing: border-box;
+    }
 }
 
 .scroll-btn {

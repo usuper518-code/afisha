@@ -27,6 +27,13 @@ function initProgramNav() {
     const viewport = document.querySelector('.program-viewport');
     if (!nav || !viewport) return;
 
+    const header = document.querySelector('.afisha-header');
+    if (header) {
+        const pin = () => { nav.style.top = header.offsetHeight + 'px'; };
+        pin();
+        if (window.ResizeObserver) new ResizeObserver(pin).observe(header);
+    }
+
     const tabs = Array.from(nav.querySelectorAll('.program-tab'));
     const panels = Array.from(viewport.querySelectorAll('.program-panel'));
 

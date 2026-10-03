@@ -383,14 +383,19 @@ h1, h2, h3, h4 {
 /* ПРОГРАММКА: ОБЛАСТЬ ПОКАЗА (БЕЗ ПРОКРУТКИ)   */
 /* ============================================ */
 
+.container {
+    /* Тот же проём, что у карточек: подвал вне .program-viewport,
+       и без своей копии переменная до него не доходит. */
+    --proscenium: max(0px, calc(5vw + var(--afisha-spacing-sm) - (100vw - min(100vw, 100vh * 16 / 9)) / 2 - 1.5vw));
+    --proscenium: max(0px, calc(5vw + var(--afisha-spacing-sm) - (100vw - min(100vw, 100dvh * 16 / 9)) / 2 - 1.5vw));
+}
+
 .program-viewport {
     position: relative;
     min-height: 62vh;
     perspective: 250vh;
     /* Открытые шторы — 5vw от края окна. Текст и карточки остаются
        в проёме, а не под тканью. 1.5vw уже съедает padding контейнера. */
-    --proscenium: max(0px, calc(5vw + var(--afisha-spacing-sm) - (100vw - min(100vw, 100vh * 16 / 9)) / 2 - 1.5vw));
-    --proscenium: max(0px, calc(5vw + var(--afisha-spacing-sm) - (100vw - min(100vw, 100dvh * 16 / 9)) / 2 - 1.5vw));
     padding-left: var(--proscenium);
     padding-right: var(--proscenium);
 }
@@ -712,6 +717,9 @@ h1, h2, h3, h4 {
 .afisha-footer {
     margin-top: var(--afisha-spacing-xl);
     padding-top: var(--afisha-spacing-xl);
+    /* Строка на всю ширину заходила под открытые шторы. */
+    padding-left: var(--proscenium, 0px);
+    padding-right: var(--proscenium, 0px);
     border-top: 0.2vh solid var(--theme-color-border);
     font-family: var(--theme-font-ui);
     /* 1.5vh на низком экране схлопывает строку до ~6px, и она
@@ -986,12 +994,22 @@ h1, h2, h3, h4 {
         --afisha-text-xl: 3vh;
     }
     .afisha-logo {
-        font-size: var(--theme-text-xl);
-        letter-spacing: 0.2em;
-        gap: var(--afisha-spacing-sm);
+        /* 4.2vh и 0.2em на ширине 390px выносят «Студию» за clip контейнера.
+           Значок громкости стоит в том же правом углу. */
+        font-size: max(2.6vh, 1rem);
+        letter-spacing: 0.1em;
+        margin-right: -0.1em;
+        gap: 0.8vh;
+        flex-wrap: nowrap;
+        max-width: 100%;
     }
     .afisha-logo i {
-        font-size: 4vh;
+        font-size: 3.2vh;
+        flex-shrink: 0;
+    }
+    body:has(#volume-control) .afisha-header {
+        padding-left: max(4vw, 5.5vh);
+        padding-right: max(4vw, 5.5vh);
     }
     .afisha-tagline {
         font-size: max(var(--theme-text-base), 0.75rem);
@@ -1003,8 +1021,15 @@ h1, h2, h3, h4 {
     }
     .afisha-btn-large {
         padding: var(--afisha-spacing-md) var(--afisha-spacing-lg);
-        width: 100%;
-        max-width: 50vw;
+        width: auto;
+        max-width: 100%;
+        letter-spacing: 0.12em;
+        white-space: nowrap;
+    }
+    /* Бахрома открытого занавеса висит на нижних ~9% кадра.
+       Иначе приписка в подвале остаётся под ней. */
+    body:has(#curtain-canvas) .container {
+        padding-bottom: 9vh;
     }
     .about-content {
         max-width: 100%;

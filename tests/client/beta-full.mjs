@@ -318,6 +318,17 @@ await page.evaluate(() => {
   };
 });
 await page.click('.program-tab[data-panel="archive"]');
+// Шапка и вкладки липкие. Кнопка ролика может лежать под ними,
+// хотя формально она ещё в окне — клик тогда попадает в шапку.
+await page.evaluate(() => {
+  const btn = document.querySelector('#panel-archive .media-video-toggle');
+  const bar = Math.max(
+    document.querySelector('.afisha-header')?.getBoundingClientRect().bottom || 0,
+    document.querySelector('.program-nav')?.getBoundingClientRect().bottom || 0,
+  );
+  const top = btn.getBoundingClientRect().top;
+  if (top < bar + 8) window.scrollBy(0, top - bar - 8);
+});
 await page.click('#panel-archive .media-video-toggle');
 await sleep(200);
 check('сбой видео не запирает кнопку', await page.evaluate(() => {
