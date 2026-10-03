@@ -554,6 +554,11 @@ body {
 }
 
 .finale-exit a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 0.6em;
     color: var(--theme-color-text-secondary);
     font-family: var(--theme-font-ui);
     font-size: max(var(--theme-text-xs), 0.75rem);
@@ -1266,6 +1271,20 @@ body {
 @media (max-height: 520px) and (orientation: landscape) {
     .stage-visual {
         max-height: 32vh;
+    }
+    /* Квадрат сжимается до ~34vh, и кнопка в углу закрывает подпись на кадре. */
+    .album-cover-wrapper {
+        overflow: visible;
+    }
+    .album-cover-wrapper .media-video-toggle {
+        top: 50%;
+        left: calc(100% + 1vh);
+        right: auto;
+        bottom: auto;
+        transform: translateY(-50%);
+    }
+    .album-cover-wrapper .media-video-toggle:hover {
+        transform: translateY(-50%) scale(1.08);
     }
     .lyrics-column {
         height: auto;
