@@ -101,15 +101,15 @@ function generate_afisha($albumId) {
                 JOIN tracks t ON rt.track_id = t.id 
                 WHERE rt.release_id = r.id) AS duration_total
         FROM releases r
-        WHERE r.is_published = 1 AND (r.is_premiere = 1 or r.id = ?)
-        ORDER BY r.is_premiere DESC, r.premiere_date DESC
+        WHERE r.is_published = 1 OR r.id = ?
+        ORDER BY r.is_premiere DESC, r.is_published DESC, (r.id = ?) DESC, r.premiere_date DESC
         LIMIT 1
     ");
-    $stmtPremiere->execute([$albumId]);
+    $stmtPremiere->execute([$albumId, $albumId]);
     $premiere = $stmtPremiere->fetch(PDO::FETCH_ASSOC);
 
     if (!$premiere) {
-        throw new Exception('Нет данных для афиши');
+        throw new Exception('Альбом не найден');
     }
 
     // 2. Ожидаемые релизы (is_premiere = 0, дата премьеры в будущем)

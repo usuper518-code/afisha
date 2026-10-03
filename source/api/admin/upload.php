@@ -57,6 +57,47 @@ if ($action === 'release_cover' && $id) {
     jsonResponse(['url' => $url]);
 }
 
+// POST /admin/upload/release_video?id={id}
+if ($action === 'release_video' && $id) {
+    if (!isset($_FILES['file'])) {
+        jsonError('Файл отсутствует', 400);
+    }
+
+    $file = $_FILES['file'];
+    rejectBadUpload($file);
+    if ($file['size'] > MAX_VIDEO_SIZE * 1024 * 1024) {
+        jsonError('Файл больше ' . MAX_VIDEO_SIZE . ' MB', 400);
+    }
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    if (!in_array($mime, ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/3gpp'], true)) {
+        jsonError('Неверный тип файла', 400);
+    }
+
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT uuid FROM releases WHERE id = ?");
+    $stmt->execute([$id]);
+    $release = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$release) {
+        jsonError('Релиз не найден', 404);
+    }
+
+    $targetDir = UPLOAD_DIR . 'release/' . $release['uuid'];
+    if (!is_dir($targetDir)) {
+        mkdir($targetDir, 0755, true);
+    }
+    $targetPath = $targetDir . '/video.mp4';
+
+    if (!fitSquareVideo($file['tmp_name'], $targetPath)) {
+        jsonError('Ошибка сохранения', 500);
+    }
+
+    $url = get_video_url($release['uuid']);
+    jsonResponse(['url' => $url]);
+}
+
 // POST /admin/upload/track_cover?id={id}
 if ($action === 'track_cover' && $id) {
     if (!isset($_FILES['file'])) {
