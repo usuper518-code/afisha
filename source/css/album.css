@@ -116,6 +116,13 @@ body {
     padding: 2vh 0;
 }
 
+/* Одна короткая пометка не должна прилипать к верхнему краю пустой колонки. */
+.lyrics-text:has(> :only-child) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* ---------- ПРАВАЯ КОЛОНКА (ПЛЕЕР) ---------- */
 .stage-column {
     display: flex;
@@ -182,10 +189,16 @@ body {
     border: var(--border-width-thin) solid var(--theme-color-border);
     border-radius: var(--theme-radius-md);
     box-shadow: var(--theme-shadow-lg);
-    display: flex;
-    flex-direction: column;
-    gap: 1.5vh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 0.75rem;
+    row-gap: 1.2vh;
     flex-shrink: 0;
+}
+
+.player-section > * {
+    grid-column: 1 / -1;
 }
 
 #audio-player { display: none; }
@@ -270,6 +283,7 @@ body {
 
 /* Прогресс-бар */
 .progress-container {
+    grid-column: 1;
     width: 100%;
     height: 28px;
     min-height: 28px;
@@ -289,10 +303,10 @@ body {
     left: 0;
     right: 0;
     top: 50%;
-    height: 4px;
+    height: 8px;
     transform: translateY(-50%);
-    background: var(--theme-color-border);
-    border-radius: 2px;
+    background: color-mix(in srgb, var(--theme-color-text-primary) 42%, transparent);
+    border-radius: 4px;
 }
 
 .progress-container:hover {
@@ -303,18 +317,20 @@ body {
     position: relative;
     z-index: 1;
     width: 0%;
-    height: 4px;
+    height: 8px;
     background: var(--theme-color-accent-secondary);
-    border-radius: 2px;
+    border-radius: 4px;
     transition: width 0.1s linear;
 }
 
 .player-time {
+    grid-column: 2;
     margin: 0;
-    text-align: center;
+    text-align: right;
+    white-space: nowrap;
     font-family: var(--theme-font-ui);
     font-size: max(0.875rem, var(--theme-text-sm));
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     color: var(--theme-color-text-secondary);
 }
 
@@ -372,6 +388,7 @@ body {
     justify-content: center;
     align-items: center;
     gap: 0.15rem 0.35rem;
+    opacity: 1;
 }
 
 .emotion-legend-item {
@@ -1035,6 +1052,11 @@ body {
 
 #volume-control {
     color: var(--theme-color-accent-secondary);
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* --- Оверлей для караоке-лирики (по умолчанию скрыт) --- */
@@ -1064,17 +1086,20 @@ body {
         display: flex;
         flex-direction: column;
         gap: 0;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
     }
 
     .stage-visual {
-        flex: 1 1 auto;
-        min-height: 22vh;
-        max-height: none;
-        aspect-ratio: auto;
-        position: relative;
+        flex: 0 0 auto;
         width: 100%;
         height: auto;
+        aspect-ratio: 1 / 1;
+        min-height: 0;
+        max-height: none;
+        position: relative;
         border: none;
         border-radius: 0;
         box-shadow: none;
@@ -1085,7 +1110,7 @@ body {
     .stage-visual img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
     }
 
     .player-section {
@@ -1093,11 +1118,12 @@ body {
         width: 100%;
         max-height: none;
         overflow: visible;
-        gap: 0.35vh;
+        row-gap: 1.2vh;
+        column-gap: 0.6rem;
         background: rgba(0, 0, 0, 0.7);
         border-radius: 0;
         z-index: 10;
-        padding: 0.6vh 3vw calc(0.6vh + env(safe-area-inset-bottom));
+        padding: 1.4vh 4vw calc(1.6vh + env(safe-area-inset-bottom));
     }
 
     .player-section .player-note {
@@ -1115,16 +1141,12 @@ body {
         box-shadow: 0 0 0 1px color-mix(in srgb, var(--theme-color-accent-secondary) 65%, transparent);
     }
 
-    .player-section .track-credits {
-        padding-top: 0.3vh;
+    .player-section .emotion-selector-label {
+        margin-bottom: 0.2rem;
     }
 
     .player-section .finale-actions {
-        margin-top: 0.2vh;
-    }
-
-    .player-section .emotion-selector-label {
-        margin-bottom: 0;
+        margin-top: 12vh;
     }
 
     .player-section .emotion-selector {
@@ -1356,13 +1378,110 @@ body {
     color: var(--theme-color-accent);
 }
 
-/* Телефон лёжа: квадрат не шире колонки и не выше слота,
-   в котором ещё видны время и кнопки. Ширина равна высоте,
-   иначе квадратный кадр режется в широкую полосу. */
+/* Горизонтальный кадр: плеер — главный экран и целиком
+   помещается рядом с текстом. Обложка отдаёт место кнопкам
+   и остаётся квадратом. */
+@media (orientation: landscape) {
+    .track-page {
+        height: 100dvh;
+        max-height: 100dvh;
+        overflow: hidden;
+    }
+
+    .track-page .track-layout {
+        flex: 1 1 auto;
+        min-height: 0;
+        align-items: stretch;
+    }
+
+    .track-page .lyrics-column,
+    .track-page .stage-column {
+        height: 100%;
+        max-height: 100%;
+        min-height: 0;
+    }
+
+    .track-page .lyrics-column {
+        overflow: hidden;
+    }
+
+    .track-page .stage-visual {
+        flex: 1 1 auto;
+        min-height: 0;
+        width: auto;
+        max-width: 100%;
+        height: auto;
+        max-height: 100%;
+        aspect-ratio: 1 / 1;
+        align-self: center;
+    }
+}
+
+/* Телефон лёжа: колонка текста уже, квадрат стоит слева от
+   кнопок и не режется в полосу. */
 @media (max-height: 520px) and (orientation: landscape) {
-    .stage-visual {
-        width: min(100%, 42vh);
-        max-height: 42vh;
+    .track-page .track-layout {
+        grid-template-columns: 10.5rem minmax(0, 1fr);
+    }
+
+    .track-page .stage-column {
+        flex-direction: row;
+        align-items: center;
+        gap: 1.2vw;
+    }
+
+    .track-page .stage-visual {
+        flex: 0 0 auto;
+        align-self: center;
+        width: min(42vh, 18rem);
+        height: min(42vh, 18rem);
+        max-width: 46%;
+        max-height: 100%;
+        aspect-ratio: 1 / 1;
+    }
+
+    .track-page .player-section {
+        flex: 1 1 auto;
+        align-self: stretch;
+        min-width: 0;
+        max-height: 100%;
+        overflow: auto;
+        row-gap: 0.25vh;
+        /* Значок громкости висит в правом верхнем углу кадра. */
+        padding: 2.6rem 0.8vw 0.5vh;
+    }
+
+    .track-page .lyrics-text:has(> :only-child) {
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    .track-page .player-section .finale-actions {
+        flex-wrap: nowrap;
+        margin-top: 0;
+    }
+
+    .track-page .player-section .album-btn {
+        flex: 1 1 0;
+        min-width: 0;
+        letter-spacing: 0.04em;
+        font-size: 0.75rem;
+        padding: 0.4vh 0.35vw;
+        white-space: nowrap;
+    }
+
+    .track-page .player-section .track-credits {
+        padding-top: 0.2vh;
+    }
+
+    .track-page .player-section #emotion-legend {
+        font-size: 1rem;
+    }
+
+    /* Второй ряд голых эмодзи здесь не помещается:
+       подписи в легенде уже нажимаются. */
+    .track-page .emotion-selector {
+        display: none;
     }
     /* Квадрат сжимается до ~34vh, и кнопка в углу закрывает подпись на кадре. */
     .album-cover-wrapper {
