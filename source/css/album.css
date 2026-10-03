@@ -764,7 +764,9 @@ body {
 /* ОБЩИЕ КНОПКИ АЛЬБОМА                         */
 /* ============================================ */
 .album-btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: transparent;
     border: var(--border-width-normal) solid var(--theme-color-accent-secondary);
     color: var(--theme-color-accent-secondary);
@@ -774,6 +776,7 @@ body {
     padding: 1vh 2vw;
     /* 1.8vh на высоте 390px даёт ~7px. */
     font-size: max(var(--theme-text-sm), 0.9375rem);
+    line-height: 1;
     min-height: 44px;
     box-sizing: border-box;
     cursor: pointer;
@@ -781,6 +784,7 @@ body {
     transition: all 0.3s ease;
     border-radius: var(--theme-radius-sm);
     text-align: center;
+    appearance: none;
 }
 
 .album-btn:hover {
