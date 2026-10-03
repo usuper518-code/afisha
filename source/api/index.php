@@ -56,6 +56,9 @@ try {
 
     jsonError('Обработчик не найден', 404);
 
+} catch (AfishaSettingsException $e) {
+    error_log($e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+    jsonError($e->getMessage(), 500);
 } catch (Exception $e) {
     error_log($e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
     jsonError('Ошибка сервера', 500);

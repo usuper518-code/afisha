@@ -2,6 +2,8 @@
 //functions.php
    
 // Подключение к БД
+class AfishaSettingsException extends RuntimeException {}
+
 function afisha_defaults(): array {
     return [
         'site_title' => 'Студия',
@@ -29,7 +31,11 @@ function afisha_settings(bool $refresh = false): array {
         $rows = getDB()->query('SELECT setting_key, setting_value FROM settings')->fetchAll(PDO::FETCH_KEY_PAIR);
     } catch (Throwable $e) {
         error_log('afisha_settings: ' . $e->getMessage());
-        return $cache;
+        $missing = $e instanceof PDOException && (($e->errorInfo[0] ?? '') === '42S02');
+        if ($missing || str_contains($e->getMessage(), '42S02')) {
+            throw new AfishaSettingsException('Нет таблицы настроек афиши');
+        }
+        throw $e;
     }
     foreach ($rows as $key => $value) {
         if (!array_key_exists($key, $cache)) {

@@ -48,7 +48,6 @@
                 <div class="form-actions">
                     <button type="submit" id="save-btn" class="btn">Сохранить</button>
                 </div>
-                <p id="afisha-note"></p>
             </form>
         </main>
         <script src="/admin/js/common.js"></script>
@@ -64,7 +63,7 @@
             async function loadAfisha() {
                 const res = await adminApiRequest('/settings');
                 if (res.error) {
-                    document.getElementById('afisha-note').textContent = res.error;
+                    toastError(res.error);
                     return;
                 }
                 const data = res.data || {};
@@ -86,9 +85,11 @@
                     body: JSON.stringify(body)
                 });
                 setButtonsLoading(false, 'save-btn');
-                document.getElementById('afisha-note').textContent = res.error
-                    ? res.error
-                    : 'Сохранено. Страницы афиши собраны заново.';
+                if (res.error) {
+                    toastError(res.error);
+                    return;
+                }
+                toastSuccess('Сохранено. Страницы афиши собраны заново.');
             });
 
             loadAfisha();
