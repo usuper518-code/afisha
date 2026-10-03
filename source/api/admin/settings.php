@@ -9,23 +9,32 @@ if ($method === 'GET') {
 if ($method === 'PUT') {
     $raw = getRequestBody();
     $pdo = getDB();
-    $stmt = $pdo->prepare(
-        'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
-         ON DUPLICATE KEY UPDATE setting_value = ?'
-    );
-    foreach ($allowed as $key) {
-        if (!array_key_exists($key, $raw)) {
-            continue;
+    try {
+        $stmt = $pdo->prepare(
+            'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
+             ON DUPLICATE KEY UPDATE setting_value = ?'
+        );
+        foreach ($allowed as $key) {
+            if (!array_key_exists($key, $raw)) {
+                continue;
+            }
+            $value = trim((string) $raw[$key]);
+            $stmt->execute([$key, $value, $value]);
         }
-        $value = trim((string) $raw[$key]);
-        $stmt->execute([$key, $value, $value]);
-    }
-    afisha_settings(true);
+        afisha_settings(true);
 
-    require_once __DIR__ . '/generate_album.php';
-    $ids = $pdo->query('SELECT id FROM releases WHERE is_published = 1 ORDER BY id')->fetchAll(PDO::FETCH_COLUMN);
-    foreach ($ids as $rid) {
-        generate_album((int) $rid);
+        require_once __DIR__ . '/generate_album.php';
+        $ids = $pdo->query('SELECT id FROM releases WHERE is_published = 1 ORDER BY id')->fetchAll(PDO::FETCH_COLUMN);
+        foreach ($ids as $rid) {
+            generate_album((int) $rid);
+        }
+    } catch (AfishaSettingsException $e) {
+        jsonError($e->getMessage(), 500);
+    } catch (PDOException $e) {
+        if (($e->errorInfo[0] ?? '') === '42S02') {
+            jsonError('Нет таблицы настроек афиши', 500);
+        }
+        throw $e;
     }
 
     jsonResponse(['success' => true, 'generated' => count($ids)]);
