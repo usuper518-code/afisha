@@ -2,6 +2,47 @@
 //functions.php
    
 // Подключение к БД
+function afisha_defaults(): array {
+    return [
+        'site_title' => 'Студия',
+        'site_tagline' => 'Акустический театр.',
+        'about_text' => 'Студия — это театр.',
+        'slogan' => '',
+        'default_author' => 'ТТТ',
+        'author_bio' => '',
+        'metrika_id' => '0',
+        'stihi_url' => '',
+        'telegram_url' => '',
+    ];
+}
+
+function afisha_settings(bool $refresh = false): array {
+    static $cache = null;
+    if ($refresh) {
+        $cache = null;
+    }
+    if ($cache !== null) {
+        return $cache;
+    }
+    $cache = afisha_defaults();
+    try {
+        $rows = getDB()->query('SELECT setting_key, setting_value FROM settings')->fetchAll(PDO::FETCH_KEY_PAIR);
+        foreach ($rows as $key => $value) {
+            if (array_key_exists($key, $cache)) {
+                $cache[$key] = (string) $value;
+            }
+        }
+    } catch (Throwable $e) {
+        // Таблицы ещё нет — остаются значения по умолчанию.
+    }
+    return $cache;
+}
+
+function afisha_setting(string $key): string {
+    $all = afisha_settings();
+    return $all[$key] ?? '';
+}
+
 function getDB(): PDO {
     static $pdo = null;
     if ($pdo === null) {
@@ -195,7 +236,7 @@ function generateSlug(string $text): string {
 }
 
 // Оптимизация изображения (GD)
-function optimizeImage(string $sourcePath, string $targetPath, int $maxSize = 1200): bool {
+function optimizeImage(string $sourcePath, string $targetPath): bool {
     if (!file_exists($sourcePath))
         return false;
     $imageInfo = getimagesize($sourcePath);
@@ -205,18 +246,10 @@ function optimizeImage(string $sourcePath, string $targetPath, int $maxSize = 12
     $mime = $imageInfo['mime'];
     $width = $imageInfo[0];
     $height = $imageInfo[1];
-    $newWidth = $width;
-    $newHeight = $height;
-
-    if ($width > $maxSize || $height > $maxSize) {
-        if ($width > $height) {
-            $newWidth = $maxSize;
-            $newHeight = (int) ($height * ($maxSize / $width));
-        } else {
-            $newHeight = $maxSize;
-            $newWidth = (int) ($width * ($maxSize / $height));
-        }
-    }
+    $side = MEDIA_SIDE;
+    $crop = min($width, $height);
+    $srcX = (int) (($width - $crop) / 2);
+    $srcY = (int) (($height - $crop) / 2);
 
     switch ($mime) {
         case 'image/jpeg': $srcImage = imagecreatefromjpeg($sourcePath);
@@ -232,19 +265,31 @@ function optimizeImage(string $sourcePath, string $targetPath, int $maxSize = 12
     if (!$srcImage)
         return false;
 
-    $dstImage = imagecreatetruecolor($newWidth, $newHeight);
-    if ($mime == 'image/png' || $mime == 'image/gif') {
-        imagealphablending($dstImage, false);
-        imagesavealpha($dstImage, true);
-        $transparent = imagecolorallocatealpha($dstImage, 0, 0, 0, 127);
-        imagefilledrectangle($dstImage, 0, 0, $newWidth, $newHeight, $transparent);
-    }
-    imagecopyresampled($dstImage, $srcImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+    $dstImage = imagecreatetruecolor($side, $side);
+    imagecopyresampled($dstImage, $srcImage, 0, 0, $srcX, $srcY, $side, $side, $crop, $crop);
 
     $result = imagejpeg($dstImage, $targetPath, 85);
     imagedestroy($srcImage);
     imagedestroy($dstImage);
     return $result;
+}
+
+function fitSquareVideo(string $sourcePath, string $targetPath): bool {
+    $side = MEDIA_SIDE;
+    $tmp = $targetPath . '.tmp.mp4';
+    $filter = 'scale=' . $side . ':' . $side . ':force_original_aspect_ratio=increase,crop=' . $side . ':' . $side;
+    $cmd = 'ffmpeg -y -i ' . escapeshellarg($sourcePath)
+        . ' -vf ' . escapeshellarg($filter)
+        . ' -c:v libx264 -pix_fmt yuv420p -an -movflags +faststart '
+        . escapeshellarg($tmp) . ' 2>/dev/null';
+    exec($cmd, $out, $code);
+    if ($code !== 0 || !is_file($tmp)) {
+        if (is_file($tmp)) {
+            unlink($tmp);
+        }
+        return false;
+    }
+    return rename($tmp, $targetPath);
 }
 
 // Определение длительности MP3 через getID3
@@ -437,8 +482,8 @@ function generateBooklet($albumId, $data, $user = null, $outputPath = null) {
 
     // 2. Настройка PDF
     $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8');
-    $pdf->SetCreator(SITE_TITLE);
-    $pdf->SetAuthor(DEFAULT_AUTHOR);
+    $pdf->SetCreator(afisha_setting('site_title'));
+    $pdf->SetAuthor(afisha_setting('default_author'));
     $pdf->SetTitle($album['title'] . ' — Буклет');
     $pdf->SetMargins(15, 15, 15);
     $pdf->SetAutoPageBreak(true, 20);
@@ -466,7 +511,7 @@ function generateBooklet($albumId, $data, $user = null, $outputPath = null) {
     $addBg();
     $pdf->SetTextColor(...$goldRgb);
     $pdf->SetFont($fonts['ui'], '', 12);
-    $pdf->Cell(0, 8, SITE_TITLE, 0, 1, 'C');
+    $pdf->Cell(0, 8, afisha_setting('site_title'), 0, 1, 'C');
     $pdf->Ln(4);
     
     // --- ПЕРСОНАЛИЗАЦИЯ (если известен пользователь) ---
@@ -571,7 +616,7 @@ function generateBooklet($albumId, $data, $user = null, $outputPath = null) {
     $pdf->Ln(8);
     $pdf->SetFont($fonts['body'], '', 11);
     $pdf->SetTextColor(...$textRgb);
-    $pdf->MultiCell(0, 6, SITE_TITLE . ' благодарит вас за внимание.' . "\n\n" . SLOGAN . "\n\n" . 'Следите за новыми постановками на нашем сайте.', 0, 'C');
+    $pdf->MultiCell(0, 6, afisha_setting('site_title') . ' благодарит вас за внимание.' . "\n\n" . afisha_setting('slogan') . "\n\n" . 'Следите за новыми постановками на нашем сайте.', 0, 'C');
 
     // --- QR-КОД НА АЛЬБОМ ---
     $albumUrl = BASE_URL . '/albums/' . $album['slug'] . '/';
@@ -606,7 +651,7 @@ function generateBooklet($albumId, $data, $user = null, $outputPath = null) {
     $pdf->Ln(20);
     $pdf->SetFont($fonts['accent'], '', 18);
     $pdf->SetTextColor(...$goldRgb);
-    $pdf->Cell(0, 10, DEFAULT_AUTHOR, 0, 1, 'R');
+    $pdf->Cell(0, 10, afisha_setting('default_author'), 0, 1, 'R');
     $pdf->SetFont($fonts['ui'], '', 8);
     $pdf->SetTextColor(...$mutedRgb);
     $pdf->Cell(0, 5, 'автор стихов и либретто', 0, 1, 'R');    

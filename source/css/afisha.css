@@ -569,6 +569,21 @@ h1, h2, h3, h4 {
     transform: scale(1.08);
 }
 
+/* На премьере кнопка лежит на самой обложке. По центру она закрывает
+   название, нарисованное на кадре. Лента «ПРЕМЬЕРА» занимает левый
+   верх, поэтому ролик — в правом нижнем углу. */
+.poster-card.main-poster .poster-media .media-video-toggle {
+    top: auto;
+    left: auto;
+    bottom: var(--afisha-spacing-sm);
+    right: var(--afisha-spacing-sm);
+    transform: none;
+    z-index: 3;
+}
+.poster-card.main-poster .poster-media .media-video-toggle:hover {
+    transform: scale(1.08);
+}
+
 /* Ширина колонки целиком. Квадрат 1/1 вместе с max-height сжимал
    и ширину, из-за этого обложка оставалась квадратиком, а кнопка
    ролика висела в пустом поле рядом. */

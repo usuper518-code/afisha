@@ -27,7 +27,8 @@ DROP TABLE IF EXISTS
   `artists`,
   `news`,
   `genres`,
-  `users`;
+  `users`,
+  `settings`;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- phpMyAdmin SQL Dump
@@ -540,6 +541,15 @@ ALTER TABLE `premiere_reminders`
 ALTER TABLE `premiere_reminders`
   ADD CONSTRAINT `premiere_reminders_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `premiere_reminders_release` FOREIGN KEY (`release_id`) REFERENCES `releases` (`id`) ON DELETE CASCADE;
+
+--
+-- Тексты афиши: название, слоган, состав на странице «О студии»
+--
+CREATE TABLE `settings` (
+  `setting_key` varchar(64) NOT NULL,
+  `setting_value` text NOT NULL,
+  PRIMARY KEY (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

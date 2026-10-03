@@ -86,7 +86,7 @@ foreach ($rows as $row) {
     $body = "Здравствуйте, {$name}!\n\n"
         . "Напоминаем: премьера «{$row['title']}» {$when}, {$row['premiere_date']}.\n"
         . "Страница спектакля: {$url}\n\n"
-        . "С уважением, " . SITE_TITLE . "\n";
+        . "С уважением, " . afisha_setting('site_title') . "\n";
 
     $line = date('c') . " {$row['email']} | {$row['title']} | {$row['premiere_date']}";
 

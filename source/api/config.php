@@ -10,18 +10,8 @@ define('DB_PASS', '12345');
 // API-ключ для админки
 define('ADMIN_API_KEY', '12345');
 
-// НАСТРОЙКИ САЙТА
-define('SITE_TITLE', 'Студия');
-define('SITE_TAGLINE', 'Акустический театр.');
-define('ABOUT_TEXT', 'Студия — это театр.');
-
+// Название, слоган, состав и прочие тексты афиши лежат в таблице settings.
 define('MAIL_FROM', '');
-
-define('METRIKA_ID', '0');
-define('STIHI_URL', '');
-define('DEFAULT_AUTHOR', 'ТТТ');
-define('AUTHOR_BIO', ''); // короткий текст для секции «Автор» на странице about.html; если пусто — секция покажет только имя
-define('SLOGAN', '');
 
 define('BASE_URL', 'https://site');
 define('ROOT_DIR', __DIR__ . '/..');
@@ -32,6 +22,8 @@ define('TEMPLATES_DIR', __DIR__ . '/../templates');
 define('UPLOAD_DIR', __DIR__ . '/../uploads/');
 define('MAX_COVER_SIZE', 10); // MB
 define('MAX_VIDEO_SIZE', 10); // MB
+// Обложки и ролики приводим к одному квадрату. Других размеров в загрузке нет.
+define('MEDIA_SIDE', 628);
 define('MAX_MP3_SIZE', 50); // MB
 // Путь к библиотеке getID3
 define('GETID3_PATH', __DIR__ . '/vendor/getid3/getid3.php');

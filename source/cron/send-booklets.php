@@ -149,7 +149,7 @@ function sendBookletMail(string $to, string $from, string $name, string $title, 
     if ($subscribed) {
         $text .= "Вы подписаны на рассылку анонсов. Будем сообщать о новых премьерах!\n";
     }
-    $text .= "С уважением, " . SITE_TITLE . "\n";
+    $text .= "С уважением, " . afisha_setting('site_title') . "\n";
 
     $boundary = 'bk_' . bin2hex(random_bytes(8));
     $headers = "From: {$from}\r\n"
