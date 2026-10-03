@@ -51,8 +51,7 @@
                         <p class="hint">Выберите эмоции, которые будут подпрыгивать при проигрывании</p>
 
                         <label>Таймкоды</label>
-                        <textarea id="lyrics_timed" rows="4" placeholder="[мм:сс.дс] строка 1
-                                  [мм:сс.дс] строка 2"></textarea>
+                        <textarea id="lyrics_timed" rows="4" placeholder="[мм:сс.дс] строка 1&#10;[мм:сс.дс] строка 2"></textarea>
 
                         <div class="form-row-two">
                             <div class="form-col flex-grow">
@@ -165,9 +164,11 @@
         <script>
             function renderEmotions(selectedCodes = '') {
                 const container = document.getElementById('emotions-selector');
-                const selected = selectedCodes.split('');
+                const map = formConfig.EMOTION_MAP;
+                if (!container || !map || map.error) return;
+                const selected = String(selectedCodes).split('');
 
-                container.innerHTML = Object.entries(formConfig.EMOTION_MAP).map(([code, {emoji, name}]) => `
+                container.innerHTML = Object.entries(map).map(([code, {emoji, name}]) => `
                         <label class="emotion-option">
                             <input type="checkbox" value="${code}" ${selected.includes(code) ? 'checked' : ''}>
                             <span class="emotion-emoji">${emoji}</span>
@@ -282,6 +283,10 @@
                     // Инструментал
                     document.getElementById('is_instrumental').addEventListener('change', toggleLyrics);
                     toggleLyrics();
+                }
+            }).then(() => {
+                if (!new URLSearchParams(location.search).get('id')) {
+                    renderEmotions('');
                 }
             });
 
