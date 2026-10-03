@@ -912,6 +912,11 @@ body:has(#panel-about.active) .afisha-footer a[href="/#about"] {
 }
 
 .finale-exit a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 0.6em;
     color: var(--theme-color-text-secondary);
     font-family: var(--theme-font-ui);
     font-size: max(var(--theme-text-xs), 0.75rem);
@@ -1110,10 +1115,16 @@ body:has(#panel-about.active) .afisha-footer a[href="/#about"] {
     }
     .announce-item {
         flex-wrap: wrap;
+        align-items: flex-start;
         gap: var(--afisha-spacing-sm);
     }
     .announce-date {
-        min-width: auto;
+        flex: 1 0 100%;
+        min-width: 0;
+    }
+    .poster-status {
+        letter-spacing: 0.04em;
+        text-wrap: balance;
     }
     .afisha-footer-content {
         flex-direction: column;
@@ -1146,7 +1157,18 @@ body:has(#curtain-canvas) .container {
         padding-top: 1.2vh;
     }
     .poster-card.coming .poster-content {
-        padding: 1vh 1.2vw;
+        padding: 1vh calc(max(6vh, 44px) + 1.6vw) 1vh 1.2vw;
+    }
+    /* Узкая полоса обложки: кнопка в углу закрывает название на кадре.
+       Держим её справа у даты, текст отступает. */
+    .poster-card.coming .media-video-toggle {
+        top: auto;
+        bottom: 1vh;
+        right: 0.8vw;
+        transform: none;
+    }
+    .poster-card.coming .media-video-toggle:hover {
+        transform: scale(1.08);
     }
 }
 
