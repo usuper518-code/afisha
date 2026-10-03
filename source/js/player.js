@@ -264,34 +264,49 @@
         const container = document.getElementById('emotion-container');
         container.innerHTML = '';
         const savedEmotions = getTrackEmotions(track.id);
-
         const containerLegend = document.getElementById('emotion-legend');
-        containerLegend.innerHTML = Object.entries(window.EMOTION_MAP)
-            .map(([code, data]) => `${data.emoji} ${data.name}`)
-            .join(' · ');
+        containerLegend.innerHTML = '';
+
+        const applyEmotion = (code, source) => {
+            const selected = !source.classList.contains('selected');
+            document.querySelectorAll(`.emotion-legend-item[data-emotion="${code}"], .emotion-option[data-emotion="${code}"]`).forEach((el) => {
+                el.classList.toggle('selected', selected);
+            });
+            const current = getTrackEmotions(track.id);
+            const updated = selected ? [...current, code] : current.filter(c => c !== code);
+            setTrackEmotions(track.id, updated);
+            safeYm('reachGoal', selected ? 'emotion_add' : 'emotion_remove', {
+                album: window.ALBUM_SLUG,
+                track: window.CURRENT_TRACK_SLUG,
+                emotion: code
+            });
+            apiRequest('reactions', { release_id: ALBUM_ID, track_id: track.id, emotions: updated });
+            logEvent(selected ? 'reaction_add' : 'reaction_remove', 'track', track.id);
+        };
 
         Object.entries(window.EMOTION_MAP).forEach(([code, data]) => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'emotion-legend-item';
+            item.dataset.emotion = code;
+            const emoji = document.createElement('span');
+            emoji.className = 'emotion-emoji';
+            emoji.textContent = data.emoji;
+            const name = document.createElement('span');
+            name.className = 'emotion-name';
+            name.textContent = data.name;
+            item.append(emoji, name);
+            if (savedEmotions.includes(code)) item.classList.add('selected');
+            item.addEventListener('click', () => applyEmotion(code, item));
+            containerLegend.appendChild(item);
+
             const btn = document.createElement('span');
             btn.className = 'emotion-option';
             btn.textContent = data.emoji;
             btn.title = data.name;
             btn.dataset.emotion = code;
             if (savedEmotions.includes(code)) btn.classList.add('selected');
-            
-            btn.addEventListener('click', () => {
-                btn.classList.toggle('selected');
-                const isAdding = btn.classList.contains('selected');
-                const current = getTrackEmotions(track.id);
-                const updated = btn.classList.contains('selected') ? [...current, code] : current.filter(c => c !== code);
-                setTrackEmotions(track.id, updated);
-                safeYm('reachGoal', isAdding ? 'emotion_add' : 'emotion_remove', {
-                    album: window.ALBUM_SLUG,
-                    track: window.CURRENT_TRACK_SLUG,
-                    emotion: code
-                });
-                apiRequest('reactions', { release_id: ALBUM_ID, track_id: track.id, emotions: updated });
-                logEvent(isAdding ? 'reaction_add' : 'reaction_remove', 'track', track.id);
-            });
+            btn.addEventListener('click', () => applyEmotion(code, btn));
             container.appendChild(btn);
         });
     }
@@ -305,7 +320,10 @@
             
             const code = suggested[Math.floor(Math.random() * suggested.length)];
             if (!/^[A-G]$/.test(code)) return;
-            const el = document.querySelector(`.emotion-option[data-emotion="${code}"]`);
+            const selector = this.karaoke
+                ? `.emotion-legend-item[data-emotion="${code}"]`
+                : `.emotion-option[data-emotion="${code}"]`;
+            const el = document.querySelector(selector);
             if (el) {
                 el.classList.add('bounce');
                 setTimeout(() => el.classList.remove('bounce'), 600);
