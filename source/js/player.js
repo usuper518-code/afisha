@@ -241,20 +241,12 @@
                 p.textContent = line;
                 lyricsContainer.appendChild(p);
             });
-            if (this.karaoke && plain.includes('\n')) {
-                plain.split(/\n+/).slice(0, 6).forEach(line => {
-                    const p = document.createElement('p');
-                    p.className = 'lyrics-overlay-line';
-                    p.textContent = line;
-                    overlayText.appendChild(p);
-                });
-            } else if (this.karaoke) {
-                const hint = document.createElement('p');
-                hint.id = 'player-note';
-                hint.className = 'player-note';
-                hint.textContent = plain;
-                document.querySelector('.player-section')?.prepend(hint);
-            }
+            plain.split(/\n+/).forEach(line => {
+                const over = document.createElement('p');
+                over.className = 'lyrics-overlay-line';
+                over.textContent = line;
+                overlayText.appendChild(over);
+            });
         }
 
         this.renderEmotions(track);
@@ -320,10 +312,7 @@
             
             const code = suggested[Math.floor(Math.random() * suggested.length)];
             if (!/^[A-G]$/.test(code)) return;
-            const selector = this.karaoke
-                ? `.emotion-legend-item[data-emotion="${code}"]`
-                : `.emotion-option[data-emotion="${code}"]`;
-            const el = document.querySelector(selector);
+            const el = document.querySelector(`.emotion-legend-item[data-emotion="${code}"]`);
             if (el) {
                 el.classList.add('bounce');
                 setTimeout(() => el.classList.remove('bounce'), 600);
@@ -370,25 +359,23 @@
             }
         }            
 
-        if (this.karaoke) {
-            const start = Math.max(0, active - 2);
-            const end = Math.min(timed.length, start + 5);
-            overlayText.replaceChildren();
-            for (let i = start; i < end; i++) {
-                if (!lyricsLines[i]) continue;
-                const line = document.createElement('div');
-                line.className = 'lyrics-overlay-line' + (i === active ? ' highlight' : '');
-                line.textContent = lyricsLines[i].textContent.trim();
-                overlayText.appendChild(line);
-            }
-        } else {
-            overlayText.innerHTML = '';
+        const start = Math.max(0, active - 2);
+        const end = Math.min(timed.length, start + 5);
+        overlayText.replaceChildren();
+        for (let i = start; i < end; i++) {
+            if (!lyricsLines[i]) continue;
+            const line = document.createElement('div');
+            line.className = 'lyrics-overlay-line' + (i === active ? ' highlight' : '');
+            line.textContent = lyricsLines[i].textContent.trim();
+            overlayText.appendChild(line);
+        }
+        {
             lyricsLines.forEach((el, i) => {
                 el.classList.toggle('highlight', i === active);
             });
-            if (active >= 0) {
+            if (active >= 0 && lyricsLines[active].offsetParent) {
                 lyricsLines[active].scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }          
+            }
         }
     }
 

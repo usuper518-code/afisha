@@ -423,11 +423,7 @@ body {
 }
 
 .emotion-selector {
-    display: flex;
-    gap: max(1vw, 4px);
-    font-size: max(3vh, 1.25rem);
-    justify-content: center;
-    flex-wrap: wrap;
+    display: none;
 }
 
 .emotion-option {
@@ -1059,9 +1055,45 @@ body {
     justify-content: center;
 }
 
-/* --- Оверлей для караоке-лирики (по умолчанию скрыт) --- */
+/* Субтитры лежат на обложке. Длинный текст листается внутри кадра. */
 .lyrics-overlay {
-    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+    padding-bottom: 12%;
+    box-sizing: border-box;
+}
+
+.lyrics-overlay-text {
+    text-align: center;
+    font-family: var(--theme-font-body);
+    font-size: max(0.95rem, 2vh);
+    line-height: 1.25;
+    color: var(--theme-color-text-primary);
+    text-shadow: 0 0 0.3em rgba(0,0,0,0.7), 0 0.08em 0.1em rgba(0,0,0,0.5);
+    padding: 1rem;
+    max-width: 88%;
+    max-height: 78%;
+    overflow-y: auto;
+    pointer-events: auto;
+}
+
+.lyrics-overlay-line {
+    opacity: 0.8;
+    transition: opacity 0.3s ease, color 0.3s ease;
+    margin-bottom: 0.35rem;
+}
+
+.lyrics-overlay-line.highlight {
+    opacity: 1;
+    font-size: 110%;
 }
 
 /* ============================================ */
@@ -1086,19 +1118,17 @@ body {
         display: flex;
         flex-direction: column;
         gap: 0;
-        overflow-x: hidden;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior: contain;
+        overflow: hidden;
     }
 
     .stage-visual {
-        flex: 0 0 auto;
+        flex: 0 1 auto;
         width: 100%;
         height: auto;
-        aspect-ratio: 1 / 1;
         min-height: 0;
-        max-height: none;
+        max-height: 62%;
+        aspect-ratio: 1 / 1;
+        align-self: center;
         position: relative;
         border: none;
         border-radius: 0;
@@ -1118,12 +1148,12 @@ body {
         width: 100%;
         max-height: none;
         overflow: visible;
-        row-gap: 1.2vh;
+        row-gap: 0.45vh;
         column-gap: 0.6rem;
         background: rgba(0, 0, 0, 0.7);
         border-radius: 0;
         z-index: 10;
-        padding: 1.4vh 4vw calc(1.6vh + env(safe-area-inset-bottom));
+        padding: 0.7vh 4vw calc(0.7vh + env(safe-area-inset-bottom));
     }
 
     .player-section .player-note {
@@ -1142,11 +1172,15 @@ body {
     }
 
     .player-section .emotion-selector-label {
-        margin-bottom: 0.2rem;
+        margin-bottom: 0;
     }
 
     .player-section .finale-actions {
-        margin-top: 12vh;
+        margin-top: 0.3vh;
+    }
+
+    .player-section .track-credits {
+        padding-top: 0.3vh;
     }
 
     .player-section .emotion-selector {
@@ -1157,11 +1191,13 @@ body {
         margin-bottom: 0;
         opacity: 1;
         font-size: max(0.95rem, 3.5vw);
-        gap: 0 0.2rem;
+        line-height: 1;
+        gap: 0 0.15rem;
     }
 
     .player-section .emotion-legend-item {
         min-height: 44px;
+        margin-block: -4px;
         padding: 0 0.1rem;
     }
 
@@ -1193,16 +1229,8 @@ body {
     }
 
     .lyrics-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 5;
-        pointer-events: none;
+        align-items: flex-end;
+        padding-bottom: 16%;
     }
 
     .lyrics-overlay-text {
@@ -1378,9 +1406,8 @@ body {
     color: var(--theme-color-accent);
 }
 
-/* Горизонтальный кадр: плеер — главный экран и целиком
-   помещается рядом с текстом. Обложка отдаёт место кнопкам
-   и остаётся квадратом. */
+/* Горизонтальный кадр: квадрат слева, субтитры на нём,
+   управление справа. */
 @media (orientation: landscape) {
     .track-page {
         height: 100dvh;
@@ -1392,52 +1419,62 @@ body {
         flex: 1 1 auto;
         min-height: 0;
         align-items: stretch;
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
     }
 
     .track-page .lyrics-column,
     .track-page .stage-column {
-        height: 100%;
-        max-height: 100%;
-        min-height: 0;
+        display: contents;
     }
 
-    .track-page .lyrics-column {
-        overflow: hidden;
+    .track-page .lyrics-header {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: end;
+    }
+
+    .track-page .lyrics-text,
+    .track-page .scroll-buttons {
+        display: none;
     }
 
     .track-page .stage-visual {
-        flex: 1 1 auto;
-        min-height: 0;
-        width: auto;
-        max-width: 100%;
-        height: auto;
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        align-self: center;
+        justify-self: center;
+        width: min(46vw, 100%);
+        height: min(46vw, 100%);
         max-height: 100%;
         aspect-ratio: 1 / 1;
-        align-self: center;
+        min-height: 0;
+    }
+
+    .track-page .player-section {
+        grid-column: 2;
+        grid-row: 2;
+        min-width: 0;
+        min-height: 0;
+        max-height: 100%;
+        overflow: auto;
     }
 }
 
-/* Телефон лёжа: колонка текста уже, квадрат стоит слева от
-   кнопок и не режется в полосу. */
+/* Телефон лёжа: заголовок прячем, квадрат занимает левый край. */
 @media (max-height: 520px) and (orientation: landscape) {
-    .track-page .track-layout {
-        grid-template-columns: 10.5rem minmax(0, 1fr);
+    .track-page .lyrics-header {
+        display: none;
     }
 
-    .track-page .stage-column {
-        flex-direction: row;
-        align-items: center;
-        gap: 1.2vw;
+    .track-page .player-section {
+        grid-row: 1 / span 2;
     }
 
     .track-page .stage-visual {
-        flex: 0 0 auto;
-        align-self: center;
-        width: min(42vh, 18rem);
-        height: min(42vh, 18rem);
-        max-width: 46%;
+        width: min(78vh, 42vw);
+        height: min(78vh, 42vw);
         max-height: 100%;
-        aspect-ratio: 1 / 1;
     }
 
     .track-page .player-section {

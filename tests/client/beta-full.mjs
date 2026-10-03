@@ -537,38 +537,24 @@ check('конец сцены открывает следующую', page.url().
 await page.setViewport({ width: 844, height: 390, hasTouch: true });
 await sleep(300);
 await page.evaluate(() => {
-  const box = document.getElementById('lyrics-container');
+  const box = document.getElementById('lyrics-overlay-text');
+  box.replaceChildren();
   for (let i = 0; i < 40; i += 1) {
     const p = document.createElement('p');
-    p.className = 'lyric-line';
+    p.className = 'lyrics-overlay-line';
     p.textContent = 'Строка ' + i;
     box.appendChild(p);
   }
   box.style.maxHeight = '80px';
-  window.dispatchEvent(new Event('resize'));
+  box.style.overflowY = 'auto';
 });
 await sleep(50);
-check('кнопки прокрутки видны', await page.$eval('.scroll-buttons', (el) => el.classList.contains('visible') && getComputedStyle(el).display !== 'none'));
-await page.evaluate(() => {
-  const btn = document.querySelector('.scroll-down');
-  btn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+const scrolled = await page.evaluate(() => {
+  const box = document.getElementById('lyrics-overlay-text');
+  box.scrollTop = 40;
+  return { top: box.scrollTop, h: box.clientHeight, sh: box.scrollHeight };
 });
-await sleep(180);
-await page.evaluate(() => {
-  document.querySelector('.scroll-down').dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-});
-const scrolled = await page.$eval('#lyrics-container', (el) => ({ top: el.scrollTop, h: el.clientHeight, sh: el.scrollHeight, down: !document.querySelector('.scroll-down').disabled }));
-check('прокрутка текста', scrolled.top > 0, JSON.stringify(scrolled));
-await page.evaluate(() => {
-  const up = document.querySelector('.scroll-up');
-  const downBtn = document.querySelector('.scroll-down');
-  up.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-  downBtn.dispatchEvent(new Event('touchstart', { bubbles: true, cancelable: true }));
-  downBtn.dispatchEvent(new Event('touchend', { bubbles: true }));
-  const box = document.getElementById('lyrics-container');
-  box.scrollTop = box.scrollHeight;
-  box.dispatchEvent(new Event('scroll'));
-});
+check('прокрутка текста', scrolled.top > 0 && scrolled.sh > scrolled.h, JSON.stringify(scrolled));
 await page.click('#prev-btn');
 await page.waitForFunction(() => location.pathname.endsWith('/track-1.html'), { timeout: 4000 });
 await page.click('#next-btn');
