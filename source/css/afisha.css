@@ -780,7 +780,7 @@ h1, h2, h3, h4 {
 }
 
 /* Вкладка «О студии» уже открыта: ссылка в подвале ведёт сюда же. */
-body:has(#panel-about.active) .afisha-footer a[href="/about.html"] {
+body:has(#panel-about.active) .afisha-footer a[href="/#about"] {
     display: none;
 }
 

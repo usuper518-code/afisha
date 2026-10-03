@@ -830,6 +830,25 @@ body {
     margin-right: 0.5vw;
 }
 
+.troupe-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    min-height: 44px;
+    padding: 0.35em 0.8em;
+    border: var(--border-width-thin) solid var(--theme-color-accent-secondary);
+    border-radius: var(--theme-radius-sm);
+    color: inherit;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.troupe-btn:hover {
+    color: var(--theme-color-accent-light);
+    border-color: var(--theme-color-accent-light);
+}
+
 .album-description {
     user-select: text;
     -webkit-user-select: text;
