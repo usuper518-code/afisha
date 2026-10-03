@@ -4,6 +4,17 @@ if ($method !== 'POST') {
     jsonError('Метод не разрешен', 405);
 }
 
+function rejectBadUpload(array $file): void {
+    $err = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($err === UPLOAD_ERR_OK) {
+        return;
+    }
+    if ($err === UPLOAD_ERR_INI_SIZE || $err === UPLOAD_ERR_FORM_SIZE) {
+        jsonError('Файл больше лимита сервера (' . ini_get('upload_max_filesize') . ')', 400);
+    }
+    jsonError('Ошибка загрузки', 400);
+}
+
 // POST /admin/upload/release_cover?id={id}
 if ($action === 'release_cover' && $id) {
     if (!isset($_FILES['file'])) {
@@ -11,9 +22,7 @@ if ($action === 'release_cover' && $id) {
     }
 
     $file = $_FILES['file'];
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        jsonError('Ошибка загрузки', 400);
-    }
+    rejectBadUpload($file);
     if ($file['size'] > MAX_COVER_SIZE * 1024 * 1024) {
         jsonError('Файл больше ' . MAX_COVER_SIZE . ' MB', 400);
     }
@@ -55,9 +64,7 @@ if ($action === 'track_cover' && $id) {
     }
 
     $file = $_FILES['file'];
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        jsonError('Ошибка загрузки', 400);
-    }
+    rejectBadUpload($file);
     if ($file['size'] > MAX_COVER_SIZE * 1024 * 1024) {
         jsonError('Файл больше ' . MAX_COVER_SIZE . ' MB', 400);
     }
@@ -99,9 +106,7 @@ if ($action === 'track_video' && $id) {
     }
 
     $file = $_FILES['file'];
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        jsonError('Ошибка загрузки', 400);
-    }
+    rejectBadUpload($file);
     if ($file['size'] > MAX_VIDEO_SIZE * 1024 * 1024) {
         jsonError('Файл больше ' . MAX_VIDEO_SIZE . ' MB', 400);
     }
@@ -109,7 +114,7 @@ if ($action === 'track_video' && $id) {
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime = finfo_file($finfo, $file['tmp_name']);
     finfo_close($finfo);
-    if (!in_array($mime, ['video/mp4', 'video/webm'])) {
+    if (!in_array($mime, ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/3gpp'], true)) {
         jsonError('Неверный тип файла', 400);
     }
 
@@ -143,9 +148,7 @@ if ($action === 'artist_cover' && $id) {
     }
 
     $file = $_FILES['file'];
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        jsonError('Ошибка загрузки', 400);
-    }
+    rejectBadUpload($file);
     if ($file['size'] > MAX_COVER_SIZE * 1024 * 1024) {
         jsonError('Файл больше ' . MAX_COVER_SIZE . ' MB', 400);
     }
@@ -186,9 +189,7 @@ if ($action === 'audio' && $id) {
     }
 
     $file = $_FILES['file'];
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        jsonError('Ошибка загрузки', 400);
-    }
+    rejectBadUpload($file);
     if ($file['size'] > MAX_MP3_SIZE * 1024 * 1024) {
         jsonError('Файл больше ' . MAX_MP3_SIZE . ' MB', 400);
     }
