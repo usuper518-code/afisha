@@ -767,6 +767,7 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.65em;
     background: transparent;
     border: var(--border-width-normal) solid var(--theme-color-accent-secondary);
     color: var(--theme-color-accent-secondary);
