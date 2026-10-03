@@ -102,10 +102,13 @@ function generate_afisha($albumId) {
                 WHERE rt.release_id = r.id) AS duration_total
         FROM releases r
         WHERE r.is_published = 1 OR r.id = ?
-        ORDER BY r.is_premiere DESC, r.is_published DESC, (r.id = ?) DESC, r.premiere_date DESC
+        ORDER BY (r.is_published = 1 AND r.is_premiere = 1) DESC,
+                 r.is_published DESC,
+                 r.sort_order ASC,
+                 r.id ASC
         LIMIT 1
     ");
-    $stmtPremiere->execute([$albumId, $albumId]);
+    $stmtPremiere->execute([$albumId]);
     $premiere = $stmtPremiere->fetch(PDO::FETCH_ASSOC);
 
     if (!$premiere) {
